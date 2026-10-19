@@ -583,9 +583,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
   <div class="card" id="hostDeck" style="display:none">
     <div class="eyebrow" style="margin-bottom:10px">Sasha’s controls</div>
     <div id="deckStops"></div>
-    <div class="hs doorctl" data-sec="door"><div class="top"><div><div class="nm">Partner door</div><div class="st" id="doorSt">Closed</div></div><button class="btn" id="btnDoor" type="button">Open</button></div></div>
-    <div class="hs"><div class="nm">Pairs</div><div class="st">Matches everyone (odd headcount makes one trio, Sasha goes last).</div>
-      <div class="row"><button class="chip" id="btnMatch">Shuffle pairs</button><button class="chip" id="btnUnmatch">Clear pairs</button></div></div>
+    <div class="hs pairctl" data-sec="pairs"><div class="top"><div><div class="nm">Pairs section</div><div class="st" id="pairSt">Not matched yet</div></div><button class="btn" id="btnPairs" type="button">Activate</button></div></div>
     <button class="btn" id="btnReset" style="width:100%;color:#a02020">Reset entire event</button>
   </div>
 </div>
@@ -620,7 +618,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
    Room size, floor and furniture live in ROOMS (floorplan section below); keys must match.
    ===================================================================== */
 const CONFIG = {
-  eventId: 'default',
+  eventId: 'internet-night',
   rememberGuests: false,              // false = everyone sees the opening on every load (preview). true = returning guests skip it.
   intro: 'Press the power button',
   previewUnlocked: true,              // design preview: rooms show unlocked...
@@ -640,7 +638,10 @@ const CONFIG = {
   partnerDoor: {   // texts for the partner door + the room behind it
     found:'MATCH FOUND!', foundPair:'say hi to your partner!', foundGroup:'say hi to your group!',
     none:'NO MATCH YET', noneSub:'ask Sasha to pair you up',
-    closedMsg:'The partner door just closed.'
+    closedMsg:'The partner door just closed.',
+    code:'MOONPIE',                      // the secret code (not case-sensitive). Set to '' to turn the intercom off. Guests only type it once (remembered on their phone).
+    intercomTitle:'PARTNER DOOR', intercomPrompt:'ENTER CODE', intercomHint:'ask Sasha for the code',
+    intercomBtn:'BUZZ', intercomWrong:'WRONG CODE', intercomOk:'WELCOME IN'
   },
   pairsEyebrow: 'You’ve been matched up. Your group is:',
   stops: [
@@ -664,7 +665,15 @@ const CONFIG = {
 };
 
 /* ---------- Firebase (paste your own config). Left blank = local preview mode. ---------- */
-const firebaseConfig = { apiKey:'YOUR_API_KEY', authDomain:'', databaseURL:'', projectId:'', appId:'' };
+const firebaseConfig = {
+  apiKey: "AIzaSyBpfqEXrMcTyqy95zhmXf8pHPbEsEtjOhI",
+  authDomain: "internet-44c0e.firebaseapp.com",
+  databaseURL: "https://internet-44c0e-default-rtdb.firebaseio.com",
+  projectId: "internet-44c0e",
+  storageBucket: "internet-44c0e.firebasestorage.app",
+  messagingSenderId: "1066919323832",
+  appId: "1:1066919323832:web:fb56afd2a40c1bb1f3ec4d"
+};
 
 /* =====================================================================
    DATA LAYER
@@ -1333,7 +1342,7 @@ function buildMap(){
   renderPeople();
 }
 let hubsNow={};
-const isLocked=(k,h=hubsNow)=>k!=='start'&&!h[k]&&(k==='partners'||!CONFIG.previewUnlocked||(CONFIG.previewLocked||[]).includes(k));
+const isLocked=(k,h=hubsNow)=>k!=='start'&&k!=='partners'&&!h[k]&&(!CONFIG.previewUnlocked||(CONFIG.previewLocked||[]).includes(k));
 /* ---------- LIVING ROOM: everyone who signed up is here, and can walk ---------- */
 const walkers={}, SPEED=30; let wRaf=0, wLast=0, wSc=1;
 const hash=s=>{let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
@@ -1386,7 +1395,7 @@ function renderPeople(){
 }
 function enterStop(key){
   const s=STOP(key);
-  if(key==='partners') return openPartnerRoom();
+  if(key==='partners') return (isHost||!CONFIG.partnerDoor.code||doorOk())?openPartnerRoom():openIntercom();
   if(s.page){sessionStorage.setItem('tpl_ret','1');location.href=s.page;return}   // room has its own page
   $('stopTitle').textContent=s.name; $('stopDesc').textContent=s.desc;
   $('stopSlot').innerHTML=''; CONFIG.onEnterStop(s,$('stopSlot')); $('stopPanel').classList.add('open');
@@ -1442,8 +1451,7 @@ function listenHubs(){
     STOPS.forEach(s=>{const p=$('pin_'+s.key);if(!p)return;p.classList.toggle('locked',isLocked(s.key,hubs));p.classList.toggle('current',hubs.current===s.key)});
     document.body.dataset.phase=hubs.current||'gathering';
     renderPeople();
-    if(!hubs.partners&&prOpen) closePartnerRoom(true);
-    if(isHost){ syncDeck(hubs); syncDoor(); }
+    if(isHost){ syncDeck(hubs); }
   });
 }
 
@@ -1504,6 +1512,7 @@ function initHost(){
   $('deckStops').innerHTML=(CONFIG.sections||[]).map(c=>`<div class="hs" data-sec="${esc(c.key)}"><div class="top"><div><div class="nm">${esc(c.title)}</div><div class="st">Not sent yet</div></div><button class="btn go">Send</button></div></div>`).join('');
   $('nextBar').style.display='none'; syncDeck();
   ref(`${E}/state`).set('lounge');
+  ref(`${E}/pairs`).on('value',snap=>{pairsNow=snap.val();syncPairs()});
 }
 window.removeGuest=async id=>{if(confirm('Remove this guest from the roster?'))await ref(`${E}/attendees/${id}`).set(null)};
 function renderHostList(){
@@ -1553,11 +1562,22 @@ function syncDeck(){
   let cur=cs.findIndex(c=>!msgsNow['sec_'+c.dataset.sec]); if(cur<0) cur=cs.length-1;   // first unsent; if all sent, keep the last (so it can be unsent)
   cs.forEach((c,i)=>{c.style.display=i===cur?'':'none'});
 }
-$('btnMatch').onclick=async()=>{const s=await ref(`${E}/pairs`).once('value');if(s.val()&&!confirm('Everyone already has a partner. Re-shuffle?'))return;matchPeople()};
-$('btnUnmatch').onclick=()=>{if(!confirm('Clear all pairs? This removes the popup for everyone.'))return;ref(`${E}/pairings`).set(null);ref(`${E}/pairs`).set(null)};
+/* PAIRS SECTION: Activate = match everyone (guests see their partner behind the door). Deactivate = clear the pairs. */
+let pairsNow=null;
+function syncPairs(){
+  const on=!!pairsNow, n=on?Object.keys(pairsNow).length:0;
+  $('btnPairs').textContent=on?'Deactivate':'Activate';
+  $('pairSt').textContent=on?'Active ✓ '+n+(n===1?' pair':' pairs')+' matched':'Not matched yet';
+  document.querySelector('.pairctl').classList.toggle('live',on);
+}
+$('btnPairs').onclick=()=>guard(async()=>{
+  const cur=(await ref(`${E}/pairs`).once('value')).val();
+  if(cur){ if(!confirm('Deactivate pairs? This clears everyone’s partner.'))return; await ref(`${E}/pairings`).set(null); await ref(`${E}/pairs`).set(null); return }
+  matchPeople();
+});
 $('btnReset').onclick=async()=>{
   if(!confirm('Clear the roster, pairs and progress for a brand new event?'))return;
-  await ref(E).set(null); ['tpl_me','tpl_hide_reveal'].forEach(k=>localStorage.removeItem(k)); location.href=location.pathname+'?host=1';
+  await ref(E).set(null); ['tpl_me','tpl_hide_reveal',doorKey].forEach(k=>localStorage.removeItem(k)); location.href=location.pathname+'?host=1';
 };
 
 /* =====================================================================
@@ -1575,6 +1595,34 @@ let prOpen=false;
 function openPartnerRoom(){ prOpen=true; prEl.classList.add('open'); renderPartnerRoom() }
 function closePartnerRoom(auto){ prOpen=false; prEl.classList.remove('open'); if(auto) toast({body:PD.closedMsg,holdMs:3000}) }
 $('prBack').onclick=()=>closePartnerRoom();
+/* ---------- INTERCOM: tap the door, type the one shared code, get in. Remembered per guest, so it's only asked once. ---------- */
+const doorKey='tpl_door_'+CONFIG.eventId;
+const doorOk=()=>!!me&&localStorage.getItem(doorKey)===me.id;
+let icOpen=false;
+const icEl=document.createElement('div'); icEl.id='intercom';
+icEl.innerHTML=`<div class="icunit"><i class="scr s1"></i><i class="scr s2"></i><i class="scr s3"></i><i class="scr s4"></i>
+  <div class="ictop"><span class="icled" id="icLed"></span><span class="icname">${esc(PD.intercomTitle)}</span><button type="button" id="icX" aria-label="Close">×</button></div>
+  <div class="icgrille"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="iclcd"><div class="iclab">${esc(PD.intercomPrompt)}</div><input id="icIn" type="text" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Secret code"><div class="icmsg" id="icMsg"></div></div>
+  <button type="button" id="icGo" aria-label="${esc(PD.intercomBtn)}"><span>${esc(PD.intercomBtn)}</span></button></div>`;
+$('screen-lounge').appendChild(icEl);
+function icBeep(f,d,t){ try{ const A=new (window.AudioContext||window.webkitAudioContext)(), o=A.createOscillator(), g=A.createGain(); o.type=t||'square'; o.frequency.value=f; g.gain.value=.06; o.connect(g); g.connect(A.destination); o.start(); o.stop(A.currentTime+d); setTimeout(()=>A.close(),d*1000+100) }catch(e){} }
+function openIntercom(){ icOpen=true; icEl.classList.add('open'); $('icIn').value=''; $('icMsg').textContent=PD.intercomHint; $('icMsg').className='icmsg'; $('icLed').className='icled'; setTimeout(()=>$('icIn').focus(),60) }
+function closeIntercom(){ icOpen=false; icEl.classList.remove('open'); $('icIn').blur() }
+function tryCode(){
+  const norm=x=>String(x||'').trim().toUpperCase().replace(/\s+/g,' '), v=norm($('icIn').value), m=$('icMsg');
+  if(!v) return;
+  if(v===norm(PD.code)){
+    try{localStorage.setItem(doorKey,me.id)}catch(e){}
+    m.textContent=PD.intercomOk; m.className='icmsg ok'; $('icLed').className='icled ok'; icBeep(880,.12); setTimeout(()=>icBeep(1320,.2),130); if(navigator.vibrate) navigator.vibrate([60,40,120]);
+    setTimeout(()=>{ closeIntercom(); openPartnerRoom() },900);
+  }else{
+    m.textContent=PD.intercomWrong; m.className='icmsg bad'; $('icLed').className='icled bad'; icBeep(150,.35,'sawtooth'); if(navigator.vibrate) navigator.vibrate(200);
+    const u=icEl.querySelector('.icunit'); u.classList.remove('shake'); void u.offsetWidth; u.classList.add('shake'); $('icIn').select();
+  }
+}
+$('icGo').onclick=tryCode; $('icIn').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();tryCode()}}; $('icX').onclick=closeIntercom;
+icEl.onclick=e=>{if(e.target===icEl)closeIntercom()};
 function fitPR(){ const s=prEl.querySelector('svg'),r=prEl.getBoundingClientRect(); if(!s||!r.width||!r.height)return;
   const ar=r.width/r.height,W=Math.max(120,150*ar),H=Math.max(150,120/ar); s.setAttribute('viewBox',`${60-W/2} ${75-H/2} ${W} ${H}`) }
 addEventListener('resize',()=>{if(prOpen)fitPR()});
@@ -1601,15 +1649,6 @@ function renderPartnerRoom(){
   });
   $('prScene').innerHTML=`<svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 120 150">${o}</svg>`; fitPR();
 }
-/* host button: Open = pair everyone (only if nobody is paired yet) + unlock the door. Close = lock it again. */
-function syncDoor(){ const on=!!hubsNow.partners; $('btnDoor').textContent=on?'Close':'Open'; $('doorSt').textContent=on?'Open ✓ everyone is paired':'Closed (Open also pairs everyone)' }
-$('btnDoor').onclick=()=>guard(async()=>{
-  if(hubsNow.partners){ setLock('partners',false); return }
-  const p=(await ref(`${E}/pairs`).once('value')).val();
-  if(!p&&!matchPeople()) return;
-  setLock('partners',true);
-});
-
 const returning=sessionStorage.getItem('tpl_ret')==='1'; sessionStorage.removeItem('tpl_ret');   // coming back from a room page skips the intro
 if(isHost){
   if(!me||!String(me.id).startsWith('host_')){me={id:'host_'+Math.random().toString(36).slice(2,9),name:CONFIG.hostName,look:randLook()};localStorage.setItem('tpl_me',JSON.stringify(me))}
@@ -1894,6 +1933,28 @@ if(isHost){
 /* ===== PARTNER ROOM ===== */
 #partnerRoom{position:absolute;left:0;right:0;top:0;bottom:calc(var(--dock) + env(safe-area-inset-bottom,0px));z-index:50;display:none;background:#2a1c4a}
 #partnerRoom.open{display:block;animation:fade .3s}
+#intercom{position:absolute;left:0;right:0;top:0;bottom:calc(var(--dock) + env(safe-area-inset-bottom,0px));z-index:51;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(21,18,26,.82)}
+#intercom.open{display:flex;animation:fade .2s}
+#intercom .icunit{position:relative;width:100%;max-width:250px;padding:16px 16px 18px;display:flex;flex-direction:column;align-items:stretch;gap:12px;background:linear-gradient(160deg,#cfcfd4,#9a9aa2);border:3px solid #15121a;border-radius:6px;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #6a6a72,5px 5px 0 #15121a}
+#intercom .scr{position:absolute;width:6px;height:6px;border-radius:50%;background:#5c5c64;box-shadow:inset 1px 1px 0 #2a2a30}
+#intercom .s1{left:6px;top:6px}#intercom .s2{right:6px;top:6px}#intercom .s3{left:6px;bottom:6px}#intercom .s4{right:6px;bottom:6px}
+#intercom .ictop{display:flex;align-items:center;gap:8px}
+#intercom .icled{flex:none;width:10px;height:10px;border-radius:50%;background:#7a1a1a;border:2px solid #15121a;box-shadow:0 0 0 1px #fff}
+#intercom .icled.ok{background:#35e06a;box-shadow:0 0 8px #35e06a}#intercom .icled.bad{background:#ff3b3b;box-shadow:0 0 8px #ff3b3b}
+#intercom .icname{flex:1;font:400 8px/1.3 var(--px);color:#15121a;letter-spacing:.04em}
+#intercom #icX{flex:none;width:20px;height:20px;padding:0;font:700 13px/1 var(--body);color:#000;background:var(--silver);border:2px solid;border-color:var(--raised);border-radius:0;cursor:pointer}
+#intercom .icgrille{display:flex;flex-direction:column;gap:4px;padding:10px 22px;background:#3a3a42;border:2px solid;border-color:var(--sunken);border-radius:3px}
+#intercom .icgrille i{display:block;height:3px;background:#101014;box-shadow:0 1px 0 #6a6a72}
+#intercom .iclcd{padding:8px;background:#0f2a1c;border:2px solid;border-color:var(--sunken);border-radius:3px;text-align:center}
+#intercom .iclab{font:400 8px/1.4 var(--px);color:#5fe08a;margin-bottom:6px}
+#intercom #icIn{width:100%;box-sizing:border-box;height:36px;padding:0 6px;text-align:center;background:#06150d;color:#9bffbb;caret-color:#9bffbb;border:1px solid #2c6a43;border-radius:0;outline:0;font:400 16px var(--px);letter-spacing:.14em;text-transform:uppercase}
+#intercom #icIn:focus{border-color:#5fe08a}
+#intercom .icmsg{min-height:11px;margin-top:6px;font:400 7px/1.5 var(--px);color:#3f9c60}
+#intercom .icmsg.ok{color:#9bffbb}#intercom .icmsg.bad{color:#ff7a7a}
+#intercom #icGo{align-self:center;width:84px;height:84px;padding:0;border-radius:50%;cursor:pointer;background:radial-gradient(circle at 35% 30%,#ff9ab8,#d62a6b 60%,#8a1245);border:3px solid #15121a;box-shadow:0 5px 0 #15121a,inset 0 2px 0 rgba(255,255,255,.5);color:#fff;font:400 9px/1 var(--px);text-shadow:1px 1px 0 #15121a}
+#intercom #icGo:active{transform:translateY(4px);box-shadow:0 1px 0 #15121a,inset 0 2px 0 rgba(255,255,255,.5)}
+#intercom .shake{animation:icshake .35s steps(6)}
+@keyframes icshake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 #prScene{position:absolute;inset:0}
 #prScene svg{display:block;width:100%;height:100%;shape-rendering:crispEdges}
 #prBack{position:absolute;left:8px;top:calc(8px + env(safe-area-inset-top,0px));z-index:2;font-size:8px}
@@ -1901,7 +1962,7 @@ if(isHost){
 @keyframes prbob{50%{transform:translateY(-1.2px)}}
 .prheart{animation:prfloat 2.4s steps(6) infinite}
 @keyframes prfloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-12px);opacity:0}}
-#sashaBox #hostDeck .doorctl .st{display:block!important}
+#sashaBox #hostDeck .pairctl .st{display:block!important}
 </style>
 </body>
 </html>
