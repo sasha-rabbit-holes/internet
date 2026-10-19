@@ -484,6 +484,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
 /* loading screen: sunken bar + retro small print */
 #loadBar{border:2px solid;border-color:var(--sunken);outline:1px solid var(--night)}
 #loadFoot{font:400 7px/1.8 var(--px);color:var(--shade);text-align:center;letter-spacing:.05em;margin-top:10px}
+  .kickx{margin-left:auto;font:400 7px var(--px);text-decoration:none;color:#fff;background:#c0392b;border:2px solid #15121a;padding:5px 6px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -569,7 +570,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
   <!-- HOST ONLY: roster + messages -->
   <div class="card" id="hostRoster" style="display:none">
     <div class="hostbadge"><div class="hb-art" id="hostPortrait"></div><div class="hb-txt"><div class="eyebrow">The one and only</div><div class="hb-name" id="hostName">Sasha</div><div class="hb-line">Runs the room tonight</div></div></div>
-    <div style="display:none"><span id="hostCount">0</span><div id="hostList"></div></div>
+    <div class="eyebrow" style="margin:6px 0 4px">Who's here (<span id="hostCount">0</span>)</div><div id="hostList"></div>
     <div class="eyebrow" style="margin:14px 0 8px">Send a message</div>
     <div class="chips" id="msgChips"></div>
     <div class="row"><input class="in" type="text" id="msgInput" maxlength="140" placeholder="Pops on their screen instantly..."><button class="btn" id="btnSend">Send</button></div>
@@ -1294,9 +1295,9 @@ renderCreator();
 function join(){
   const name=$('inName').value.trim();
   if(!name){const i=$('inName');i.classList.remove('nudge');void i.offsetWidth;i.classList.add('nudge');i.focus();return}
-  me={id:isHost?((me&&String(me.id).startsWith('host_'))?me.id:'host_'+Math.random().toString(36).slice(2,9)):((me&&me.id&&!String(me.id).startsWith('host_'))?me.id:'g_'+Math.random().toString(36).slice(2,9)),name,look:{...look}};
+  me={id:(me&&me.id)?me.id:'g_'+Math.random().toString(36).slice(2,9),name,look:{...look}};   // one character per browser, shared by guest + host views
   localStorage.setItem('tpl_me',JSON.stringify(me));
-  ref(`${E}/attendees/${me.id}`).update({...me,joinedAt:Date.now()});
+  ref(`${E}/attendees/${me.id}`).update({...me,...(isHost?{isHost:true}:{}),joinedAt:Date.now()});
   enterLounge();
 }
 $('btnJoin').onclick=join;
@@ -1466,7 +1467,7 @@ function listenMessages(){
    ===================================================================== */
 function matchPeople(){
   if(guests.length<2){alert('You need at least 2 guests to match people.');return false}
-  const host=guests.find(g=>g.id.startsWith('host_'));
+  const isH=g=>g.isHost||String(g.id).startsWith('host_'), host=guests.find(isH);
   const shuffled=guests.filter(g=>g!==host).sort(()=>Math.random()-.5); if(host) shuffled.push(host);
   const mine={}, pairs={}; let n=0;
   for(let i=0;i<shuffled.length;i+=2){
@@ -1506,7 +1507,7 @@ function initHost(){
   ref(`${E}/state`).set('lounge');
   ref(`${E}/pairs`).on('value',snap=>{pairsNow=snap.val();syncPairs()});
 }
-window.removeGuest=async id=>{if(confirm('Remove this guest from the roster?'))await ref(`${E}/attendees/${id}`).set(null)};
+window.removeGuest=async id=>{if(me&&id===me.id){alert('That is you.');return} if(confirm('Remove this guest from the roster?')){await ref(`${E}/kicked/${id}`).set(true);await ref(`${E}/attendees/${id}`).set(null)}};
 function renderHostList(){
   $('hostCount').textContent=guests.length;
   $('hostList').innerHTML=guests.map(g=>`<div class="hrow">${sprite(g.look,24,35)}<span class="grow">${esc(g.name)}</span><button class="btn" onclick="removeGuest('${g.id}')">Kick</button></div>`).join('');
@@ -1642,15 +1643,14 @@ function renderPartnerRoom(){
   $('prScene').innerHTML=`<svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 120 150">${o}</svg>`; fitPR();
 }
 const returning=sessionStorage.getItem('tpl_ret')==='1'; sessionStorage.removeItem('tpl_ret');   // coming back from a room page skips the intro
-if(isHost){
-  if(me&&String(me.id).startsWith('host_')&&me.look){   // same browser: Sasha keeps the character they made
-    ref(`${E}/attendees/${me.id}`).update({...me,joinedAt:Date.now()}); enterLounge();
-  }else{                                                  // first time: Sasha builds a character like everyone else
-    $('inName').value=CONFIG.hostName||'Sasha'; show('screen-welcome');
-  }
-}else if((CONFIG.rememberGuests||returning)&&me&&me.look){
-  ref(`${E}/attendees/${me.id}`).update({...me,joinedAt:Date.now()}); enterLounge();
-}else show('screen-welcome');
+const announce=()=>ref(`${E}/attendees/${me.id}`).update({...me,...(isHost?{isHost:true}:{}),joinedAt:Date.now()});
+if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in before on this browser: straight to the room
+  announce(); enterLounge();
+  if(!isHost) ref(`${E}/kicked/${me.id}`).once('value').then(sn=>{ if(sn.val()){ localStorage.removeItem('tpl_me'); location.reload() } });   // kicked guests start over
+}else{
+  if(isHost) $('inName').value=CONFIG.hostName||'Sasha';
+  show('screen-welcome');
+}
 </script>
 
 <style>
@@ -1813,9 +1813,10 @@ if(isHost){
   let msgs={}, mailSub=false, viewMail=null;
   const readSet=()=>{try{return new Set(JSON.parse(localStorage.getItem('tpl_mail_read')||'[]'))}catch(e){return new Set()}};
   const markRead=id=>{const r=readSet();r.add(id);localStorage.setItem('tpl_mail_read',JSON.stringify([...r]))};
+  const isH0=new URLSearchParams(location.search).get('host')==='1';
   function mailItems(){
     if(!me) return [];
-    const out=Object.entries(msgs).filter(([id,m])=>m&&m.ts&&m.senderId!==me.id&&(m.target==='all'||m.target===me.id))
+    const out=Object.entries(msgs).filter(([id,m])=>m&&m.ts&&(isH0||m.senderId!==me.id)&&(m.target==='all'||m.target===me.id))
       .map(([id,m])=>({id,from:m.from||hn(),title:m.title,text:m.text,ts:m.ts}));
     const pp=window.myPartners;
     if(pp&&pp.length){
@@ -1859,7 +1860,7 @@ if(isHost){
     else{
       const L=G.filter(g=>String(g.name||'').toLowerCase().includes(q.toLowerCase()));
       h=`<div class="srch"><label for="srch">FIND:</label><input id="srch" type="search" placeholder="type a name..." value="${esc(q)}" autocomplete="off"></div>`
-        +`<div class="plist">`+(L.length?L.map(g=>`<button class="prow" data-id="${esc(g.id)}" type="button"><span class="av">${sprite(g.look,26,37)}</span><span>${esc(g.name)}</span>${me&&g.id===me.id?'<i>YOU</i>':''}</button>`).join(''):'<div class="empty">Nobody found.</div>')+`</div>`;
+        +`<div class="plist">`+(L.length?L.map(g=>`<button class="prow" data-id="${esc(g.id)}" type="button"><span class="av">${sprite(g.look,26,37)}</span><span>${esc(g.name)}</span>${me&&g.id===me.id?'<i>YOU</i>':(isH0?`<u class="kickx" data-kick="${esc(g.id)}">KICK</u>`:'')}</button>`).join(''):'<div class="empty">Nobody found.</div>')+`</div>`;
     }
     sheet.innerHTML=bar+`<div class="wb">${h}</div>`;
     const si=document.getElementById('srch'); if(si){si.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=document.getElementById('srch');n.focus();n.setSelectionRange(pos,pos)}}
@@ -1870,6 +1871,7 @@ if(isHost){
     if(e.target.closest('[data-back]')){viewing=null;render();return}
     if(e.target.closest('[data-mback]')){viewMail=null;render();updateDot();return}
     const mr=e.target.closest('.mrow'); if(mr){viewMail=mr.dataset.mid;markRead(viewMail);updateDot();render();return}
+    const kx=e.target.closest('[data-kick]'); if(kx){e.stopPropagation(); window.removeGuest(kx.dataset.kick); return}
     const r=e.target.closest('.prow'); if(r){viewing=r.dataset.id;render()}
   };
   const mi=document.getElementById('msgInput'); if(mi) mi.placeholder='Lands in their MAIL box...';
@@ -1920,7 +1922,7 @@ if(isHost){
     if(!scr.classList.contains('active')) return;
     startMail(); updateDot(); fitRoom();
     if(!autoTour&&!localStorage.getItem('tpl_toured')&&me&&document.querySelector('#map svg')&&new URLSearchParams(location.search).get('host')!=='1'){autoTour=true;setTimeout(()=>startTour(true),900)}
-    const isH=new URLSearchParams(location.search).get('host')==='1'; document.getElementById('dbSasha').style.display=isH?'flex':'none'; dock.querySelector('[data-t=mail]').style.display=isH?'none':'flex';
+    const isH=new URLSearchParams(location.search).get('host')==='1'; document.getElementById('dbSasha').style.display=isH?'flex':'none'; dock.querySelector('[data-t=mail]').style.display='flex';
     const g=(typeof guests!=='undefined'?guests:[]); const n=g.map(x=>x.id+x.name+JSON.stringify(x.look||'')).join('|')+(me?me.id:'');
     if(n!==sig){sig=n; if(tab!=='sasha') render(); else document.getElementById('dbd').textContent=g.length}
   },700);
@@ -1960,6 +1962,7 @@ if(isHost){
 .prheart{animation:prfloat 2.4s steps(6) infinite}
 @keyframes prfloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-12px);opacity:0}}
 #sashaBox #hostDeck .pairctl .st{display:block!important}
+.kickx{margin-left:auto;font:400 7px var(--px);text-decoration:none;color:#fff;background:#c0392b;border:2px solid #15121a;padding:5px 6px;cursor:pointer}
 </style>
 </body>
 </html>
