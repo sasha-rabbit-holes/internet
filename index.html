@@ -701,7 +701,6 @@ const firebaseConfig = {
    ===================================================================== */
 let db=null;
 try{ if(firebaseConfig.apiKey!=='YOUR_API_KEY'){ firebase.initializeApp(firebaseConfig); db=firebase.database(); } }catch(e){ console.warn('Firebase failed, preview mode',e); }
-if(!db) addEventListener('DOMContentLoaded',()=>{const b=document.createElement('div');b.textContent='OFFLINE - not synced (Firebase failed to load)';b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#c0392b;color:#fff;font:600 12px sans-serif;text-align:center;padding:4px';document.body.appendChild(b)});
 const subs=[];
 const L={get(){try{return JSON.parse(localStorage.tpl_db||'{}')}catch(e){return{}}},put(t){localStorage.tpl_db=JSON.stringify(t)}};
 const walk=(t,p)=>p.split('/').reduce((a,k)=>a==null?null:a[k],t);
@@ -716,14 +715,6 @@ function localRef(p){return{
   on(_,cb){subs.push({p,cb});cb(snapOf(p))}}}
 const ref=p=>db?db.ref(p):localRef(p);
 const E=`events/${CONFIG.eventId}`;
-/* ---------- connection diagnostics: red bar shows the real Firebase error ---------- */
-function fbBar(msg,ok){let b=document.getElementById('fbBar');if(!b){b=document.createElement('div');b.id='fbBar';b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;color:#fff;font:600 12px sans-serif;text-align:center;padding:4px;pointer-events:none';document.body.appendChild(b)}
-  b.style.background=ok?'#1e8e3e':'#c0392b';b.textContent=msg;if(ok)setTimeout(()=>b.remove(),2500)}
-if(db){
-  db.ref('.info/connected').on('value',s=>{ if(s.val()) fbBar('Connected to Firebase',true); else fbBar('Firebase: not connected (check databaseURL / network)') });
-  db.ref(E+'/_ping').set(Date.now()).catch(e=>fbBar('Firebase write failed: '+(e.code||e.message)+' - fix Realtime Database Rules'));
-  db.ref(E+'/attendees').on('value',()=>{},e=>fbBar('Firebase read failed: '+(e.code||e.message)+' - fix Realtime Database Rules'));
-}
 
 
 /* =====================================================================
@@ -1383,9 +1374,72 @@ function walkTap(ev){
   if(!me||!walkers[me.id])return;
   const svg=$('map').querySelector('svg'),pt=svg.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY;
   const q=pt.matrixTransform(svg.getScreenCTM().inverse()),b=floorBox(wSc);
+  // tapped a character? -> open the interaction menu instead of walking
+  let hit=null,hitY=-1e9;
+  for(const id in walkers){const w=walkers[id],X=b.x0+w.x*b.w,Y=b.y0+w.y*b.h;
+    if(q.x>=X-1&&q.x<=X+b.sw+1&&q.y>=Y-3&&q.y<=Y+b.sh+1&&Y>hitY){hit=id;hitY=Y}}
+  if(hit){ev.stopPropagation();openCharMenu(hit,ev.clientX,ev.clientY);return}
+  closeCharMenu();
   const nx=Math.max(0,Math.min(1,(q.x-b.sw/2-b.x0)/b.w)), ny=Math.max(0,Math.min(1,(q.y-b.sh-b.y0)/b.h));
-  walkers[me.id].tx=nx; walkers[me.id].ty=ny;
+  const me_=walkers[me.id], dist=Math.hypot((nx-me_.x)*b.w,(ny-me_.y)*b.h);
+  me_.tx=nx; me_.ty=ny;
+  tapSpot(b.x0+nx*b.w+b.sw/2, b.y0+ny*b.h+b.sh, dist/SPEED);
   ref(`${E}/attendees/${me.id}/pos`).set({x:+nx.toFixed(3),y:+ny.toFixed(3)});   // everyone else sees you walk
+}
+/* ---------- blue spot on the floor where you're headed ---------- */
+let spotTimer=0;
+function tapSpot(x,y,secs){
+  const svg=$('map').querySelector('svg'); if(!svg)return;
+  let g=svg.querySelector('#tapfx'); if(g)g.remove();
+  g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.id='tapfx'; g.setAttribute('pointer-events','none');
+  g.setAttribute('transform',`translate(${x} ${y})`);
+  g.innerHTML=`<ellipse rx="7" ry="2.8" fill="#3d9bff" fill-opacity=".38" stroke="#9fd2ff" stroke-width=".6"><animate attributeName="fill-opacity" values=".15;.45;.15" dur="1s" repeatCount="indefinite"/></ellipse>`
+    +`<ellipse rx="2" ry="0.8" fill="none" stroke="#cfe8ff" stroke-width=".7"><animate attributeName="rx" from="2" to="11" dur=".9s" repeatCount="indefinite"/><animate attributeName="ry" from=".8" to="4.4" dur=".9s" repeatCount="indefinite"/><animate attributeName="stroke-opacity" from=".9" to="0" dur=".9s" repeatCount="indefinite"/></ellipse>`;
+  const ppl=svg.querySelector('#ppl'); svg.insertBefore(g,ppl||null);   // under the characters
+  clearTimeout(spotTimer); spotTimer=setTimeout(()=>{g.style.transition='opacity .4s';g.style.opacity=0;setTimeout(()=>g.remove(),450)},secs*1000+250);
+}
+
+/* ---------- tap a character: moves + interactions ---------- */
+const EMOTES={jump:{e:'\u2757',dur:.8},spin:{e:'\uD83C\uDF00',dur:.9},dance:{e:'\uD83D\uDC83',dur:2.4},wave:{e:'\uD83D\uDC4B',dur:1.8},heart:{e:'\u2764\uFE0F',dur:2},highfive:{e:'\u270B',dur:1.6}};
+const SELF_MOVES=[['jump','Jump'],['spin','Spin'],['dance','Dance'],['wave','Wave'],['heart','Send love']];
+const OTHER_MOVES=[['wave','Wave at'],['highfive','High five'],['dance','Dance with'],['heart','Send love to']];
+function closeCharMenu(){const m=$('charMenu'); if(m)m.remove()}
+function openCharMenu(id,cx,cy){
+  closeCharMenu(); const g=guests.find(x=>x.id===id); if(!g)return;
+  const mine=me&&id===me.id, m=document.createElement('div'); m.id='charMenu';
+  m.style.cssText='position:fixed;z-index:9000;background:var(--cream,#fff8e7);color:var(--ink,#222);border:3px solid var(--line,#15121a);box-shadow:0 4px 0 var(--line,#15121a);padding:6px;min-width:150px;font:700 13px Trebuchet MS,sans-serif';
+  m.innerHTML=`<div style="padding:2px 6px 6px;opacity:.7">${mine?'You':esc(String(g.name||'').slice(0,14))}</div>`
+    +(mine?SELF_MOVES:OTHER_MOVES).map(([k,l])=>`<button data-m="${k}" style="display:block;width:100%;text-align:left;margin:2px 0;padding:7px 8px;border:2px solid var(--line,#15121a);background:#fff;font:inherit;color:inherit;cursor:pointer">${EMOTES[k].e} ${l}${mine?'':' '+esc(String(g.name||'').slice(0,10))}</button>`).join('');
+  document.body.appendChild(m);
+  const r=m.getBoundingClientRect();
+  m.style.left=Math.max(6,Math.min(innerWidth-r.width-6,cx-r.width/2))+'px';
+  m.style.top=Math.max(6,Math.min(innerHeight-r.height-6,cy+10))+'px';
+  m.onclick=e=>{const k=e.target.closest('button')?.dataset.m; if(!k)return; e.stopPropagation(); closeCharMenu(); doEmote(k,mine?null:id)};
+  setTimeout(()=>document.addEventListener('pointerdown',function f(e){if(!e.target.closest('#charMenu')){closeCharMenu()}document.removeEventListener('pointerdown',f)}),0);
+}
+function doEmote(type,to){
+  if(!me||!walkers[me.id])return;
+  const send=()=>ref(`${E}/attendees/${me.id}/emote`).set({type,to:to||null,ts:Date.now()});
+  if(!to){send();return}
+  // walk up next to them first, then do it
+  const b=floorBox(wSc),t=walkers[to],w=walkers[me.id]; if(!t)return send();
+  const off=(b.sw*1.05)/b.w, nx=Math.max(0,Math.min(1,t.x+(t.x>.5?off:-off))), ny=Math.max(0,Math.min(1,t.y));
+  const dist=Math.hypot((nx-w.x)*b.w,(ny-w.y)*b.h);
+  w.tx=nx;w.ty=ny; ref(`${E}/attendees/${me.id}/pos`).set({x:+nx.toFixed(3),y:+ny.toFixed(3)});
+  setTimeout(send,dist/SPEED*1000+150);
+}
+function playFx(id,type){const w=walkers[id]; if(!w||!EMOTES[type])return; w.fx={type,t0:performance.now()/1000}; if(w.bub){w.bub.remove();w.bub=null}}
+function checkEmotes(){
+  guests.forEach(g=>{const w=walkers[g.id],em=g.emote; if(!w||!em||!em.ts||w.emoTs===em.ts)return;
+    const first=w.emoTs===undefined; w.emoTs=em.ts;
+    if(first&&Date.now()-em.ts>8000)return;          // old news from before we loaded
+    playFx(g.id,em.type);
+    if(em.to&&me&&em.to===me.id&&g.id!==me.id){
+      if(em.type==='highfive'||em.type==='dance') playFx(me.id,em.type);   // they join in
+      const msg={wave:'waved at you',highfive:'wants a high five',dance:'is dancing with you',heart:'sent you love'}[em.type]||'is saying hi';
+      toast({title:g.name||'Someone',body:msg+' '+EMOTES[em.type].e,holdMs:2500});
+    }
+  });
 }
 function syncWalkers(){
   const ids=new Set(guests.map(g=>g.id));
@@ -1401,10 +1455,24 @@ function placeAll(dt){
   const b=floorBox(wSc), t=performance.now()/1000, ph=Math.floor(t*8)%2, list=[];
   for(const id in walkers){const w=walkers[id]; if(!w.el)continue;
     const dx=(w.tx-w.x)*b.w, dy=(w.ty-w.y)*b.h, d=Math.hypot(dx,dy), step=SPEED*dt, mv=d>.3;
+    if(mv&&Math.abs(dx)>.5) w.face=dx<0?-1:1;
     if(mv){ if(d<=step){w.x=w.tx;w.y=w.ty}else{w.x+=dx/d*step/b.w;w.y+=dy/d*step/b.h} }
     const Y=b.y0+w.y*b.h;
     w.el.setAttribute('transform',`translate(${b.x0+w.x*b.w} ${Y})`);
-    w.bod.setAttribute('transform',mv?`translate(0 ${ph?-.8:0}) rotate(${ph?3:-3} 8 20)`:'');
+    let bob=mv?-Math.abs(Math.sin(t*9))*1.1:0, tilt=mv?Math.sin(t*9)*2:0, spin='';
+    if(w.fx){const f=w.fx,a=t-f.t0,E_=EMOTES[f.type];
+      if(!E_||a>E_.dur){w.fx=null; if(w.bub){w.bub.remove();w.bub=null}}
+      else{
+        if(f.type==='jump') bob-=Math.sin(Math.PI*Math.min(1,a/.7))*6;
+        else if(f.type==='spin'){ bob-=Math.sin(Math.PI*Math.min(1,a/.9))*2; spin=`translate(8 0) scale(${Math.cos(a/.9*Math.PI*4).toFixed(3)} 1) translate(-8 0) `}
+        else if(f.type==='dance'){ bob-=Math.abs(Math.sin(a*10))*2.2; tilt=Math.sin(a*10)*10 }
+        else if(f.type==='wave'){ tilt=Math.sin(a*14)*7 }
+        else if(f.type==='highfive'){ bob-=Math.sin(Math.PI*Math.min(1,a/.5))*3; tilt=-6 }
+        else if(f.type==='heart'){ bob-=Math.abs(Math.sin(a*6))*1.2 }
+        if(!w.bub||!w.bub.isConnected){const b_=document.createElementNS('http://www.w3.org/2000/svg','text');b_.setAttribute('text-anchor','middle');b_.setAttribute('font-size',7);b_.setAttribute('pointer-events','none');b_.textContent=E_.e;w.el.appendChild(b_);w.bub=b_}
+        w.bub.setAttribute('x',7*wSc);w.bub.setAttribute('y',-2-a*3);w.bub.setAttribute('opacity',Math.max(0,Math.min(1,(E_.dur-a)*2)));
+      }}
+    w.bod.setAttribute('transform',`${w.face===-1?`translate(${16} 0) scale(-1 1) `:''}${spin}translate(0 ${bob}) rotate(${tilt} 8 20)`);
     list.push([Y,w.el]);
   }
   list.sort((p,q)=>p[0]-q[0]);   // lower on screen = drawn in front
@@ -1465,7 +1533,10 @@ function listenRoster(){
   ref(`${E}/attendees`).on('value',snap=>{
     guests=Object.values(snap.val()||{}).sort((a,b)=>a.joinedAt-b.joinedAt);
     $('countLabel').textContent=guests.length+' here';
-    renderPeople(); if(isHost) renderHostList();
+    const sig=JSON.stringify(guests.map(g=>[g.id,g.name,g.look]));
+    if(sig===listenRoster.sig && $('ppl')){ syncWalkers(); checkEmotes(); return }   // someone only walked: don't rebuild, just update targets
+    listenRoster.sig=sig;
+    renderPeople(); checkEmotes(); if(isHost) renderHostList();
   });
 }
 
