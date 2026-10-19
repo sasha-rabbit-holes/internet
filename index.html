@@ -686,13 +686,22 @@ const CONFIG = {
 };
 
 /* ---------- Firebase (paste your own config). Left blank = local preview mode. ---------- */
-const firebaseConfig = { apiKey:'YOUR_API_KEY', authDomain:'', databaseURL:'', projectId:'', appId:'' };
+const firebaseConfig = {
+  apiKey: "AIzaSyBpfqEXrMcTyqy95zhmXf8pHPbEsEtjOhI",
+  authDomain: "internet-44c0e.firebaseapp.com",
+  databaseURL: "https://internet-44c0e-default-rtdb.firebaseio.com",
+  projectId: "internet-44c0e",
+  storageBucket: "internet-44c0e.firebasestorage.app",
+  messagingSenderId: "1066919323832",
+  appId: "1:1066919323832:web:fb56afd2a40c1bb1f3ec4d"
+};
 
 /* =====================================================================
    DATA LAYER
    ===================================================================== */
 let db=null;
 try{ if(firebaseConfig.apiKey!=='YOUR_API_KEY'){ firebase.initializeApp(firebaseConfig); db=firebase.database(); } }catch(e){ console.warn('Firebase failed, preview mode',e); }
+if(!db) addEventListener('DOMContentLoaded',()=>{const b=document.createElement('div');b.textContent='OFFLINE - not synced (Firebase failed to load)';b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#c0392b;color:#fff;font:600 12px sans-serif;text-align:center;padding:4px';document.body.appendChild(b)});
 const subs=[];
 const L={get(){try{return JSON.parse(localStorage.tpl_db||'{}')}catch(e){return{}}},put(t){localStorage.tpl_db=JSON.stringify(t)}};
 const walk=(t,p)=>p.split('/').reduce((a,k)=>a==null?null:a[k],t);
@@ -707,6 +716,15 @@ function localRef(p){return{
   on(_,cb){subs.push({p,cb});cb(snapOf(p))}}}
 const ref=p=>db?db.ref(p):localRef(p);
 const E=`events/${CONFIG.eventId}`;
+/* ---------- connection diagnostics: red bar shows the real Firebase error ---------- */
+function fbBar(msg,ok){let b=document.getElementById('fbBar');if(!b){b=document.createElement('div');b.id='fbBar';b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;color:#fff;font:600 12px sans-serif;text-align:center;padding:4px;pointer-events:none';document.body.appendChild(b)}
+  b.style.background=ok?'#1e8e3e':'#c0392b';b.textContent=msg;if(ok)setTimeout(()=>b.remove(),2500)}
+if(db){
+  db.ref('.info/connected').on('value',s=>{ if(s.val()) fbBar('Connected to Firebase',true); else fbBar('Firebase: not connected (check databaseURL / network)') });
+  db.ref(E+'/_ping').set(Date.now()).catch(e=>fbBar('Firebase write failed: '+(e.code||e.message)+' - fix Realtime Database Rules'));
+  db.ref(E+'/attendees').on('value',()=>{},e=>fbBar('Firebase read failed: '+(e.code||e.message)+' - fix Realtime Database Rules'));
+}
+
 
 /* =====================================================================
    STATE + HELPERS
