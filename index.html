@@ -567,25 +567,45 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
 <!-- ===== 2. THE HOUSE ===== -->
 <div class="screen" id="screen-lounge"><div class="wrap">
 
-  <!-- HOST ONLY: roster + messages -->
+  <!-- HOST ONLY: roster -->
   <div class="card" id="hostRoster" style="display:none">
-    <div class="hostbadge"><div class="hb-art" id="hostPortrait"></div><div class="hb-txt"><div class="eyebrow">The one and only</div><div class="hb-name" id="hostName">Sasha</div><div class="hb-line">Runs the room tonight</div></div></div>
-    <div class="eyebrow" style="margin:6px 0 4px">Who's here (<span id="hostCount">0</span>)</div><div id="hostList"></div>
-    <div class="eyebrow" style="margin:14px 0 8px">Send a message</div>
-    <div class="chips" id="msgChips"></div>
-    <div class="row"><input class="in" type="text" id="msgInput" maxlength="140" placeholder="Pops on their screen instantly..."><button class="btn" id="btnSend">Send</button></div>
+    <details class="hc-more" id="rosterDet"><summary>Who&rsquo;s here (<span id="hostCount">0</span>)</summary><div id="hostList"></div></details>
   </div>
 
   <div class="head"><h2>The Room</h2><span class="pill" id="countLabel"></span></div>
     <div id="mapwrap"><div class="map" id="map"></div><div id="guideBubble" role="status"></div></div>
   <div class="signoff" id="signoff"></div>
 
-  <!-- HOST ONLY: run of show -->
+  <!-- HOST ONLY: run of show (one card per step, same idea as the Host Controls in the Paris file) -->
   <div class="card" id="hostDeck" style="display:none">
-    <div class="eyebrow" style="margin-bottom:10px">Sasha’s controls</div>
+    <div class="hc-title">Host Controls</div>
+
+    <!-- Pairs activity -->
+    <div class="hc" id="pairCard">
+      <div class="hc-head"><div><div class="hc-step">Pairs activity</div><div class="hc-name">Partner Door</div></div></div>
+      <div class="hc-clock" id="pairClock" style="display:none"><b id="pairClockT">00:00</b><em id="pairClockL">left</em></div>
+      <div class="hc-main">
+        <button type="button" class="hc-go" id="btnPairs">Start pairs</button>
+        <label class="hc-timerbox"><input type="number" id="pairMinutes" value="10" min="0" step="1" inputmode="numeric" aria-label="Pairs timer in minutes"><span>min</span></label>
+      </div>
+      <div class="hc-hint" id="pairHint">One tap: matches everyone and starts the timer. Set 0 for no timer. You&rsquo;re in the trio if the count is odd, and anyone who joins late is added to your group.</div>
+      <div class="hc-chips" id="pairChips" style="display:none">
+        <button type="button" class="hc-chip" id="btnPlus">+1 min</button>
+        <button type="button" class="hc-chip" id="btnStopTimer">Stop timer</button>
+      </div>
+      <details class="hc-more" id="pairMore" style="display:none">
+        <summary>More</summary>
+        <div class="hc-more-row">
+          <button type="button" class="hc-chip" id="btnReshuffle">Re-shuffle pairs</button>
+          <button type="button" class="hc-chip" id="btnClearPairs">Clear pairs</button>
+        </div>
+      </details>
+    </div>
+
+    <!-- Mail sections, one at a time -->
     <div id="deckStops"></div>
-    <div class="hs pairctl" data-sec="pairs"><div class="top"><div><div class="nm">Pairs section</div><div class="st" id="pairSt">Not matched yet</div></div><button class="btn" id="btnPairs" type="button">Activate</button></div></div>
-    <button class="btn" id="btnReset" style="width:100%;color:#a02020">Reset entire event</button>
+
+    <details class="hc-more hc-reset"><summary>Event</summary><div class="hc-more-row"><button type="button" class="hc-chip danger" id="btnReset">Reset entire event</button></div></details>
   </div>
 </div>
 <div class="nextbar" id="nextBar">
@@ -1421,7 +1441,6 @@ function enterLounge(){
   
   $('signoff').textContent=CONFIG.signoff;
   buildMap(); listenRoster(); listenHubs(); listenMessages(); listenPairings();
-  $('hostPortrait').innerHTML=hostSvg(72,70,'-2 -1 20 19'); $('hostName').textContent=CONFIG.hostName||'Sasha';
   if(isHost) initHost(); else if(!localStorage.getItem('tpl_toured')) setTimeout(()=>tourShow(0),1400);
 }
 function listenRoster(){
@@ -1465,21 +1484,44 @@ function listenMessages(){
 /* =====================================================================
    PAIRS
    ===================================================================== */
+const isHostG=g=>!!g&&(g.isHost||String(g.id).startsWith('host_'));
+const slimG=g=>({id:g.id,name:g.name||'?',look:g.look||null,...(isHostG(g)?{isHost:true}:{})});
+/* Match everyone. Sasha is always placed last, so with an odd number she lands in the trio. */
 function matchPeople(){
-  if(guests.length<2){alert('You need at least 2 guests to match people.');return false}
-  const isH=g=>g.isHost||String(g.id).startsWith('host_'), host=guests.find(isH);
-  const shuffled=guests.filter(g=>g!==host).sort(()=>Math.random()-.5); if(host) shuffled.push(host);
-  const mine={}, pairs={}; let n=0;
-  for(let i=0;i<shuffled.length;i+=2){
-    if(i===shuffled.length-1){
-      const a=shuffled[i-2],b=shuffled[i-1],c=shuffled[i];
-      mine[c.id]=[a,b]; mine[a.id].push(c); mine[b.id].push(c);
-      pairs['pair_'+(n-1)]={members:[a.id,b.id,c.id]};
-    } else {
-      const a=shuffled[i],b=shuffled[i+1]; mine[a.id]=[b]; mine[b.id]=[a]; pairs['pair_'+n++]={members:[a.id,b.id]};
-    }
-  }
+  const host=guests.find(isHostG);
+  const order=[...guests.filter(g=>g!==host).sort(()=>Math.random()-.5),...(host?[host]:[])];
+  if(order.length<2){alert('You need at least 2 guests to match people.');return false}
+  const groups=[]; for(let i=0;i<order.length;i+=2) groups.push(order.slice(i,i+2));
+  if(groups.length>1&&groups[groups.length-1].length===1){ const lone=groups.pop()[0]; groups[groups.length-1].push(lone) }
+  const mine={}, pairs={};
+  groups.forEach((grp,n)=>{
+    pairs['pair_'+n]={members:grp.map(g=>g.id)};
+    grp.forEach(a=>{ mine[a.id]=grp.filter(b=>b!==a).map(slimG) });
+  });
   ref(`${E}/pairings`).set(mine); ref(`${E}/pairs`).set(pairs); return true;
+}
+/* Latecomers: once pairs are live, anyone not in a group is added to Sasha's group (up to 4),
+   so nobody else's pair is reshuffled. If hers is full they join the smallest group. */
+let placing=false;
+async function placeLatecomers(){
+  if(!isHost||placing||!pairsNow) return;
+  const inGroup=new Set(Object.values(pairsNow).flatMap(p=>p.members||[]));
+  const late=guests.filter(g=>!inGroup.has(g.id)); if(!late.length) return;
+  placing=true;
+  try{
+    const pairs=JSON.parse(JSON.stringify(pairsNow)), mine=JSON.parse(JSON.stringify(lastPairings||{}));
+    const hostId=(guests.find(isHostG)||{}).id, byId=id=>guests.find(x=>x.id===id)||{id,name:'?'};
+    late.forEach(g=>{
+      const keys=Object.keys(pairs); if(!keys.length) return;
+      const key=keys.find(k=>pairs[k].members.includes(hostId)&&pairs[k].members.length<4)||keys.sort((a,b)=>pairs[a].members.length-pairs[b].members.length)[0];
+      const mem=pairs[key].members;
+      mem.forEach(id=>{ (mine[id]=mine[id]||[]).push(slimG(g)) });
+      mine[g.id]=mem.map(id=>slimG(byId(id)));
+      mem.push(g.id);
+    });
+    await ref(`${E}/pairings`).set(mine); await ref(`${E}/pairs`).set(pairs);
+  }catch(e){console.warn('late match failed',e)}
+  finally{ setTimeout(()=>{placing=false},400) }
 }
 const sig=ps=>CONFIG.eventId+':'+ps.map(p=>p.id).sort().join(',');
 let lastPairings=null;
@@ -1499,11 +1541,13 @@ $('btnRevealHide').onclick=()=>{if(window.myPartners)localStorage.setItem('tpl_h
 /* =====================================================================
    HOST
    ===================================================================== */
-let msgTarget='all', msgsNow={};
+let msgsNow={};
 function initHost(){
   ['hostRoster','hostDeck'].forEach(i=>$(i).style.display='block'); 
-  $('deckStops').innerHTML=(CONFIG.sections||[]).map(c=>`<div class="hs" data-sec="${esc(c.key)}"><div class="top"><div><div class="nm">${esc(c.title)}</div><div class="st">Not sent yet</div></div><button class="btn go">Send</button></div></div>`).join('');
-  $('nextBar').style.display='none'; syncDeck();
+  const SEC=CONFIG.sections||[];
+  $('deckStops').innerHTML=SEC.map((c,i)=>`<div class="hc" data-sec="${esc(c.key)}"><div class="hc-head"><div><div class="hc-step">Mail &middot; ${i+1} of ${SEC.length}</div><div class="hc-name">${esc(c.title)}</div></div></div><div class="hc-main"><button type="button" class="hc-go go">Send to mail</button></div><div class="hc-hint st">Goes to everyone&rsquo;s MAIL, including late joiners.</div></div>`).join('');
+  syncDeck(); syncBar();
+  ref(`${E}/pairsTimerEnd`).on('value',s=>{pairEnd=s.val()||null; pairFired=!!(pairEnd&&pairEnd<=Date.now()); tickPair()});
   ref(`${E}/state`).set('lounge');
   ref(`${E}/pairs`).on('value',snap=>{pairsNow=snap.val();syncPairs()});
 }
@@ -1511,17 +1555,8 @@ window.removeGuest=async id=>{if(me&&id===me.id){alert('That is you.');return} i
 function renderHostList(){
   $('hostCount').textContent=guests.length;
   $('hostList').innerHTML=guests.map(g=>`<div class="hrow">${sprite(g.look,24,35)}<span class="grow">${esc(g.name)}</span><button class="btn" onclick="removeGuest('${g.id}')">Kick</button></div>`).join('');
-  const chips=[['all','Everyone'],...guests.map(g=>[g.id,g.name])];
-  if(!chips.some(c=>c[0]===msgTarget)) msgTarget='all';
-  $('msgChips').innerHTML=''; chips.forEach(([id,label])=>{const b=document.createElement('button');b.type='button';b.className='chip'+(id===msgTarget?' active':'');b.textContent=label;
-    b.onclick=()=>{msgTarget=id;document.querySelectorAll('#msgChips .chip').forEach(c=>c.classList.remove('active'));b.classList.add('active')};$('msgChips').appendChild(b)});
+  placeLatecomers();
 }
-function sendMsg(){
-  const text=$('msgInput').value.trim(); if(!text)return;
-  ref(`${E}/messages/m_${Date.now()}_${Math.random().toString(36).slice(2,6)}`).set({text,target:msgTarget,from:me.name,senderId:me.id,ts:Date.now()});
-  $('msgInput').value=''; $('btnSend').textContent='Sent ✓'; setTimeout(()=>$('btnSend').textContent='Send',1000);
-}
-$('btnSend').onclick=sendMsg; $('msgInput').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();sendMsg()}};
 
 const hubRef=k=>ref(`${E}/hubs/${k}`), curRef=()=>ref(`${E}/hubs/current`);
 const setLock=(k,u)=>{hubRef(k).set(u);if(!u)ref(`${E}/state`).set('lounge')};
@@ -1537,37 +1572,70 @@ async function hostPrimary(k){
 }
 let busy=false; const guard=async fn=>{if(busy)return;busy=true;try{await fn()}finally{setTimeout(()=>busy=false,500)}};
 $('deckStops').onclick=e=>{
-  const b=e.target.closest('button'),card=b&&b.closest('.hs'); if(!card)return;
+  const b=e.target.closest('button'),card=b&&b.closest('.hc'); if(!card)return;
   const c=(CONFIG.sections||[]).find(x=>x.key===card.dataset.sec); if(!c)return;
   const r=ref(`${E}/messages/sec_${c.key}`);
   guard(()=>msgsNow['sec_'+c.key]?r.set(null):r.set({title:c.title,text:c.text,target:'all',from:me.name,senderId:me.id,ts:Date.now()}));   // send, or take it back
 };
-$('nextGo').onclick=function(){if(this.dataset.stop)guard(()=>openStop(this.dataset.stop))};
 function syncDeck(){
-  document.querySelectorAll('#deckStops .hs').forEach(c=>{
+  document.querySelectorAll('#deckStops .hc').forEach(c=>{
     const sent=!!msgsNow['sec_'+c.dataset.sec];
     c.classList.toggle('live',sent);
-    c.querySelector('.st').textContent=sent?'Sent to everyone’s mail ✓':'Not sent yet';
-    c.querySelector('.go').textContent=sent?'Unsend':'Send';
+    c.querySelector('.st').innerHTML=sent?'Sent to everyone&rsquo;s mail &#10003;':'Goes to everyone&rsquo;s MAIL, including late joiners.';
+    c.querySelector('.go').textContent=sent?'Unsend':'Send to mail';
   });
   /* one section at a time: Section N shows only once Section N-1 has been sent */
-  const cs=[...document.querySelectorAll('#deckStops .hs')];
+  const cs=[...document.querySelectorAll('#deckStops .hc')];
   let cur=cs.findIndex(c=>!msgsNow['sec_'+c.dataset.sec]); if(cur<0) cur=cs.length-1;   // first unsent; if all sent, keep the last (so it can be unsent)
   cs.forEach((c,i)=>{c.style.display=i===cur?'':'none'});
 }
-/* PAIRS SECTION: Activate = match everyone (guests see their partner behind the door). Deactivate = clear the pairs. */
-let pairsNow=null;
+/* ---------- PAIRS: one tap matches everyone + starts the timer ---------- */
+let pairsNow=null, pairEnd=null, pairTickId=null, pairFired=false;
+const fmtT=ms=>{const t=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(t/60),s=t%60;return m+':'+String(s).padStart(2,'0')};
 function syncPairs(){
   const on=!!pairsNow, n=on?Object.keys(pairsNow).length:0;
-  $('btnPairs').textContent=on?'Deactivate':'Activate';
-  $('pairSt').textContent=on?'Active ✓ '+n+(n===1?' pair':' pairs')+' matched':'Not matched yet';
-  document.querySelector('.pairctl').classList.toggle('live',on);
+  $('pairCard').classList.toggle('live',on);
+  $('btnPairs').textContent=on?'Clear pairs':'Start pairs';
+  $('pairHint').textContent=on?(n+(n===1?' group':' groups')+' matched. Latecomers join your group automatically.'):'One tap: matches everyone and starts the timer. Set 0 for no timer. You\u2019re in the trio if the count is odd, and anyone who joins late is added to your group.';
+  $('pairChips').style.display=on?'flex':'none'; $('pairMore').style.display=on?'block':'none';
+  tickPair(); placeLatecomers();
 }
-$('btnPairs').onclick=()=>guard(async()=>{
-  const cur=(await ref(`${E}/pairs`).once('value')).val();
-  if(cur){ if(!confirm('Deactivate pairs? This clears everyone’s partner.'))return; await ref(`${E}/pairings`).set(null); await ref(`${E}/pairs`).set(null); return }
-  matchPeople();
+function tickPair(){
+  clearInterval(pairTickId);
+  const left=pairEnd?pairEnd-Date.now():null, over=left!==null&&left<=0, clk=$('pairClock');
+  clk.style.display=(pairEnd&&pairsNow)?'flex':'none'; clk.classList.toggle('over',over);
+  $('pairClockT').textContent=left===null?'':fmtT(left); $('pairClockL').textContent=over?'time\u2019s up!':'left';
+  $('btnStopTimer').style.display=pairEnd?'':'none';
+  if(over&&!pairFired){pairFired=true; if(navigator.vibrate)navigator.vibrate([200,100,200,100,400]); try{icBeep(880,.2);setTimeout(()=>icBeep(660,.4),220)}catch(e){}}
+  if(pairEnd&&!over) pairTickId=setInterval(tickPair,250);
+  syncBar();
+}
+/* the sticky Now bar: always on screen for the host, shows the timer even when the Sasha window is closed */
+function syncBar(){
+  const bar=$('nextBar'); if(!isHost||!bar) return; bar.style.display='flex';
+  const left=pairEnd?pairEnd-Date.now():null, over=left!==null&&left<=0, go=$('nextGo'); bar.classList.toggle('over',!!(pairsNow&&over));
+  if(!pairsNow){ $('nowName').textContent='Nothing live yet'; go.textContent='Start pairs'; go.dataset.act='start' }
+  else if(pairEnd&&!over){ $('nowName').textContent='Pairs \u00b7 '+fmtT(left)+' left'; go.textContent='+1 min'; go.dataset.act='plus' }
+  else if(over){ $('nowName').textContent='Pairs \u00b7 time\u2019s up!'; go.textContent='Clear pairs'; go.dataset.act='clear' }
+  else { $('nowName').textContent='Pairs matched'; go.textContent='Clear pairs'; go.dataset.act='clear' }
+  go.style.display='';
+}
+const startPairs=()=>guard(async()=>{
+  if(!matchPeople()) return;
+  const mins=parseFloat($('pairMinutes').value);
+  await ref(`${E}/pairsTimerEnd`).set(mins>0?Date.now()+Math.round(mins*60000):null);
 });
+const clearPairs=()=>guard(async()=>{
+  if(!confirm('Clear the pairs? This removes everyone\u2019s partner.')) return;
+  await ref(`${E}/pairsTimerEnd`).set(null); await ref(`${E}/pairings`).set(null); await ref(`${E}/pairs`).set(null);
+});
+const plusMin=()=>guard(async()=>{ const base=Math.max(pairEnd||0,Date.now()); await ref(`${E}/pairsTimerEnd`).set(base+60000) });
+$('btnPairs').onclick=()=>pairsNow?clearPairs():startPairs();
+$('btnClearPairs').onclick=clearPairs;
+$('btnPlus').onclick=plusMin;
+$('btnStopTimer').onclick=()=>guard(()=>ref(`${E}/pairsTimerEnd`).set(null));
+$('btnReshuffle').onclick=()=>guard(async()=>{ if(!confirm('Re-shuffle? Everyone gets a new partner.'))return; matchPeople() });
+$('nextGo').onclick=function(){const a=this.dataset.act; if(a==='start')startPairs(); else if(a==='plus')plusMin(); else if(a==='clear')clearPairs()};
 $('btnReset').onclick=async()=>{
   if(!confirm('Clear the roster, pairs and progress for a brand new event?'))return;
   await ref(E).set(null); ['tpl_me','tpl_hide_reveal',doorKey].forEach(k=>localStorage.removeItem(k)); location.href=location.pathname+'?host=1';
@@ -1703,26 +1771,6 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
 .sback{margin:0 0 10px;font:400 8px/1.2 var(--px);padding:8px 10px;background:var(--silver);color:#000;border:2px solid;border-color:var(--raised);outline:1px solid var(--night);border-radius:0;cursor:pointer}
 .sback:active{border-color:var(--sunken)}
 .empty{padding:14px 6px;font:700 13px var(--body);text-align:center}
-#sashaBox:not(.more) #hostRoster,#sashaBox:not(.more) #hostDeck>.hs:not([data-sec]),#sashaBox:not(.more) #btnReset{display:none!important}
-#sashaBox .card::before{display:none}
-#sashaBox .card{padding:0;border:0;background:none;margin:0}
-#sashaBox #hostDeck>.eyebrow{display:none}
-#sashaBox #hostDeck .hs[data-sec] .st{display:none}
-#sashaBox #hostDeck .hs{padding:6px 8px;margin:0 0 6px}
-#sashaBox #hostDeck .hs[data-sec]{border:0;background:none;padding:0}
-#sashaBox #hostDeck .hs .nm{font-size:13px}
-#sashaBox .hs .btn{font-size:9px;padding:8px 10px}
-#sashaBox .morebtn{display:block;margin:6px 0 0 auto;font-size:7px;padding:5px 7px}
-#sashaBox:not(.more) .hostbadge{display:none}
-#sashaBox.more .hostbadge{display:none}
-#sheet:has(#sashaBox) .wb{padding:8px}
-#sashaBox{display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap}
-#sashaBox #hostDeck{flex:1 1 0;min-width:0}
-#sashaBox .morebtn{margin:0;order:2}
-#sashaBox #hostRoster{order:3;width:100%}
-#sashaBox #hostDeck,#sashaBox #hostDeck .hs[data-sec]{border:0!important;box-shadow:none!important;background:none!important}
-#sashaBox #hostDeck .hs[data-sec] .top{padding:0}
-#sashaBox .card{background:var(--silver);border:2px solid;border-color:var(--sunken);box-shadow:none;border-radius:0;margin:0 0 10px}
 #nextBar{bottom:calc(var(--dock) + env(safe-area-inset-bottom,0px))!important}
 :root{--dock:64px}
 .dbtn{flex-direction:column;gap:4px;height:50px;font-size:7px;padding:0 2px}
@@ -1795,10 +1843,7 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
   const hostDeck=document.getElementById('hostDeck'), hostRoster=document.getElementById('hostRoster');
   const sasha=document.createElement('div'); sasha.id='sashaBox';
   const stash=document.createElement('div'); stash.id='sashaStash'; stash.style.display='none'; document.body.appendChild(stash); stash.appendChild(sasha);   // keep host controls in the page while their tab is closed
-  if(hostRoster&&hostDeck){sasha.append(hostDeck,hostRoster);
-    const mb=document.createElement('button');mb.type='button';mb.className='chip morebtn';mb.textContent='⋯';
-    mb.onclick=()=>{sasha.classList.toggle('more');mb.textContent=sasha.classList.contains('more')?'×':'⋯'};
-    sasha.insertBefore(mb,hostRoster)}
+  if(hostRoster&&hostDeck){sasha.append(hostDeck,hostRoster)}
   const num=id=>String([...String(id)].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7)%900000+100000);
   const issued=new Date().toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
   const hn=()=>((typeof CONFIG!=='undefined'&&CONFIG.hostName)||'Sasha');
@@ -1874,8 +1919,6 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
     const kx=e.target.closest('[data-kick]'); if(kx){e.stopPropagation(); window.removeGuest(kx.dataset.kick); return}
     const r=e.target.closest('.prow'); if(r){viewing=r.dataset.id;render()}
   };
-  const mi=document.getElementById('msgInput'); if(mi) mi.placeholder='Lands in their MAIL box...';
-  const mh=[...document.querySelectorAll('#hostRoster .eyebrow')].find(e=>/Send a message/.test(e.textContent)); if(mh) mh.textContent='Send to their mailbox';
   /* ---- FIT: the room fills the whole screen; extra wall/floor is drawn beyond its edges ---- */
   const mapEl=document.getElementById('map');
   function fitRoom(){
@@ -1961,8 +2004,50 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
 @keyframes prbob{50%{transform:translateY(-1.2px)}}
 .prheart{animation:prfloat 2.4s steps(6) infinite}
 @keyframes prfloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-12px);opacity:0}}
-#sashaBox #hostDeck .pairctl .st{display:block!important}
 .kickx{margin-left:auto;font:400 7px var(--px);text-decoration:none;color:#fff;background:#c0392b;border:2px solid #15121a;padding:5px 6px;cursor:pointer}
+/* ===== HOST CONTROLS (run-of-show cards, same idea as the Paris file, in this Y2K look) ===== */
+#sashaBox{display:block}
+#sashaBox .card{padding:0;border:0;background:none;box-shadow:none;margin:0 0 8px;max-width:none}
+#sashaBox .card::before{display:none}
+.hc-title{font:400 8px/1.4 var(--px);letter-spacing:.12em;text-transform:uppercase;color:#7a2bd6;text-align:center;margin:0 0 8px}
+.hc{position:relative;padding:10px;margin:0 0 8px;background:#fff;color:#000;border:2px solid;border-color:var(--sunken);outline:1px solid var(--night)}
+.hc.live{background:#fff6c2;outline:2px solid var(--pink)}
+.hc-head{margin:0 0 8px}
+.hc-step{font:400 7px/1.4 var(--px);letter-spacing:.1em;text-transform:uppercase;color:#7a2bd6}
+.hc-name{font:700 17px/1.2 var(--body);color:#000;margin-top:3px}
+.hc-main{display:flex;gap:8px;align-items:stretch}
+.hc-go{flex:1;min-height:46px;font:400 9px/1.2 var(--px);background:var(--lemon);color:#000;border:2px solid;border-color:var(--raised);outline:1px solid var(--night);border-radius:0;cursor:pointer}
+.hc-go:active{border-color:var(--sunken);transform:translate(1px,1px)}
+.hc.live .hc-go{background:var(--silver);color:#b01030}
+.hc-timerbox{display:flex;align-items:center;gap:6px;padding:0 8px;background:#fff;border:2px solid;border-color:var(--sunken);outline:1px solid var(--night);font:400 8px/1 var(--px);color:#505050}
+.hc-timerbox input{width:46px;min-width:0;background:none;border:0;outline:0;text-align:right;color:#000;font:700 18px var(--body);padding:0}
+.hc-hint{margin-top:7px;font:13px/1.4 var(--body);color:#505050}
+.hc-chips{display:flex;gap:6px;margin-top:8px}
+.hc-chip{flex:1;padding:10px 8px;font:400 8px/1.2 var(--px);background:var(--silver);color:#000;border:2px solid;border-color:var(--raised);outline:1px solid var(--night);border-radius:0;cursor:pointer}
+.hc-chip:active{border-color:var(--sunken)}
+.hc-chip.danger{color:#b01030}
+.hc-more{margin-top:8px}
+.hc-more summary{cursor:pointer;list-style:none;font:400 7px/1.6 var(--px);color:#505050;padding:4px 2px}
+.hc-more summary::-webkit-details-marker{display:none}
+.hc-more summary::before{content:'+ '}
+.hc-more[open] summary::before{content:'\2013 '}
+.hc-more-row{display:flex;flex-wrap:wrap;gap:6px;padding-top:6px}
+.hc-reset{margin-top:12px}
+#hostRoster{background:var(--silver)}
+#hostRoster .hc-more{margin:0;padding:8px;background:#fff;border:2px solid;border-color:var(--sunken);outline:1px solid var(--night);color:#000}
+#hostRoster .hrow{border-bottom:1px dotted #b0b0b0;color:#000}
+.hc-clock{display:flex;align-items:baseline;justify-content:center;gap:10px;margin:0 0 10px;padding:10px 6px;background:#0f2a1c;border:2px solid;border-color:var(--sunken);outline:1px solid var(--night)}
+.hc-clock b{font:400 30px/1 var(--px);color:#9bffbb;letter-spacing:.04em}
+.hc-clock em{font:400 8px/1 var(--px);font-style:normal;color:#5fe08a;text-transform:uppercase}
+.hc-clock.over b,.hc-clock.over em{color:#ff7a7a;animation:hcblink 1s steps(2) infinite}
+@keyframes hcblink{50%{opacity:.25}}
+/* sticky Now bar (host only) */
+#nextBar{left:6px;right:6px;max-width:460px;margin:0 auto;padding:6px 6px 6px 10px;background:var(--silver);color:#000;border:2px solid;border-color:var(--raised);outline:1px solid var(--night);box-shadow:3px 3px 0 var(--night);gap:8px;z-index:50}
+#nextBar .eyebrow{color:#7a2bd6;font-size:7px}
+#nextBar #nowName{font:700 15px/1.25 var(--body);color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nextBar>div{min-width:0}
+#nextBar .btn{flex:none;font-size:8px;padding:10px 10px;white-space:nowrap}
+#nextBar.over #nowName{color:#b01030;animation:hcblink 1s steps(2) infinite}
 </style>
 </body>
 </html>
