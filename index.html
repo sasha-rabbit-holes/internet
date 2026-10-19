@@ -618,8 +618,8 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
    Room size, floor and furniture live in ROOMS (floorplan section below); keys must match.
    ===================================================================== */
 const CONFIG = {
-  eventId: 'internet-night',
-  rememberGuests: false,              // false = everyone sees the opening on every load (preview). true = returning guests skip it.
+  eventId: 'default',
+  rememberGuests: true,               // false = everyone sees the opening on every load (preview). true = returning guests skip it.
   intro: 'Press the power button',
   previewUnlocked: true,              // design preview: rooms show unlocked...
   previewLocked: [],            // ...except these (to see the locked look). Host Open/Unlock still overrides.
@@ -665,15 +665,7 @@ const CONFIG = {
 };
 
 /* ---------- Firebase (paste your own config). Left blank = local preview mode. ---------- */
-const firebaseConfig = {
-  apiKey: "AIzaSyBpfqEXrMcTyqy95zhmXf8pHPbEsEtjOhI",
-  authDomain: "internet-44c0e.firebaseapp.com",
-  databaseURL: "https://internet-44c0e-default-rtdb.firebaseio.com",
-  projectId: "internet-44c0e",
-  storageBucket: "internet-44c0e.firebasestorage.app",
-  messagingSenderId: "1066919323832",
-  appId: "1:1066919323832:web:fb56afd2a40c1bb1f3ec4d"
-};
+const firebaseConfig = { apiKey:'YOUR_API_KEY', authDomain:'', databaseURL:'', projectId:'', appId:'' };
 
 /* =====================================================================
    DATA LAYER
@@ -1302,7 +1294,7 @@ renderCreator();
 function join(){
   const name=$('inName').value.trim();
   if(!name){const i=$('inName');i.classList.remove('nudge');void i.offsetWidth;i.classList.add('nudge');i.focus();return}
-  me={id:(me&&me.id&&!me.id.startsWith('host_'))?me.id:'g_'+Math.random().toString(36).slice(2,9),name,look:{...look}};
+  me={id:isHost?((me&&String(me.id).startsWith('host_'))?me.id:'host_'+Math.random().toString(36).slice(2,9)):((me&&me.id&&!String(me.id).startsWith('host_'))?me.id:'g_'+Math.random().toString(36).slice(2,9)),name,look:{...look}};
   localStorage.setItem('tpl_me',JSON.stringify(me));
   ref(`${E}/attendees/${me.id}`).update({...me,joinedAt:Date.now()});
   enterLounge();
@@ -1386,7 +1378,7 @@ function renderPeople(){
   syncWalkers(); if(!guests.length) return;
   wSc=scFor(guests.length); const sw=14*wSc, sh=20.1*wSc;
   const out=guests.map(p=>{const mine=me&&p.id===me.id;
-    return `<g id="w_${p.id}"${String(p.id).startsWith('host_')?' style="display:none"':''}><svg width="${sw}" height="${sh}" viewBox="0 0 16 23" overflow="visible"><g class="bod">${R(spriteRects(p.look||DEFLOOK))}</g></svg>`
+    return `<g id="w_${p.id}"><svg width="${sw}" height="${sh}" viewBox="0 0 16 23" overflow="visible"><g class="bod">${R(spriteRects(p.look||DEFLOOK))}</g></svg>`
     +(mine?`<path d="M${sw/2-3} -4.8h6l-3 3.4z" fill="#ffdd00" stroke="#15121a" stroke-width=".5"/>`:'')
     +((wSc>=1.1||mine)?`<text x="${sw/2}" y="${sh+5}" text-anchor="middle" font-size="4.6" font-weight="700" font-family="Trebuchet MS,sans-serif" fill="#fff" stroke="#15121a" stroke-width="1.3" paint-order="stroke">${esc(String(p.name||'').slice(0,9))}</text>`:'')+`</g>`}).join('');
   svg.insertAdjacentHTML('beforeend',`<g id="ppl" pointer-events="none">${out}</g>`);
@@ -1429,7 +1421,7 @@ function enterLounge(){
   $('signoff').textContent=CONFIG.signoff;
   buildMap(); listenRoster(); listenHubs(); listenMessages(); listenPairings();
   $('hostPortrait').innerHTML=hostSvg(72,70,'-2 -1 20 19'); $('hostName').textContent=CONFIG.hostName||'Sasha';
-  if(isHost) initHost(); else setTimeout(()=>tourShow(0),1400);
+  if(isHost) initHost(); else if(!localStorage.getItem('tpl_toured')) setTimeout(()=>tourShow(0),1400);
 }
 function listenRoster(){
   ref(`${E}/attendees`).on('value',snap=>{
@@ -1517,7 +1509,7 @@ function initHost(){
 window.removeGuest=async id=>{if(confirm('Remove this guest from the roster?'))await ref(`${E}/attendees/${id}`).set(null)};
 function renderHostList(){
   $('hostCount').textContent=guests.length;
-  $('hostList').innerHTML=guests.map(g=>`<div class="hrow">${String(g.id).startsWith('host_')?hostSvg(21,35):sprite(g.look,24,35)}<span class="grow">${esc(g.name)}</span><button class="btn" onclick="removeGuest('${g.id}')">Kick</button></div>`).join('');
+  $('hostList').innerHTML=guests.map(g=>`<div class="hrow">${sprite(g.look,24,35)}<span class="grow">${esc(g.name)}</span><button class="btn" onclick="removeGuest('${g.id}')">Kick</button></div>`).join('');
   const chips=[['all','Everyone'],...guests.map(g=>[g.id,g.name])];
   if(!chips.some(c=>c[0]===msgTarget)) msgTarget='all';
   $('msgChips').innerHTML=''; chips.forEach(([id,label])=>{const b=document.createElement('button');b.type='button';b.className='chip'+(id===msgTarget?' active':'');b.textContent=label;
@@ -1651,8 +1643,11 @@ function renderPartnerRoom(){
 }
 const returning=sessionStorage.getItem('tpl_ret')==='1'; sessionStorage.removeItem('tpl_ret');   // coming back from a room page skips the intro
 if(isHost){
-  if(!me||!String(me.id).startsWith('host_')){me={id:'host_'+Math.random().toString(36).slice(2,9),name:CONFIG.hostName,look:randLook()};localStorage.setItem('tpl_me',JSON.stringify(me))}
-  ref(`${E}/attendees/${me.id}`).update({...me,joinedAt:Date.now()}); enterLounge();
+  if(me&&String(me.id).startsWith('host_')&&me.look){   // same browser: Sasha keeps the character they made
+    ref(`${E}/attendees/${me.id}`).update({...me,joinedAt:Date.now()}); enterLounge();
+  }else{                                                  // first time: Sasha builds a character like everyone else
+    $('inName').value=CONFIG.hostName||'Sasha'; show('screen-welcome');
+  }
 }else if((CONFIG.rememberGuests||returning)&&me&&me.look){
   ref(`${E}/attendees/${me.id}`).update({...me,joinedAt:Date.now()}); enterLounge();
 }else show('screen-welcome');
@@ -1799,6 +1794,7 @@ if(isHost){
   let tab=null, viewing=null, q='';
   const hostDeck=document.getElementById('hostDeck'), hostRoster=document.getElementById('hostRoster');
   const sasha=document.createElement('div'); sasha.id='sashaBox';
+  const stash=document.createElement('div'); stash.id='sashaStash'; stash.style.display='none'; document.body.appendChild(stash); stash.appendChild(sasha);   // keep host controls in the page while their tab is closed
   if(hostRoster&&hostDeck){sasha.append(hostDeck,hostRoster);
     const mb=document.createElement('button');mb.type='button';mb.className='chip morebtn';mb.textContent='⋯';
     mb.onclick=()=>{sasha.classList.toggle('more');mb.textContent=sasha.classList.contains('more')?'×':'⋯'};
@@ -1848,7 +1844,8 @@ if(isHost){
     ref(`${E}/messages`).on('value',s=>{msgs=s.val()||{};updateDot();if(tab==='mail'&&!viewMail)render()});
   }
   function render(){
-    const G=(typeof guests!=='undefined'?guests:[]).filter(g=>!String(g.id).startsWith('host_'));
+    if(sasha.parentNode!==stash) stash.appendChild(sasha);
+    const G=(typeof guests!=='undefined'?guests:[]);
     document.getElementById('dbd').textContent=G.length;
     dock.querySelectorAll('.dbtn').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
     if(!tab){sheet.classList.remove('open');return}
@@ -1922,7 +1919,7 @@ if(isHost){
   let sig=''; setInterval(()=>{
     if(!scr.classList.contains('active')) return;
     startMail(); updateDot(); fitRoom();
-    if(!autoTour&&me&&document.querySelector('#map svg')&&new URLSearchParams(location.search).get('host')!=='1'){autoTour=true;setTimeout(()=>startTour(true),900)}
+    if(!autoTour&&!localStorage.getItem('tpl_toured')&&me&&document.querySelector('#map svg')&&new URLSearchParams(location.search).get('host')!=='1'){autoTour=true;setTimeout(()=>startTour(true),900)}
     const isH=new URLSearchParams(location.search).get('host')==='1'; document.getElementById('dbSasha').style.display=isH?'flex':'none'; dock.querySelector('[data-t=mail]').style.display=isH?'none':'flex';
     const g=(typeof guests!=='undefined'?guests:[]); const n=g.map(x=>x.id+x.name+JSON.stringify(x.look||'')).join('|')+(me?me.id:'');
     if(n!==sig){sig=n; if(tab!=='sasha') render(); else document.getElementById('dbd').textContent=g.length}
