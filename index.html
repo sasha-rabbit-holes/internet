@@ -1673,7 +1673,7 @@ function openTV(){
     if(!page){ tvBusy=false; toast({title:TVC.title||'TV',body:'Coming soon!',holdMs:2500}); return }
     if(l){ l.classList.remove('locked'); l.classList.add('turning') }   // CRT "pop" turn-on
     try{icBeep(520,.08)}catch(e){}
-    setTimeout(()=>{ sessionStorage.setItem('tpl_ret','1'); location.href=page },850);
+    setTimeout(()=>{ sessionStorage.setItem('tpl_ret','1'); location.href=page+(isHost?(page.includes('?')?'&':'?')+'host=1':'') },850);   // host goes to the host version of the TV page
   });
 }
 function placeAtDoor(){   // coming back out of the door: you appear in front of it and step into the room
