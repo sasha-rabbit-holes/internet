@@ -552,6 +552,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
         <div class="wtitle"><span>Create your character</span><span class="wbtns" aria-hidden="true"><b>_</b><b>□</b><b>×</b></span></div>
         <div class="wbody">
         <div class="namebar"><label for="inName">Name</label><input class="in" type="text" id="inName" maxlength="14" placeholder="required" autocomplete="given-name" aria-label="Your name" required></div>
+        <div class="namebar"><label for="inIg">Insta</label><input class="in" type="text" id="inIg" maxlength="60" placeholder="@handle or link (optional)" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="Your Instagram"></div>
         <div class="stage2"><div id="prev"></div></div>
         <div class="tabs" id="tabs"></div>
         <div class="opts" id="opts"></div>
@@ -580,29 +581,40 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
   <div class="card" id="hostDeck" style="display:none">
     <div class="hc-title">Host Controls</div>
 
-    <!-- Pairs activity -->
+    <!-- STEP 1: roommates room -->
     <div class="hc" id="pairCard">
-      <div class="hc-head"><div><div class="hc-step">Pairs activity</div><div class="hc-name">Partner Door</div></div></div>
+      <div class="hc-head"><span class="hc-badge" id="pairBadge">NOT OPEN</span><div><div class="hc-step">Step 1</div><div class="hc-name">Roommates room</div></div></div>
       <div class="hc-clock" id="pairClock" style="display:none"><b id="pairClockT">00:00</b><em id="pairClockL">left</em></div>
       <div class="hc-main">
-        <button type="button" class="hc-go" id="btnPairs">Start pairs</button>
-        <label class="hc-timerbox"><input type="number" id="pairMinutes" value="10" min="0" step="1" inputmode="numeric" aria-label="Pairs timer in minutes"><span>min</span></label>
+        <button type="button" class="hc-go" id="btnPairs">Open roommates room</button>
+        <label class="hc-timerbox"><input type="number" id="pairMinutes" value="40" min="0" step="1" inputmode="numeric" aria-label="Timer in minutes"><span>min</span></label>
       </div>
-      <div class="hc-hint" id="pairHint">One tap: matches everyone and starts the timer. Set 0 for no timer. You&rsquo;re in the trio if the count is odd, and anyone who joins late is added to your group.</div>
+      <div class="hc-hint" id="pairHint">One tap: matches everyone, opens the door and starts the timer.</div>
       <div class="hc-chips" id="pairChips" style="display:none">
         <button type="button" class="hc-chip" id="btnPlus">+1 min</button>
         <button type="button" class="hc-chip" id="btnStopTimer">Stop timer</button>
       </div>
-      <details class="hc-more" id="pairMore" style="display:none">
-        <summary>More</summary>
+      <details class="hc-more" id="pairEdit" style="display:none" open>
+        <summary>Who&rsquo;s with who (change pairs / trios)</summary>
+        <div id="pairEditor"></div>
+      </details>
+      <details class="hc-more" id="pairMore">
+        <summary>More options</summary>
         <div class="hc-more-row">
+          <button type="button" class="hc-chip" id="btnPin">Pin intercom: ON</button>
           <button type="button" class="hc-chip" id="btnReshuffle">Re-shuffle pairs</button>
           <button type="button" class="hc-chip" id="btnClearPairs">Clear pairs</button>
         </div>
       </details>
     </div>
 
-    <!-- Mail sections, one at a time -->
+    <!-- STEP 2: the box (can be opened at any time, in any order) -->
+    <div class="hc" id="boxCard">
+      <div class="hc-head"><span class="hc-badge" id="boxBadge">LOCKED</span><div><div class="hc-step">Step 2</div><div class="hc-name">The box</div></div></div>
+      <div class="hc-main"><button type="button" class="hc-go" id="btnBox">Open the box</button></div>
+      <div class="hc-hint" id="boxHint">Locked for guests. Open it any time &mdash; you don&rsquo;t need to do step 1 first.</div>
+    </div>
+
     <div id="deckStops"></div>
 
     <details class="hc-more hc-reset"><summary>Event</summary><div class="hc-more-row"><button type="button" class="hc-chip danger" id="btnReset">Reset entire event</button></div></details>
@@ -656,6 +668,8 @@ const CONFIG = {
   ],
   mapNote: 'Welcome, {name}. Tap the floor to walk around. Watch your MAIL: Sasha sends each part of the night there.',
   signoff: 'Yours truly, Sasha',
+  linkBox:{ url:'', title:'SURPRISE BOX', text:'You found the box!', btn:'OPEN LINK' },   // the box in the room: paste its link in url (empty = "coming soon")
+  tipUrl:'',   // TIP JAR: paste your donation link here (e.g. 'https://...'). Empty = the button says "coming soon"
   partnerDoor: {   // texts for the partner door + the room behind it
     found:'MATCH FOUND!', foundPair:'say hi to your partner!', foundGroup:'say hi to your group!',
     none:'NO MATCH YET', noneSub:'ask Sasha to pair you up',
@@ -671,11 +685,7 @@ const CONFIG = {
   ],
   /* Sections: nothing is locked on the map any more. From the host page, "Send to mail" drops a section into everyone's MAIL,
      including guests who join later. Edit the titles and text here. */
-  sections: [
-    { key:'one',   title:'Section 1', text:'Write the first activity here.' },
-    { key:'two',   title:'Section 2', text:'Write the second activity here.' },
-    { key:'three', title:'Section 3', text:'Write the third activity here.' }
-  ],
+  sections: [],   // (the old mail sections are gone: the host steps are Roommates room + Box)
   patience: [
     'Door’s locked — sit tight, you’ll get a ping when it opens.',
     'Still on our way. This room opens the second we arrive.',
@@ -827,27 +837,14 @@ const PINKROOM=[
   [66,96,10,5,'#f8e8e0'],...HEART(42,94,'#ff9ab8'),...HEART(95,94,'#f9d0dc')],0,32)
 ];
 /* ---- THE ROOM: front-on view on a 120x150 pixel grid (big window, desk + computer, shelf, rug + table) ---- */
+const DOOR_RECTS=[[7,44,24,46,'#6b4423'],[9,46,20,42,'#e87a9c'],[11,48,7,16,'#d65a7a'],[20,48,7,16,'#d65a7a'],[11,67,7,18,'#d65a7a'],[20,67,7,18,'#d65a7a'],[12,49,5,1,'#f7a8bf'],[21,49,5,1,'#f7a8bf'],[25,66,3,3,'#e8c14a'],[26,67,1,1,'#fff3b0'],[7,90,24,1,'rgba(0,0,0,.18)']];   // the partner door: drawn in the lounge AND in the partner room
 const ROOM2=(()=>{
   const a=[], P=(...r)=>a.push(r);
   /* poster + wall clock (decor) */
   P(7,12,22,28,'#fff7f2');P(9,14,18,24,'#9fd6f5');a.push(...OV(21,20,3,3,'#ffe566'));P(9,31,18,7,'#6fbf6f');P(11,28,8,3,'#4f8f5f');P(13,26,4,2,'#4f8f5f');P(19,29,7,2,'#4f8f5f');P(8,40,22,1,'rgba(0,0,0,.14)');
   a.push(...OV(105,14,8,8,'#c9a23a'),...OV(105,14,7,7,'#fff7f2'));P(105,9,1,6,'#2a2630');P(105,14,4,1,'#2a2630');P(104,13,3,3,'#d65a5a');
-  /* window: night sky, moon, skyline with one lit window */
-  P(36,8,48,52,'#7a4f2e');P(37,9,46,50,'#5e3a20');
-  P(39,11,42,12,'#18224f');P(39,23,42,10,'#1f2b66');P(39,33,42,10,'#33498f');P(39,43,42,11,'#4a63a8');
-  [[44,15],[52,19],[66,14],[75,27],[47,28],[58,24],[78,17],[43,36],[70,34]].forEach(q=>P(q[0],q[1],1,1,'#fff'));
-  a.push(...OV(72,20,5,5,'#ffe9b8'),...OV(74.5,19,4.5,4.5,'#18224f'));
-  [[39,44,7,10],[47,40,6,14],[54,46,6,8],[61,38,7,16],[69,43,6,11],[76,45,5,9]].forEach(b=>P(b[0],b[1],b[2],b[3],'#0f1535'));
-  [[49,43],[49,47],[63,41],[65,45],[71,46],[78,48],[41,48]].forEach(q=>P(q[0],q[1],1,2,'#ffd66b'));P(63,49,2,2,'#fff3b0');
-  P(59,11,2,43,'#7a4f2e');P(39,31,42,2,'#7a4f2e');
-  P(32,58,56,3,'#c99a68');P(32,61,56,1,'rgba(0,0,0,.2)');
-  P(28,5,64,2,'#c9a23a');P(27,4,2,5,'#e0b84a');P(91,4,2,5,'#e0b84a');
-  [[31,'#f08aa8'],[76,'#f08aa8']].forEach(([x,c])=>{P(x,7,13,50,c);P(x,55,13,2,'#d9708f')});
-  [34,38,79,83].forEach(x=>P(x,7,1,48,'#d9708f'));[41,86].forEach(x=>P(x,7,1,48,'#f7a8bf'));P(31,36,13,3,'#c9a23a');P(76,36,13,3,'#c9a23a');
   /* the partner door (replaces the desk + computer) */
-  P(7,44,24,46,'#6b4423');P(9,46,20,42,'#e87a9c');
-  P(11,48,7,16,'#d65a7a');P(20,48,7,16,'#d65a7a');P(11,67,7,18,'#d65a7a');P(20,67,7,18,'#d65a7a');
-  P(12,49,5,1,'#f7a8bf');P(21,49,5,1,'#f7a8bf');P(25,66,3,3,'#e8c14a');P(26,67,1,1,'#fff3b0');P(7,90,24,1,'rgba(0,0,0,.18)');
+  a.push(...DOOR_RECTS);
   /* shelf */
   P(94,26,22,60,'#9a6d46');P(96,28,18,56,'#4a3320');
   [41,54,67].forEach(y=>P(94,y,22,2,'#9a6d46'));P(94,84,22,2,'#7a5334');
@@ -1321,10 +1318,11 @@ $('cc').addEventListener('click',e=>{
 });
 $('btnShuffle').onclick=()=>{look=randLook();renderCreator()};
 renderCreator();
+const igHandle=v=>{v=String(v||'').trim(); const m=v.match(/instagram\.com\/([A-Za-z0-9._]+)/i); if(m) v=m[1]; return v.replace(/^@+/,'').replace(/[^A-Za-z0-9._]/g,'').slice(0,30)};   // '@name', 'name' or a profile link -> 'name'
 function join(){
   const name=$('inName').value.trim();
   if(!name){const i=$('inName');i.classList.remove('nudge');void i.offsetWidth;i.classList.add('nudge');i.focus();return}
-  me={id:(me&&me.id)?me.id:'g_'+Math.random().toString(36).slice(2,9),name,look:{...look}};   // one character per browser, shared by guest + host views
+  me={id:(me&&me.id)?me.id:'g_'+Math.random().toString(36).slice(2,9),name,look:{...look},ig:igHandle($('inIg').value)};   // one character per browser, shared by guest + host views
   localStorage.setItem('tpl_me',JSON.stringify(me));
   ref(`${E}/attendees/${me.id}`).update({...me,...(isHost?{isHost:true}:{}),joinedAt:Date.now()});
   enterLounge();
@@ -1355,7 +1353,9 @@ function buildMap(){
     </g>`}).join('');
   /* the Host stands in the room as the tour guide (tap to replay the tour) */
   const guide=`<g id="guide"><g transform="translate(90 70) scale(1.45)"><ellipse cx="8" cy="22.6" rx="7" ry="1.6" fill="#000" opacity=".25"/><g class="gbob"><svg width="16" height="23" viewBox="0 0 16 23" overflow="visible">${R(hostRects())}</svg></g><text x="8" y="29.5" text-anchor="middle" font-size="4.4" font-weight="700" font-family="Trebuchet MS,sans-serif" fill="#e8c14a" stroke="#15121a" stroke-width="1.3" paint-order="stroke">${esc(CONFIG.hostName||'Sasha')}</text><rect class="twk" x="2" y="-9" width="1" height="3" fill="#ffe680"/><rect class="twk" x="1" y="-8" width="3" height="1" fill="#ffe680"/></g></g>`;
-  $('map').innerHTML=`<svg viewBox="0 0 120 150">${DEFS}<rect width="120" height="150" fill="#15131a"/>${rooms}${sections}${guide}</svg>`;
+  const linkbox=`<g id="linkbox" style="cursor:pointer"><rect x="92" y="82" width="26" height="26" fill="#000" fill-opacity="0"/>${R(BOX_RECTS)}<rect x="104" y="83" width="1" height="1" fill="#fff"><animate attributeName="opacity" values="1;.1;1" dur="1.3s" repeatCount="indefinite"/></rect><g class="blk" transform="translate(98.5 91) scale(.8)">${R(LOCK)}</g></g>`;
+  $('map').innerHTML=`<svg viewBox="0 0 120 150">${DEFS}<rect width="120" height="150" fill="#15131a"/>${rooms}${sections}${guide}${linkbox}</svg>`;
+  $('linkbox').onclick=ev=>{ev.stopPropagation();openLinkBox()}; applyBoxLock();
   STOPS.forEach(s=>{const el=$('pin_'+s.key); if(el) el.onclick=function(ev){if(s.key==='start'){walkTap(ev);return}
     if(this.classList.contains('locked')){this.classList.remove('shake');void this.getBoundingClientRect();this.classList.add('shake');toast({title:'Locked',body:CONFIG.lockedMsg.replace('{room}',s.name),holdMs:2800,vibrate:[40,40,40]});return}
     enterStop(s.key);
@@ -1364,7 +1364,8 @@ function buildMap(){
   renderPeople();
 }
 let hubsNow={};
-const isLocked=(k,h=hubsNow)=>k!=='start'&&k!=='partners'&&!h[k]&&(!CONFIG.previewUnlocked||(CONFIG.previewLocked||[]).includes(k));
+const isLocked=(k,h=hubsNow)=>k==='partners'?!(isHost||window.myPartners):(k!=='start'&&!h[k]&&(!CONFIG.previewUnlocked||(CONFIG.previewLocked||[]).includes(k)));   // the partner door is locked until the host opens the roommates room
+function syncDoorLock(){ const p=$('pin_partners'); if(p) p.classList.toggle('locked',isLocked('partners')) }
 /* ---------- LIVING ROOM: everyone who signed up is here, and can walk ---------- */
 const walkers={}, SPEED=30; let wRaf=0, wLast=0, wSc=1;
 const hash=s=>{let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
@@ -1378,13 +1379,58 @@ function walkTap(ev){
   let hit=null,hitY=-1e9;
   for(const id in walkers){const w=walkers[id],X=b.x0+w.x*b.w,Y=b.y0+w.y*b.h;
     if(q.x>=X-1&&q.x<=X+b.sw+1&&q.y>=Y-3&&q.y<=Y+b.sh+1&&Y>hitY){hit=id;hitY=Y}}
-  if(hit){ev.stopPropagation();openCharMenu(hit,ev.clientX,ev.clientY);return}
+  if(hit){ev.stopPropagation();openCharMenu(hit);return}
   closeCharMenu();
   const nx=Math.max(0,Math.min(1,(q.x-b.sw/2-b.x0)/b.w)), ny=Math.max(0,Math.min(1,(q.y-b.sh-b.y0)/b.h));
   const me_=walkers[me.id], dist=Math.hypot((nx-me_.x)*b.w,(ny-me_.y)*b.h);
   me_.tx=nx; me_.ty=ny;
   tapSpot(b.x0+nx*b.w+b.sw/2, b.y0+ny*b.h+b.sh, dist/SPEED);
   ref(`${E}/attendees/${me.id}/pos`).set({x:+nx.toFixed(3),y:+ny.toFixed(3)});   // everyone else sees you walk
+}
+/* ---------- the partner door: your character physically walks to it first, THEN the door opens ---------- */
+let doorWalk=0;
+function doorSpot(){ const z=STOP('partners').zone||[7,44,24,46], b=floorBox(wSc);
+  return {nx:Math.max(0,Math.min(1,(z[0]+z[2]/2-b.sw/2-b.x0)/b.w)), ny:0} }   // standing right in front of the door
+function walkToDoor(then){ walkToSpot(doorSpot(),then) }
+function walkToSpot(s,then){
+  const w=me&&walkers[me.id];
+  if(doorWalk) return;
+  if(!w||!$('ppl')){ then(); return }
+  const b=floorBox(wSc), dist=Math.hypot((s.nx-w.x)*b.w,(s.ny-w.y)*b.h);
+  closeCharMenu(); doorWalk=1; w.tx=s.nx; w.ty=s.ny;
+  tapSpot(b.x0+s.nx*b.w+b.sw/2, b.y0+s.ny*b.h+b.sh, dist/SPEED);
+  ref(`${E}/attendees/${me.id}/pos`).set({x:+s.nx.toFixed(3),y:+s.ny.toFixed(3)});
+  const t0=performance.now();
+  (function wait(){
+    const c=me&&walkers[me.id];
+    if(!c||c.tx!==s.nx||c.ty!==s.ny){ doorWalk=0; return }   // you tapped somewhere else: walk cancelled
+    const left=Math.hypot((c.x-s.nx)*b.w,(c.y-s.ny)*b.h);
+    if(left<=.5||performance.now()-t0>9000){ setTimeout(()=>{doorWalk=0;then()},350); return }   // arrived: short beat, then the door opens
+    requestAnimationFrame(wait);
+  })();
+}
+/* ---------- the box in the room: walk to it, it opens, and a card offers the link ---------- */
+let boxOpen=false, prevBoxOpen=null;
+function applyBoxLock(){ const l=$('linkbox'); if(l) l.classList.toggle('locked',!boxOpen) }
+const BOX_RECTS=[[95,104,18,1,'rgba(0,0,0,.22)'],[96,94,16,10,'#d65a5a'],[96,94,16,2,'#e87a7a'],[95,90,18,5,'#e87a9c'],[95,94,18,1,'#b8486a'],[102,90,4,14,'#e8c14a'],[100,87,3,3,'#e8c14a'],[105,87,3,3,'#e8c14a'],[103,88,2,2,'#fff3b0']];
+function boxSpot(){ const b=floorBox(wSc), c=v=>Math.max(0,Math.min(1,v)); return {nx:c((104-b.sw/2-b.x0)/b.w), ny:c((106-b.sh-b.y0)/b.h)} }
+function closeLinkBox(){ const m=$('lbModal'); if(m) m.remove() }
+function openLinkBox(){
+  if(!boxOpen&&!isHost){ toast({title:'Locked',body:'The box isn’t open yet. You’ll get a ping when it opens.',holdMs:2500,vibrate:[40,40,40]}); return }
+  walkToSpot(boxSpot(),()=>{
+    const LB=CONFIG.linkBox||{}; let url=(LB.url||'').trim();
+    if(!url){ toast({title:LB.title||'Box',body:'Coming soon!',holdMs:2500}); return }
+    if(!/^https?:\/\//i.test(url)) url='https://'+url;
+    closeLinkBox(); const m=document.createElement('div'); m.id='lbModal';
+    m.style.cssText='position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(21,18,26,.62)';
+    m.innerHTML=`<div style="width:100%;max-width:300px;background:#c0c0c0;border:2px solid;border-color:#fff #404040 #404040 #fff;outline:1px solid #15121a;padding:14px;text-align:center;color:#000"><div style="font:400 10px/1.5 var(--px);margin-bottom:8px">${esc(LB.title||'SURPRISE BOX')}</div><div style="font:15px/1.4 var(--body);margin-bottom:12px">${esc(LB.text||'')}</div><a href="${esc(url)}" target="_blank" rel="noopener" style="display:block;padding:12px;background:#ffdd00;color:#000;text-decoration:none;font:400 9px var(--px);border:2px solid;border-color:#fff #404040 #404040 #fff;outline:1px solid #15121a">${esc(LB.btn||'OPEN LINK')}</a></div>`;
+    m.onclick=e=>{ if(e.target===m||e.target.closest('a')) m.remove() }; document.body.appendChild(m);
+  });
+}
+function placeAtDoor(){   // coming back out of the door: you appear in front of it and step into the room
+  const w=me&&walkers[me.id]; if(!w) return; const s=doorSpot();
+  w.x=s.nx; w.y=s.ny; w.tx=s.nx; w.ty=Math.min(1,s.ny+.22);
+  ref(`${E}/attendees/${me.id}/pos`).set({x:+w.tx.toFixed(3),y:+w.ty.toFixed(3)});
 }
 /* ---------- blue spot on the floor where you're headed ---------- */
 let spotTimer=0;
@@ -1404,19 +1450,24 @@ const EMOTES={jump:{e:'\u2757',dur:.8},spin:{e:'\uD83C\uDF00',dur:.9},dance:{e:'
 const SELF_MOVES=[['jump','Jump'],['spin','Spin'],['dance','Dance'],['wave','Wave'],['heart','Send love']];
 const OTHER_MOVES=[['wave','Wave at'],['highfive','High five'],['dance','Dance with'],['heart','Send love to']];
 function closeCharMenu(){const m=$('charMenu'); if(m)m.remove()}
-function openCharMenu(id,cx,cy){
+function openCharMenu(id){
   closeCharMenu(); const g=guests.find(x=>x.id===id); if(!g)return;
   const mine=me&&id===me.id, m=document.createElement('div'); m.id='charMenu';
-  m.style.cssText='position:fixed;z-index:9000;background:var(--cream,#fff8e7);color:var(--ink,#222);border:3px solid var(--line,#15121a);box-shadow:0 4px 0 var(--line,#15121a);padding:6px;min-width:150px;font:700 13px Trebuchet MS,sans-serif';
-  m.innerHTML=`<div style="padding:2px 6px 6px;opacity:.7">${mine?'You':esc(String(g.name||'').slice(0,14))}</div>`
-    +(mine?SELF_MOVES:OTHER_MOVES).map(([k,l])=>`<button data-m="${k}" style="display:block;width:100%;text-align:left;margin:2px 0;padding:7px 8px;border:2px solid var(--line,#15121a);background:#fff;font:inherit;color:inherit;cursor:pointer">${EMOTES[k].e} ${l}${mine?'':' '+esc(String(g.name||'').slice(0,10))}</button>`).join('');
+  m.style.cssText='position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(21,18,26,.62)';
+  const pass=window.passHTML?window.passHTML(g,mine):'<div style="background:#fff;color:#000;padding:12px">'+esc(g.name||'')+'</div>';
+  m.innerHTML=`<div style="width:100%;max-width:340px;max-height:100%;overflow:auto">${pass}<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">`
+    +(mine?SELF_MOVES:OTHER_MOVES).map(([k,l])=>`<button data-m="${k}" type="button" style="flex:1 1 40%;padding:9px 6px;border:2px solid #15121a;background:#fff;color:#000;font:700 12px Trebuchet MS,sans-serif;cursor:pointer">${EMOTES[k].e} ${l}${mine?'':' '+esc(String(g.name||'').slice(0,10))}</button>`).join('')
+    +`</div></div>`;
   document.body.appendChild(m);
-  const r=m.getBoundingClientRect();
-  m.style.left=Math.max(6,Math.min(innerWidth-r.width-6,cx-r.width/2))+'px';
-  m.style.top=Math.max(6,Math.min(innerHeight-r.height-6,cy+10))+'px';
-  m.onclick=e=>{const k=e.target.closest('button')?.dataset.m; if(!k)return; e.stopPropagation(); closeCharMenu(); doEmote(k,mine?null:id)};
-  setTimeout(()=>document.addEventListener('pointerdown',function f(e){if(!e.target.closest('#charMenu')){closeCharMenu()}document.removeEventListener('pointerdown',f)}),0);
+  m.onclick=e=>{ if(e.target===m){closeCharMenu();return}
+    const k=e.target.closest('button')?.dataset.m; if(!k)return; e.stopPropagation(); closeCharMenu(); doEmote(k,mine?null:id)};
 }
+document.addEventListener('click',e=>{   // edit my own Instagram from my passport
+  const a=e.target.closest('[data-igedit]'); if(!a||!me)return; e.preventDefault(); e.stopPropagation();
+  const v=prompt('Your Instagram @handle or link (leave empty to remove)',me.ig?'@'+me.ig:''); if(v===null)return;
+  me.ig=igHandle(v); localStorage.setItem('tpl_me',JSON.stringify(me)); ref(`${E}/attendees/${me.id}`).update({ig:me.ig});
+  if($('charMenu')) openCharMenu(me.id);
+});
 function doEmote(type,to){
   if(!me||!walkers[me.id])return;
   const send=()=>ref(`${E}/attendees/${me.id}/emote`).set({type,to:to||null,ts:Date.now()});
@@ -1487,14 +1538,14 @@ function renderPeople(){
   const out=guests.map(p=>{const mine=me&&p.id===me.id;
     return `<g id="w_${p.id}"><svg width="${sw}" height="${sh}" viewBox="0 0 16 23" overflow="visible"><g class="bod">${R(spriteRects(p.look||DEFLOOK))}</g></svg>`
     +(mine?`<path d="M${sw/2-3} -4.8h6l-3 3.4z" fill="#ffdd00" stroke="#15121a" stroke-width=".5"/>`:'')
-    +((wSc>=1.1||mine)?`<text x="${sw/2}" y="${sh+5}" text-anchor="middle" font-size="4.6" font-weight="700" font-family="Trebuchet MS,sans-serif" fill="#fff" stroke="#15121a" stroke-width="1.3" paint-order="stroke">${esc(String(p.name||'').slice(0,9))}</text>`:'')+`</g>`}).join('');
+    +((wSc>=1.1||mine)?`<text x="${sw/2}" y="${sh+5}" text-anchor="middle" font-size="4.6" font-weight="700" font-family="Trebuchet MS,sans-serif" fill="#fff" stroke="#15121a" stroke-width="1.3" paint-order="stroke">${esc(String(p.name||'').slice(0,9))}</text>`+(igHandle(p.ig)?`<text x="${sw/2}" y="${sh+9.6}" text-anchor="middle" font-size="3.3" font-weight="700" font-family="Trebuchet MS,sans-serif" fill="#ffd0ec" stroke="#15121a" stroke-width="1" paint-order="stroke">@${esc(igHandle(p.ig).slice(0,16))}</text>`:''):'')+`</g>`}).join('');
   svg.insertAdjacentHTML('beforeend',`<g id="ppl" pointer-events="none">${out}</g>`);
   guests.forEach(p=>{const w=walkers[p.id]; w.el=$('w_'+p.id); w.bod=w.el.querySelector('.bod')});
   placeAll(0); if(!wRaf){wLast=performance.now();wRaf=requestAnimationFrame(tick)}
 }
 function enterStop(key){
   const s=STOP(key);
-  if(key==='partners') return (isHost||!CONFIG.partnerDoor.code||doorOk())?openPartnerRoom():openIntercom();
+  if(key==='partners') return walkToDoor(()=>(!CONFIG.partnerDoor.code||doorPinOff||doorOk())?openPartnerRoom():openIntercom());
   if(s.page){sessionStorage.setItem('tpl_ret','1');location.href=s.page;return}   // room has its own page
   $('stopTitle').textContent=s.name; $('stopDesc').textContent=s.desc;
   $('stopSlot').innerHTML=''; CONFIG.onEnterStop(s,$('stopSlot')); $('stopPanel').classList.add('open');
@@ -1533,7 +1584,8 @@ function listenRoster(){
   ref(`${E}/attendees`).on('value',snap=>{
     guests=Object.values(snap.val()||{}).sort((a,b)=>a.joinedAt-b.joinedAt);
     $('countLabel').textContent=guests.length+' here';
-    const sig=JSON.stringify(guests.map(g=>[g.id,g.name,g.look]));
+    const sig=JSON.stringify(guests.map(g=>[g.id,g.name,g.look,g.ig]));
+    if(isHost) renderPairEditor();
     if(sig===listenRoster.sig && $('ppl')){ syncWalkers(); checkEmotes(); return }   // someone only walked: don't rebuild, just update targets
     listenRoster.sig=sig;
     renderPeople(); checkEmotes(); if(isHost) renderHostList();
@@ -1541,10 +1593,12 @@ function listenRoster(){
 }
 
 /* ---------- hubs/{key}=true means unlocked, hubs/current = "we're here" ---------- */
-let prevHubs=null, prevCurrent=null;
+let prevHubs=null, prevCurrent=null, doorPinOff=false;
 function listenHubs(){
+  ref(`${E}/doorPin`).on('value',s=>{ doorPinOff=s.val()===false; const b=$('btnPin'); if(b) b.textContent='Pin intercom: '+(doorPinOff?'OFF':'ON') });   // host can switch the door code off for everyone
   ref(`${E}/hubs`).on('value',snap=>{
     const hubs=snap.val()||{}; hubsNow=hubs;
+    const bo=!!hubs.box; if(prevBoxOpen===false&&bo&&!isHost) toast({body:'The box is open!',actionLabel:'Go to the box',onAction:openLinkBox}); prevBoxOpen=bo; boxOpen=bo; applyBoxLock(); if(isHost) syncBox();
     if(prevCurrent!==null&&prevCurrent!==hubs.current&&hubs.current&&navigator.vibrate&&!document.hidden) navigator.vibrate([150,80,250]);
     prevCurrent=hubs.current||null;
     if(prevHubs) STOPS.forEach(s=>{ if(!prevHubs[s.key]&&hubs[s.key]) toast({body:s.unlockMsg||s.name+' is now open.',actionLabel:s.actionLabel||'Take a look',onAction:()=>enterStop(s.key)}) });
@@ -1623,7 +1677,7 @@ function renderReveal(all){
   if(!box.classList.contains('show')&&navigator.vibrate) navigator.vibrate([100,50,200]);
   box.classList.add('show');
 }
-function listenPairings(){ ref(`${E}/pairings`).on('value',s=>{lastPairings=s.val();renderReveal(lastPairings);if(prOpen)renderPartnerRoom()}) }
+function listenPairings(){ ref(`${E}/pairings`).on('value',s=>{lastPairings=s.val();renderReveal(lastPairings);syncDoorLock();if(prOpen){ if(!isHost&&!window.myPartners) closePartnerRoom(true); else renderPartnerRoom() }}) }
 $('btnRevealClose').onclick=()=>$('reveal').classList.remove('show');
 $('btnRevealHide').onclick=()=>{if(window.myPartners)localStorage.setItem('tpl_hide_reveal',sig(window.myPartners));$('reveal').classList.remove('show')};
 
@@ -1684,11 +1738,52 @@ const fmtT=ms=>{const t=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(t/60),s=t%60
 function syncPairs(){
   const on=!!pairsNow, n=on?Object.keys(pairsNow).length:0;
   $('pairCard').classList.toggle('live',on);
-  $('btnPairs').textContent=on?'Clear pairs':'Start pairs';
-  $('pairHint').textContent=on?(n+(n===1?' group':' groups')+' matched. Latecomers join your group automatically.'):'One tap: matches everyone and starts the timer. Set 0 for no timer. You\u2019re in the trio if the count is odd, and anyone who joins late is added to your group.';
-  $('pairChips').style.display=on?'flex':'none'; $('pairMore').style.display=on?'block':'none';
-  tickPair(); placeLatecomers();
+  $('btnPairs').textContent=on?'Close roommates room':'Open roommates room';
+  $('pairBadge').textContent=on?'OPEN':'NOT OPEN';
+  $('pairHint').textContent=on?(n+(n===1?' group':' groups')+' matched and the door is open. Latecomers join your group automatically.'):'One tap: matches everyone, opens the door and starts the timer. Set the minutes to 0 for no timer. If the count is odd you\u2019re in the trio.';
+  $('pairChips').style.display=on?'flex':'none';
+  ['btnReshuffle','btnClearPairs'].forEach(k=>$(k).style.display=on?'':'none');
+  renderPairEditor(); syncDoorLock(); tickPair(); placeLatecomers();
 }
+/* change who's with who by hand: every guest has a dropdown to move them to another group */
+function pairGroups(){
+  const here=new Set(guests.map(g=>g.id));
+  return Object.keys(pairsNow||{}).sort((x,y)=>(+x.replace(/\D/g,''))-(+y.replace(/\D/g,''))).map(k=>((pairsNow[k]||{}).members||[]).filter(id=>here.has(id))).filter(g=>g.length);
+}
+function renderPairEditor(){
+  const box=$('pairEditor'), det=$('pairEdit'); if(!box||!det) return;
+  if(!pairsNow){ box.innerHTML=''; det.style.display='none'; return }
+  det.style.display='block';
+  if(document.activeElement&&box.contains(document.activeElement)) return;   // don't redraw while a dropdown is open
+  const G=pairGroups(), nm=id=>{const x=guests.find(g=>g.id===id);return x?x.name:'?'};
+  const inG=new Set(G.flat()), loose=guests.filter(g=>!inG.has(g.id));
+  const opts=cur=>G.map((_,i)=>`<option value="${i}"${cur===i?' selected':''}>Group ${i+1}</option>`).join('')+'<option value="new">+ New group</option>';
+  box.innerHTML=G.map((g,i)=>`<div class="pe-g"><div class="pe-h">GROUP ${i+1}${g.length>2?' \u00b7 TRIO':g.length===1?' \u00b7 ALONE':''}</div>`
+      +g.map(id=>`<label class="pe-m"><span>${esc(nm(id))}</span><select data-pe="${esc(id)}">${opts(i)}</select></label>`).join('')+'</div>').join('')
+    +(loose.length?`<div class="pe-g"><div class="pe-h">NOT IN A GROUP</div>`+loose.map(g=>`<label class="pe-m"><span>${esc(g.name)}</span><select data-pe="${esc(g.id)}"><option value="" selected>Pick a group\u2026</option>${opts(-1)}</select></label>`).join('')+'</div>':'');
+}
+function savePairs(G){
+  const byId=id=>guests.find(x=>x.id===id)||{id,name:'?'}, mine={}, pairs={}; let n=0;
+  G.filter(g=>g.length).forEach(grp=>{ pairs['pair_'+(n++)]={members:grp}; grp.forEach(a=>{ mine[a]=grp.filter(b=>b!==a).map(b=>slimG(byId(b))) }) });
+  ref(`${E}/pairings`).set(mine); ref(`${E}/pairs`).set(pairs);
+}
+$('pairEditor').onchange=e=>{
+  const sel=e.target.closest('select[data-pe]'); if(!sel||sel.value==='') return;
+  const id=sel.dataset.pe, G=pairGroups(); let target;
+  if(sel.value==='new'){ target=[]; G.push(target) } else target=G[+sel.value];
+  if(!target) return;
+  const out=G.map(g=>g===target?g:g.filter(x=>x!==id)); if(!target.includes(id)) target.push(id);
+  guard(async()=>savePairs(out));
+};
+/* the box (step 2) */
+function syncBox(){
+  const c=$('boxCard'); if(!c) return;
+  c.classList.toggle('live',boxOpen); $('btnBox').textContent=boxOpen?'Close the box':'Open the box'; $('boxBadge').textContent=boxOpen?'OPEN':'LOCKED';
+  $('boxHint').textContent=boxOpen?'The box is open: everyone can tap it in the room.':'Locked for guests. Open it any time \u2014 you don\u2019t need to do step 1 first.';
+  syncBar();
+}
+const toggleBox=()=>guard(()=>hubRef('box').set(!boxOpen));
+$('btnBox').onclick=toggleBox;
 function tickPair(){
   clearInterval(pairTickId);
   const left=pairEnd?pairEnd-Date.now():null, over=left!==null&&left<=0, clk=$('pairClock');
@@ -1702,11 +1797,12 @@ function tickPair(){
 /* the sticky Now bar: always on screen for the host, shows the timer even when the Sasha window is closed */
 function syncBar(){
   const bar=$('nextBar'); if(!isHost||!bar) return; bar.style.display='flex';
-  const left=pairEnd?pairEnd-Date.now():null, over=left!==null&&left<=0, go=$('nextGo'); bar.classList.toggle('over',!!(pairsNow&&over));
-  if(!pairsNow){ $('nowName').textContent='Nothing live yet'; go.textContent='Start pairs'; go.dataset.act='start' }
-  else if(pairEnd&&!over){ $('nowName').textContent='Pairs \u00b7 '+fmtT(left)+' left'; go.textContent='+1 min'; go.dataset.act='plus' }
-  else if(over){ $('nowName').textContent='Pairs \u00b7 time\u2019s up!'; go.textContent='Clear pairs'; go.dataset.act='clear' }
-  else { $('nowName').textContent='Pairs matched'; go.textContent='Clear pairs'; go.dataset.act='clear' }
+  const left=pairEnd?pairEnd-Date.now():null, over=left!==null&&left<=0, go=$('nextGo'), bx=boxOpen?' \u00b7 Box open':'';
+  bar.classList.toggle('over',!!(pairsNow&&over));
+  if(!pairsNow){ $('nowName').textContent='Nothing live yet'+bx; go.textContent='Open roommates'; go.dataset.act='start' }
+  else if(pairEnd&&!over){ $('nowName').textContent='Roommates \u00b7 '+fmtT(left)+' left'+bx; go.textContent='+1 min'; go.dataset.act='plus' }
+  else{ $('nowName').textContent=(over?'Roommates \u00b7 time\u2019s up!':'Roommates open')+bx;
+    if(boxOpen){ go.textContent='Close roommates'; go.dataset.act='clear' } else { go.textContent='Open the box'; go.dataset.act='box' } }
   go.style.display='';
 }
 const startPairs=()=>guard(async()=>{
@@ -1715,16 +1811,17 @@ const startPairs=()=>guard(async()=>{
   await ref(`${E}/pairsTimerEnd`).set(mins>0?Date.now()+Math.round(mins*60000):null);
 });
 const clearPairs=()=>guard(async()=>{
-  if(!confirm('Clear the pairs? This removes everyone\u2019s partner.')) return;
+  if(!confirm('Close the roommates room? This removes everyone\u2019s partner and locks the door.')) return;
   await ref(`${E}/pairsTimerEnd`).set(null); await ref(`${E}/pairings`).set(null); await ref(`${E}/pairs`).set(null);
 });
 const plusMin=()=>guard(async()=>{ const base=Math.max(pairEnd||0,Date.now()); await ref(`${E}/pairsTimerEnd`).set(base+60000) });
 $('btnPairs').onclick=()=>pairsNow?clearPairs():startPairs();
 $('btnClearPairs').onclick=clearPairs;
 $('btnPlus').onclick=plusMin;
+$('btnPin').onclick=()=>guard(()=>ref(`${E}/doorPin`).set(doorPinOff?null:false));
 $('btnStopTimer').onclick=()=>guard(()=>ref(`${E}/pairsTimerEnd`).set(null));
 $('btnReshuffle').onclick=()=>guard(async()=>{ if(!confirm('Re-shuffle? Everyone gets a new partner.'))return; matchPeople() });
-$('nextGo').onclick=function(){const a=this.dataset.act; if(a==='start')startPairs(); else if(a==='plus')plusMin(); else if(a==='clear')clearPairs()};
+$('nextGo').onclick=function(){const a=this.dataset.act; if(a==='start')startPairs(); else if(a==='plus')plusMin(); else if(a==='clear')clearPairs(); else if(a==='box')toggleBox()};
 $('btnReset').onclick=async()=>{
   if(!confirm('Clear the roster, pairs and progress for a brand new event?'))return;
   await ref(E).set(null); ['tpl_me','tpl_hide_reveal',doorKey].forEach(k=>localStorage.removeItem(k)); location.href=location.pathname+'?host=1';
@@ -1739,12 +1836,25 @@ $('btnReset').onclick=async()=>{
    ===================================================================== */
 const PD=CONFIG.partnerDoor;
 const prEl=document.createElement('div'); prEl.id='partnerRoom';
-prEl.innerHTML='<button class="btn" id="prBack" type="button">&lt; BACK TO THE ROOM</button><div id="prScene"></div>';
+prEl.innerHTML='<div id="prScene"></div>';
 $('screen-lounge').appendChild(prEl);
 let prOpen=false;
 function openPartnerRoom(){ prOpen=true; prEl.classList.add('open'); renderPartnerRoom() }
 function closePartnerRoom(auto){ prOpen=false; prEl.classList.remove('open'); if(auto) toast({body:PD.closedMsg,holdMs:3000}) }
-$('prBack').onclick=()=>closePartnerRoom();
+let prLeaving=0;
+function leavePartnerRoom(){   // tap the door: your character walks to it, steps through, and you're back in the lounge
+  if(prLeaving||!prOpen) return;
+  const m=prEl.querySelector('#prMe'); if(!m){ closePartnerRoom(); placeAtDoor(); return }
+  prLeaving=1; const cx=+m.dataset.cx, fy=130, tx=19, ty=92, t0=performance.now(), D=1000;
+  (function f(now){
+    const k=Math.min(1,(now-t0)/D), x=cx+(tx-cx)*k, y=fy+(ty-fy)*k-Math.abs(Math.sin(k*Math.PI*5))*2, sc=1-.45*k;
+    m.setAttribute('transform',`translate(${x} ${y}) scale(${sc}) translate(${-cx} ${-fy})`);
+    if(k<1) return requestAnimationFrame(f);
+    m.style.transition='opacity .25s'; m.style.opacity=0;   // steps through the door
+    setTimeout(()=>{ prLeaving=0; closePartnerRoom(); placeAtDoor() },300);
+  })(t0);
+}
+$('prScene').onclick=e=>{ if(e.target.closest('#prDoor')) leavePartnerRoom() };
 /* ---------- INTERCOM: tap the door, type the one shared code, get in. Remembered per guest, so it's only asked once. ---------- */
 const doorKey='tpl_door_'+CONFIG.eventId;
 const doorOk=()=>!!me&&localStorage.getItem(doorKey)===me.id;
@@ -1777,6 +1887,7 @@ function fitPR(){ const s=prEl.querySelector('svg'),r=prEl.getBoundingClientRect
   const ar=r.width/r.height,W=Math.max(120,150*ar),H=Math.max(150,120/ar); s.setAttribute('viewBox',`${60-W/2} ${75-H/2} ${W} ${H}`) }
 addEventListener('resize',()=>{if(prOpen)fitPR()});
 function renderPartnerRoom(){
+  if(prLeaving) return;
   const mine=(window.myPartners||[]).map(p=>guests.find(g=>g.id===p.id)||p), grp=[{...me,mine:1},...mine], n=grp.length, found=mine.length>0;
   const sc=n<=2?2.4:n===3?2:1.6, gap=8, x0=60-(n*16*sc+(n-1)*gap)/2, px='style="font-family:var(--px)"';
   const W=(x,y,w,h,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
@@ -1784,18 +1895,20 @@ function renderPartnerRoom(){
   let o=`<defs><pattern id="prwall" width="16" height="8" patternUnits="userSpaceOnUse">${W(0,0,16,8,'#5b3f8c')}${W(0,0,8,8,'#654699')}</pattern></defs>`
    +W(-600,-600,1320,688,'url(#prwall)')+`<rect x="-600" y="88" width="1320" height="662" fill="url(#pw2)"/>`+W(-600,85,1320,3,'#2f1f4d')
    +R(Array.from({length:19},(_,i)=>[2+i*6.4,3+(i%2)*2,2,2,i%3?'#ffd66b':'#ff9ab8']))
-   +W(22,12,76,40,'#c0c0c0')+W(23,13,74,7,'#000080')+T(60,18.3,3.6,'#fff','partners.exe',px)+W(26,23,68,24,'#fff')
-   +T(60,31,6,found?'#d62a6b':'#808080',found?PD.found:PD.none,px)+T(60,37.5,3.4,'#303030',found?(n>2?PD.foundGroup:PD.foundPair):PD.noneSub,px)
-   +W(30,40,60,4,'#808080')+W(31,41,found?58:6,2,'#000080')
-   +R([[14,62,92,14,'#2e8a8a'],[10,74,100,12,'#3aa3a3'],[8,68,8,18,'#2e8a8a'],[104,68,8,18,'#2e8a8a'],[60,74,1,12,'#2e8a8a'],
-       [6,78,10,10,'#c46e50'],[104,78,10,10,'#c46e50'],...OV(11,70,7,9,'#3f8a52'),...OV(109,70,7,9,'#3f8a52'),
+   +W(34,12,76,40,'#c0c0c0')+W(35,13,74,7,'#000080')+T(72,18.3,3.6,'#fff','partners.exe',px)+W(38,23,68,24,'#fff')
+   +T(72,31,6,found?'#d62a6b':'#808080',found?PD.found:PD.none,px)+T(72,37.5,3.4,'#303030',found?(n>2?PD.foundGroup:PD.foundPair):PD.noneSub,px)
+   +W(42,40,60,4,'#808080')+W(43,41,found?58:6,2,'#000080')
+   +`<g id="prDoor" style="cursor:pointer">${R(DOOR_RECTS)}<rect x="2" y="38" width="34" height="58" fill="#000" fill-opacity="0"/></g>`
+   +R([[40,62,72,14,'#2e8a8a'],[36,74,80,12,'#3aa3a3'],[34,68,8,18,'#2e8a8a'],[108,68,8,18,'#2e8a8a'],[76,74,1,12,'#2e8a8a'],
+       [108,78,10,10,'#c46e50'],...OV(113,70,7,9,'#3f8a52'),
        ...OV(60,127,52,14,'#d65a7a'),...OV(60,126,48,12,'#f7b8cb'),...OV(60,126,40,9,'#d65a7a')])
-   +[[10,26],[104,22],[102,54],[12,56]].map(([x,y],i)=>`<g class="prheart" style="animation-delay:${i*.6}s">${R(HEART(x,y,i%2?'#ff9ab8':'#ffd0e0'))}</g>`).join('');
+   +[[10,26],[104,22],[102,54],[40,54]].map(([x,y],i)=>`<g class="prheart" style="animation-delay:${i*.6}s">${R(HEART(x,y,i%2?'#ff9ab8':'#ffd0e0'))}</g>`).join('');
   grp.forEach((p,i)=>{
     const cx=x0+i*(16*sc+gap)+8*sc, top=130-23*sc, c=p.mine?['YOU','#ffdd00','#000',14]:['PARTNER','#ff3399','#fff',22];
-    o+=`<g class="prbob" style="animation-delay:${i*.3}s"><svg x="${cx-8*sc}" y="${top}" width="${16*sc}" height="${23*sc}" viewBox="0 0 16 23" overflow="visible">${R(spriteRects(p.look||DEFLOOK))}</svg></g>`
+    o+=(p.mine?`<g id="prMe" data-cx="${cx}">`:'')+`<g class="prbob" style="animation-delay:${i*.3}s"><svg x="${cx-8*sc}" y="${top}" width="${16*sc}" height="${23*sc}" viewBox="0 0 16 23" overflow="visible">${R(spriteRects(p.look||DEFLOOK))}</svg></g>`
       +W(cx-c[3]/2,top-8,c[3],6,c[1])+T(cx,top-3.4,3.4,c[2],c[0],px)
-      +T(cx,136,4.8,'#fff',String(p.name||'').slice(0,12),'font-weight="700" stroke="#15121a" stroke-width="1.3" paint-order="stroke" font-family="Trebuchet MS,sans-serif"');
+      +T(cx,136,4.8,'#fff',String(p.name||'').slice(0,12),'font-weight="700" stroke="#15121a" stroke-width="1.3" paint-order="stroke" font-family="Trebuchet MS,sans-serif"')
+      +(p.mine?'</g>':'');
   });
   $('prScene').innerHTML=`<svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 120 150">${o}</svg>`; fitPR();
 }
@@ -1844,6 +1957,7 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
 .pass .pl{font:700 11px/1.9 var(--body);color:#303030}
 .pass .pl span{display:block;border-bottom:1px dotted #707070}
 .pass .pl em{font:400 7px/1 var(--px);font-style:normal;color:#7a2bd6;margin-right:6px}
+.pass .pl a{color:#7a2bd6;font-weight:700;word-break:break-all}
 .pass .bars{height:14px;margin:0 10px 6px;background:repeating-linear-gradient(90deg,#000 0 2px,transparent 2px 4px,#000 4px 5px,transparent 5px 9px)}
 .pass .mrz{padding:4px 10px 10px;font:700 10px/1.4 'Courier New',monospace;letter-spacing:.12em;color:#505050;word-break:break-all}
 .pass .st{position:absolute;right:10px;top:50px;transform:rotate(-10deg);padding:5px 7px;border:3px double #d62a6b;color:#d62a6b;font:400 8px/1 var(--px);background:rgba(255,255,255,.35)}
@@ -1918,11 +2032,11 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
     pass:px(['KKKKKKKKKKKK','KBBBBBBBBBBK','KBWWBBYYYYBK','KBWWBBBBBBBK','KBBBBBPPPPBK','KBBBBBBBBBBK','KKKKKKKKKKKK']),
     ppl:px(['..KKKK....','.KBBBBK...','KBWBBBBK..','KBWBBBBK..','KBBBBBBK..','.KBBBBKK..','..KKKKKK..','.....KKKK.','......KKKK','.......KKK']),
     mail:px(['KKKKKKKKKKKK','KWWWWWWWWWWK','KWKWWWWWWKWK','KWWKWWWWKWWK','KWWWKKKKWWWK','KWWWWWWWWWWK','KKKKKKKKKKKK']),
+    tip:px(['..KKKK..','.KWWWWK.','.KKKKKK.','KBBBYBBK','KBBYYYBK','KBBBYBBK','KBBBBBBK','.KKKKKK.']),
     star:px(['....Y....','....Y....','...YYY...','YYYYYYYYY','.YYYYYYY.','..YYYYY..','..YYOYY..','.YYO.OYY.','.YO...OY.'])};
   const dock=document.createElement('div'); dock.id='dock';
-  dock.innerHTML=`<button class="dbtn" data-t="pass" type="button">${I.pass}PASSPORT</button>`
-    +`<button class="dbtn" data-t="ppl" type="button">${I.ppl}PEOPLE<span class="bd" id="dbd">0</span></button>`
-    +`<button class="dbtn" data-t="mail" type="button">${I.mail}MAIL<span class="rd" id="rd"></span></button>`
+  dock.innerHTML=`<button class="dbtn" data-t="ppl" type="button">${I.ppl}PEOPLE<span class="bd" id="dbd">0</span></button>`
+    +`<button class="dbtn" data-tip type="button">${I.tip}TIP JAR</button>`
     +`<button class="dbtn" data-t="sasha" id="dbSasha" type="button" style="display:none">${I.star}SASHA</button>`
     +`<button class="dbtn help" data-help type="button" aria-label="Replay the tour">?</button><div id="tray"></div>`;
   const sheet=document.createElement('div'); sheet.id='sheet';
@@ -1936,12 +2050,15 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
   const num=id=>String([...String(id)].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7)%900000+100000);
   const issued=new Date().toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
   const hn=()=>((typeof CONFIG!=='undefined'&&CONFIG.hostName)||'Sasha');
+  const igRow=(g,mine)=>{const h=igHandle(g.ig); if(!h&&!mine) return '';
+    return `<span><em>INSTA</em>${h?`<a href="https://instagram.com/${h}" target="_blank" rel="noopener">@${esc(h)}</a>`:''}${mine?` <a href="#" data-igedit>${h?'edit':'+ add yours'}</a>`:''}</span>`};
   const passHTML=(g,mine)=>`<div class="pass"><div class="ph"><span>★ WELCOME HOME ★</span><span>PASSPORT</span></div>
     <div class="pb"><div class="pic">${sprite(g.look,64,92)}</div><div style="min-width:0"><div class="pn">${esc(g.name)}</div>
-    <div class="pl"><span><em>NO.</em>${num(g.id)}</span><span><em>ISSUED</em>${issued}</span><span><em>GUEST OF</em>${esc(hn())}</span></div></div></div>
+    <div class="pl"><span><em>NO.</em>${num(g.id)}</span><span><em>ISSUED</em>${issued}</span><span><em>GUEST OF</em>${esc(hn())}</span>${igRow(g,mine)}</div></div></div>
     <div class="bars"></div>
     <div class="mrz">P&lt;HOME&lt;${esc(String(g.name||'').toUpperCase().replace(/[^A-Z0-9]/g,'&lt;'))}&lt;&lt;${num(g.id)}&lt;&lt;&lt;&lt;&lt;</div>
     <div class="st">${mine?'THIS IS YOU':'ADMIT ONE'}</div></div>`;
+  window.passHTML=passHTML;
   const TT={pass:'Passport.exe',ppl:'People.exe',mail:'Mail.exe',sasha:'Sasha.exe'};
   /* ---- MAIL: Sasha's messages + pair assignments land here; red dot = unread ---- */
   let msgs={}, mailSub=false, viewMail=null;
@@ -1961,7 +2078,7 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
     return out.sort((a,b)=>b.ts-a.ts);
   }
   const fmt=ts=>new Date(ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
-  function updateDot(){const r=readSet(),n=mailItems().filter(m=>!r.has(m.id)).length;document.getElementById('rd').classList.toggle('on',n>0);return n}
+  function updateDot(){const r=readSet(),n=mailItems().filter(m=>!r.has(m.id)).length;const d=document.getElementById('rd');if(d)d.classList.toggle('on',n>0);return n}
   function mailHTML(){
     const items=mailItems(), r=readSet();
     if(viewMail){
@@ -1999,7 +2116,8 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
     sheet.innerHTML=bar+`<div class="wb">${h}</div>`;
     const si=document.getElementById('srch'); if(si){si.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=document.getElementById('srch');n.focus();n.setSelectionRange(pos,pos)}}
   }
-  dock.onclick=e=>{const b=e.target.closest('.dbtn'); if(!b) return; if('help' in b.dataset){startTour(true);return} const t=b.dataset.t; tab=(tab===t)?null:t; viewing=null; viewMail=null; q=''; render()};
+  dock.onclick=e=>{const b=e.target.closest('.dbtn'); if(!b) return; if('help' in b.dataset){startTour(true);return}
+    if('tip' in b.dataset){ const u=(CONFIG.tipUrl||'').trim(); if(u) window.open(u,'_blank','noopener'); else toast({title:'Tip jar',body:'The tip jar link is coming soon!',holdMs:2500}); return} const t=b.dataset.t; tab=(tab===t)?null:t; viewing=null; viewMail=null; q=''; render()};
   sheet.onclick=e=>{
     if(e.target.closest('[data-x]')){tab=null;render();return}
     if(e.target.closest('[data-back]')){viewing=null;render();return}
@@ -2021,10 +2139,9 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
   new MutationObserver(fitRoom).observe(mapEl,{childList:true}); addEventListener('resize',fitRoom); fitRoom();
   /* ---- TOUR: spotlight each part of the screen and say what it's for ---- */
   const STEPS=[
-    {sel:'#mapwrap',t:'THE ROOM',x:'This is the room. Tap the floor to walk around. Check MAIL for each part of the night.'},
-    {sel:'[data-t=pass]',t:'PASSPORT',x:'This is your passport: your name, your character and your card. Tap it any time to see how you look.'},
+    {sel:'#mapwrap',t:'THE ROOM',x:'This is the room. Tap the floor to walk around. Tap your character to see your passport, or tap anyone else to see theirs (and their Instagram).'},
     {sel:'[data-t=ppl]',t:'PEOPLE',x:'Search for anyone here and peek at their passport.'},
-    {sel:'[data-t=mail]',t:'MAIL',x:'Each part of the night lands here, plus your secret missions. Watch for the red dot!'}
+    {sel:'[data-tip]',t:'TIP JAR',x:'Enjoying the night? Leave a tip here.'}
   ];
   let tourOn=null;
   function endTour(){ if(!tourOn) return; tourOn.remove(); tourOn=null; try{localStorage.setItem('tpl_toured','1')}catch(e){} }
@@ -2054,8 +2171,8 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
     if(!scr.classList.contains('active')) return;
     startMail(); updateDot(); fitRoom();
     if(!autoTour&&!localStorage.getItem('tpl_toured')&&me&&document.querySelector('#map svg')&&new URLSearchParams(location.search).get('host')!=='1'){autoTour=true;setTimeout(()=>startTour(true),900)}
-    const isH=new URLSearchParams(location.search).get('host')==='1'; document.getElementById('dbSasha').style.display=isH?'flex':'none'; dock.querySelector('[data-t=mail]').style.display='flex';
-    const g=(typeof guests!=='undefined'?guests:[]); const n=g.map(x=>x.id+x.name+JSON.stringify(x.look||'')).join('|')+(me?me.id:'');
+    const isH=new URLSearchParams(location.search).get('host')==='1'; document.getElementById('dbSasha').style.display=isH?'flex':'none';
+    const g=(typeof guests!=='undefined'?guests:[]); const n=g.map(x=>x.id+x.name+(x.ig||'')+JSON.stringify(x.look||'')).join('|')+(me?me.id:'');
     if(n!==sig){sig=n; if(tab!=='sasha') render(); else document.getElementById('dbd').textContent=g.length}
   },700);
 })();
@@ -2088,7 +2205,6 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
 @keyframes icshake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 #prScene{position:absolute;inset:0}
 #prScene svg{display:block;width:100%;height:100%;shape-rendering:crispEdges}
-#prBack{position:absolute;left:8px;top:calc(8px + env(safe-area-inset-top,0px));z-index:2;font-size:8px}
 .prbob{animation:prbob 1.1s steps(1) infinite}
 @keyframes prbob{50%{transform:translateY(-1.2px)}}
 .prheart{animation:prfloat 2.4s steps(6) infinite}
@@ -2121,6 +2237,19 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
 .hc-more summary::before{content:'+ '}
 .hc-more[open] summary::before{content:'\2013 '}
 .hc-more-row{display:flex;flex-wrap:wrap;gap:6px;padding-top:6px}
+.hc-head{overflow:hidden}
+.hc-badge{float:right;margin-left:8px;font:400 7px/1 var(--px);padding:5px 6px;background:var(--silver);color:#505050;border:2px solid;border-color:var(--sunken)}
+.hc.live .hc-badge{background:#35e06a;color:#000}
+#btnPairs,#btnBox{min-height:58px;font-size:10px}
+#pairEditor{padding-top:6px}
+.pe-g{margin:0 0 8px;padding:6px 8px;background:#fff;border:2px solid;border-color:var(--sunken);outline:1px solid var(--night)}
+.pe-h{font:400 7px/1.4 var(--px);color:#7a2bd6;margin-bottom:4px}
+.pe-m{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dotted #b0b0b0;font:700 14px var(--body);color:#000}
+.pe-m:last-child{border-bottom:0}
+.pe-m span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pe-m select{flex:none;max-width:50%;min-height:36px;font:14px var(--body)}
+#linkbox.locked{opacity:.5;filter:grayscale(.7)}
+#linkbox .blk{display:none}#linkbox.locked .blk{display:block}
 .hc-reset{margin-top:12px}
 #hostRoster{background:var(--silver)}
 #hostRoster .hc-more{margin:0;padding:8px;background:#fff;border:2px solid;border-color:var(--sunken);outline:1px solid var(--night);color:#000}
