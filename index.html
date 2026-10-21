@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Event Template</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#2a2630;--ink:#3a2f3a;--cream:#f3e9d8;--cream2:#e6d8bf;--line:#15121a;--wood:#e0a85e;--red:#d65a5a;--dim:#d8ccb8;
   --px:'Press Start 2P','Courier New',monospace;--body:'Trebuchet MS',system-ui,-apple-system,'Segoe UI',sans-serif}
@@ -198,7 +198,7 @@ h2{font-size:13px}
 #bunnyBubble.show{display:block;animation:pop .35s steps(4)}
 #bunnyBubble.out{opacity:0;transition:opacity .4s}
 #bunnyBubble::after{content:'';position:absolute;right:calc(var(--tw)/2);bottom:-13px;width:14px;height:14px;background:#fff;border-right:3px solid #15121a;border-bottom:3px solid #15121a;transform:translateX(50%) rotate(45deg)}
-.bun{animation:bun 2s steps(10) infinite}
+.bun,.sofabun{animation:bun 2s steps(10) infinite}
 @keyframes bun{to{transform:translateX(-540px)}}
 .led{fill:#3e4348;transition:fill .3s}
 .pwrbtn{fill:#7fb7a4;transition:fill .3s}
@@ -453,8 +453,12 @@ h2{font-size:13px}
 #loadPct{font:400 9px var(--px);color:#cfd8e3;letter-spacing:.08em}
 #loadSlot{position:relative;width:min(70vw,260px);height:38px;display:flex;align-items:center;justify-content:center;margin-top:-6px}
 #loadSlot #loadPct{position:absolute}
-#loadStart{position:absolute;inset:0;display:none;font:400 11px var(--px);letter-spacing:.06em;color:#000;background:#c0c0c0;border:0;border-radius:0;cursor:pointer;
+#loadMid{position:relative;display:flex}
+#loadMid #loadBar{transition:opacity .35s}
+#loadBar.done{opacity:0;visibility:hidden;transition:opacity .35s,visibility 0s .35s}
+#loadStart{position:absolute;inset:0;display:block;opacity:0;transition:opacity .45s .25s;font:400 11px var(--px);letter-spacing:.06em;color:#000;background:#c0c0c0;border:0;border-radius:0;cursor:pointer;
   box-shadow:inset -1px -1px #0a0a0a,inset 1px 1px #fff,inset -2px -2px #808080,inset 2px 2px #dfdfdf}   /* Windows-95 raised button, same silver as the loading bar frame */
+#loadStart.show{opacity:1}
 #loadStart:focus-visible{outline:1px dotted #000;outline-offset:-6px}
 #loadStart:active{box-shadow:inset -1px -1px #fff,inset 1px 1px #0a0a0a,inset -2px -2px #dfdfdf,inset 2px 2px #808080;padding:2px 0 0 2px}
 #loadScreen #loadFoot{display:flex;align-items:center;justify-content:center;gap:10px;position:absolute;left:0;right:0;bottom:22px;margin:0}
@@ -501,7 +505,7 @@ h1{text-shadow:2px 2px 0 var(--pink)}
 .in:focus,input[type=text]:focus{outline:2px dotted var(--pink);outline-offset:1px}
 /* windows: silver body + navy title bar */
 .card,.cc .opts{background:var(--silver);color:#000;border:2px solid;border-color:var(--raised);outline:1px solid var(--night);box-shadow:3px 3px 0 var(--night)}
-.card::before,.cc .opts::before{content:'NETHOUSE.exe';display:block;margin:-14px -14px 12px;padding:6px 8px;font:400 8px/1.2 var(--px);letter-spacing:.06em;color:#fff;background:linear-gradient(90deg,var(--navy),#1084d0)}
+.card::before,.cc .opts::before{content:'SASHA’S HOUSE.exe';display:block;margin:-14px -14px 12px;padding:6px 8px;font:400 8px/1.2 var(--px);letter-spacing:.06em;color:#fff;background:linear-gradient(90deg,var(--navy),#1084d0)}
 .cc .opts::before{content:'appearance.exe';margin:-12px -12px 12px}
 .card .eyebrow,.opt>label{color:var(--navy)}
 .sw button{border:2px solid;border-color:var(--sunken);outline:1px solid var(--night)}
@@ -561,7 +565,7 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
       <div id="cloudLayer"></div>
       <button id="earthSkip" type="button">SKIP</button>
     </div>
-    <div id="loadScreen"><div id="loadName">NETHOUSE</div><div id="loadBar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div id="loadPct">loading 0%</div><div id="loadFoot"><span>made by Oleksandr B.<br>&copy; 2026 NETHOUSE</span></div></div>
+    <div id="loadScreen"><div id="loadName">SASHA’S HOUSE</div><div id="loadBar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div id="loadPct">loading 0%</div><div id="loadFoot"><span>made by Oleksandr B.<br>&copy; 2026 SASHA’S HOUSE</span></div></div>
     <div id="city" aria-hidden="true">
       <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="hmb" x="-10%" y="0" width="120%" height="100%"><feGaussianBlur id="hmbs" stdDeviation="0 0"/></filter></svg>
       <div id="cityZoom"><div id="cityWorld"><svg id="citySvg" viewBox="0 0 640 1200" preserveAspectRatio="xMinYMax slice"></svg></div></div>
@@ -759,12 +763,13 @@ window.SFX=(function(){
    ===================================================================== */
 const CONFIG = {
   eventId: 'default',
+  returnLoadScreen: false,            // true = guests coming back get the SASHA’S HOUSE loading screen (no START GAME) before the room opens
   rememberGuests: true,               // false = everyone sees the opening on every load (preview). true = returning guests skip it.
   intro: 'Press the power button',
   previewUnlocked: true,              // design preview: rooms show unlocked...
   previewLocked: [],            // ...except these (to see the locked look). Host Open/Unlock still overrides.
   lockedMsg: 'The {room} is locked for now. You’ll get a ping when it opens.',              // true = every room shows unlocked (design preview). Set false for the real event.
-  gameName: 'NETHOUSE',              // the name of the game: shows on the monitor, boot screen, tab title and pop-ups
+  gameName: 'SASHA’S HOUSE',              // the name of the game: shows on the monitor, boot screen, tab title and pop-ups
   appName: '',                        // pop-up header; blank = use gameName
   hostName: 'Sasha',
   hostName: 'Sasha',
@@ -776,7 +781,7 @@ const CONFIG = {
   mapNote: 'Welcome, {name}. Tap the floor to walk around. Watch your MAIL: Sasha sends each part of the night there.',
   signoff: 'Yours truly, Sasha',
   tv:{ page:'best-liar-in-town.html', title:'BEST LIAR IN TOWN' },   // the little TV in the room: tapping it turns it on and opens this page
-  tipUrl:'',   // TIP JAR: paste your donation link here (e.g. 'https://...'). Empty = the button says "coming soon"
+  tipUrl:'',   // DONATIONS: paste your donation link here (e.g. 'https://...'). Empty = the button says "coming soon"
   partnerDoor: {   // texts for the partner door + the room behind it
     found:'MATCH FOUND!', foundPair:'say hi to your partner!', foundGroup:'say hi to your group!',
     none:'NO MATCH YET', noneSub:'ask Sasha to pair you up',
@@ -786,6 +791,194 @@ const CONFIG = {
     intercomBtn:'BUZZ', intercomWrong:'WRONG CODE', intercomOk:'WELCOME IN'
   },
   pairsEyebrow: 'You’ve been matched up. Your group is:',
+  /* TOPICS for the pairs room. Guests pick one when they walk in (or hit Surprise me / Mix of everything) and can switch any time.
+     Add, remove or rename topics freely: each needs a key (unique), a name, a short sub line and a list of questions (8+ is nice, any number works). */
+  topicsTitle: 'Pick a topic',
+  topicsSub: 'Choose what you two want to talk about. You can change the topic anytime with the TOPIC button.',
+  topicRandomLabel: 'Surprise me',
+  topicMixLabel: 'Mix of everything',
+  topics: [
+    { key:'getting', name:'Getting to know you', sub:'easy starters', q:[
+      'What is a small thing that made you smile this week?',
+      'What is something you could talk about for hours?',
+      'What is your go-to comfort food?',
+      'Are you a morning person or a night owl? What is your best hour of the day?',
+      'What is a tiny habit you secretly love?',
+      'What is something you are looking forward to?',
+      'What is a hobby you would love to pick up?',
+      'What is the best thing that happened to you this month?' ] },
+    { key:'health', name:'Health & wellbeing', sub:'body and mind', q:[
+      'How do you usually recharge after a stressful week?',
+      'What does a healthy day look like for you?',
+      'Do you think you sleep enough? What would your ideal sleep routine be?',
+      'What is a healthy habit you want to build, and what stops you?',
+      'How do you feel about exercise: love it, hate it, or somewhere in between?',
+      'What helps you calm down when you feel overwhelmed?',
+      'Do you think people take mental health seriously enough these days?',
+      'What is the best health advice you have ever heard, and the worst?' ] },
+    { key:'internet', name:'Internet & social media', sub:'life online', q:[
+      'How many hours a day do you think you spend on your phone, and does that number scare you?',
+      'Which app could you not live without, and which one would you happily delete?',
+      'Have you ever taken a break from social media? How did it feel?',
+      'Do you think social media makes people happier or more lonely?',
+      'What is the weirdest corner of the internet you have ever ended up in?',
+      'Do you post a lot online, or do you mostly watch and scroll?',
+      'Would you ever want to be an influencer? What would you post about?',
+      'What is a meme or trend that you still find hilarious?' ] },
+    { key:'pop', name:'Pop culture', sub:'trends and celebrities', q:[
+      'Which celebrity would you like to spend a day with, and what would you do?',
+      'What is a trend that you never understood?',
+      'What is a guilty pleasure show, song or celebrity that you secretly enjoy?',
+      'Which fictional character do you think you are most like?',
+      'Do you think celebrities should be role models?',
+      'What is a viral moment you still remember?',
+      'Which decade had the best pop culture, in your opinion?',
+      'Which fandom would you join if you had to choose one?' ] },
+    { key:'art', name:'Art & creativity', sub:'make and imagine', q:[
+      'What is the last piece of art, in any form, that made you feel something?',
+      'Do you consider yourself a creative person? Why or why not?',
+      'If you could have one famous painting in your home, which would it be?',
+      'What would you create if you had a whole month and no limits?',
+      'Do you think art should have a message, or just be beautiful?',
+      'Which museum or gallery would you love to visit?',
+      'What did you enjoy drawing, building or making as a kid?',
+      'Can everyone be an artist, or is it a talent you are born with?' ] },
+    { key:'music', name:'Music', sub:'playlists and concerts', q:[
+      'What song is stuck in your head right now?',
+      'What was the first concert you went to, or the one you would love to go to?',
+      'What kind of music do you listen to when you are sad, and when you are happy?',
+      'Which song do you think everyone should hear at least once?',
+      'Do you sing in the shower, in the car, or never?',
+      'If your life were a movie, which song would play during the opening scene?',
+      'Do you play any instrument, or is there one you would like to learn?',
+      'What is an old song that you still love as much as ever?' ] },
+    { key:'screen', name:'Movies & series', sub:'what to watch', q:[
+      'What is a movie you can watch again and again?',
+      'Which series did you binge-watch the fastest?',
+      'Which book-to-movie adaptation was better than the book, or much worse?',
+      'What is a movie that made you cry, and one that made you laugh the loudest?',
+      'Which fictional world would you most like to live in?',
+      'Do you prefer watching at home or at the cinema? Why?',
+      'Which actor would you cast to play you in a movie about your life?',
+      'What is a movie ending that you still think about?' ] },
+    { key:'food', name:'Food & cooking', sub:'tasty topics', q:[
+      'What is the best meal you have ever eaten?',
+      'What can you cook really well, and what is your cooking disaster story?',
+      'Sweet or salty? Be honest and defend your answer.',
+      'What is a food that you hated as a kid but love now?',
+      'Which cuisine could you eat every day for a year?',
+      'What is a dish that reminds you of home?',
+      'Do you like trying strange foods or sticking with what you know?',
+      'If you opened a cafe, what would be on the menu?' ] },
+    { key:'travel', name:'Travel & places', sub:'near and far', q:[
+      'What is the most beautiful place you have ever been to?',
+      'Where would you go tomorrow if you had a free plane ticket?',
+      'Are you more of a city, beach or mountains person?',
+      'What is the most unexpected thing that happened to you while travelling?',
+      'What is one thing you always pack, no matter where you go?',
+      'Which city in Ukraine would you recommend to a tourist, and why?',
+      'Would you rather travel with a detailed plan or just wing it?',
+      'If you could live in another country for a year, which would you pick?' ] },
+    { key:'tech', name:'Tech & AI', sub:'gadgets and the future', q:[
+      'Do you use AI in your daily life? What for?',
+      'What technology do you think will change life the most in the next ten years?',
+      'Which gadget could you not live without?',
+      'Do you think robots will take over most jobs?',
+      'What is something that technology made worse, in your opinion?',
+      'Would you trust a self-driving car?',
+      'If you could invent one app, what would it do?',
+      'Do you think people depend on technology too much?' ] },
+    { key:'work', name:'Work, study & money', sub:'careers and goals', q:[
+      'What does your dream job look like on an ordinary Tuesday?',
+      'What is the most useful thing you have learned at university or work?',
+      'Would you rather work for yourself or for a big company?',
+      'What is the best way to spend money: things, experiences or saving it?',
+      'Is remote work better than working in an office? Why?',
+      'What is one skill that you think everyone should learn at school?',
+      'What was your first job or side hustle, and what did it teach you?',
+      'What would you do if you won a lot of money tomorrow?' ] },
+    { key:'fashion', name:'Fashion & style', sub:'what we wear', q:[
+      'How would you describe your style in three words?',
+      'What is the best piece of clothing you own?',
+      'Is there a fashion trend you love, or one you could never wear?',
+      'Do you think clothes can change how you feel? Give an example.',
+      'Who is your style icon?',
+      'What did you wear as a kid or teenager that you cannot believe now?',
+      'Do you prefer comfort or looking sharp?',
+      'If you could wear one outfit for a whole year, what would it be?' ] },
+    { key:'friends', name:'Friends & relationships', sub:'people we love', q:[
+      'What makes a good friend?',
+      'Who has taught you the most about friendship?',
+      'Do you prefer a few close friends or lots of friends?',
+      'What is the best way to make up after a fight with someone you care about?',
+      'What is a small gesture that makes you feel really valued?',
+      'How do you stay in touch with friends who live far away?',
+      'What is something you would like to do together with a friend this year?',
+      'What qualities do you value most in people you spend time with?' ] },
+    { key:'nature', name:'Nature & environment', sub:'planet talk', q:[
+      'What is your favourite season, and what do you like to do in it?',
+      'Do you think one person can really make a difference for the environment?',
+      'What is one small eco-friendly habit you try to keep?',
+      'Which animal would you like to have as a pet, even if it is impossible?',
+      'What is the most beautiful natural place you have seen?',
+      'Would you ever live in a village or in the countryside?',
+      'How do you feel about the weather today and how does it affect your mood?',
+      'If you could save one endangered species, which would it be?' ] },
+    { key:'sport', name:'Sports & hobbies', sub:'fun in free time', q:[
+      'What do you do on a perfect free afternoon?',
+      'Have you ever tried a sport that you ended up loving?',
+      'Do you prefer team sports or doing things on your own?',
+      'What is a hobby that you picked up by accident?',
+      'Which sport would you like to try, even if it scares you?',
+      'Do you think video games count as a real hobby or even a sport?',
+      'What is the best way to spend a rainy weekend?',
+      'Which hobby do you think is underrated?' ] },
+    { key:'dreams', name:'Dreams & future', sub:'big plans', q:[
+      'Where do you see yourself living in five years?',
+      'What is something you want to learn before you turn 30?',
+      'What is one goal you have been quietly working on?',
+      'What would you do if you knew you could not fail?',
+      'What does a successful life mean to you?',
+      'If money and time were no problem, what would you do next year?',
+      'What is something on your bucket list that you are really serious about?',
+      'What do you hope will be different about the world in 20 years?' ] },
+    { key:'memories', name:'Memories & childhood', sub:'throwback', q:[
+      'What is your happiest childhood memory?',
+      'What did you want to be when you grew up?',
+      'What was your favourite cartoon or game as a kid?',
+      'What is a song that takes you straight back to a moment?',
+      'What is a family tradition you love?',
+      'What is something you miss from a few years ago?',
+      'Who was your favourite teacher and why?',
+      'What was your first phone or gadget, and what did you do with it?' ] },
+    { key:'wouldyou', name:'Would you rather', sub:'silly choices', q:[
+      'Would you rather travel to the past or to the future?',
+      'Would you rather always be 10 minutes late or 20 minutes early?',
+      'Would you rather live by the sea or in the mountains?',
+      'Would you rather speak every language or play every instrument?',
+      'Would you rather never use social media again or never watch another movie?',
+      'Would you rather have a personal chef or a personal driver?',
+      'Would you rather be famous or be rich but unknown?',
+      'Would you rather have a rewind button or a pause button for your life?' ] },
+    { key:'deep', name:'Deep talk', sub:'a little more serious', q:[
+      'What is something you are proud of that nobody sees?',
+      'When do you feel most like yourself?',
+      'What is the best advice you have ever received?',
+      'What is something you changed your mind about?',
+      'What is one thing you would tell your younger self?',
+      'What is a fear you have slowly learned to live with?',
+      'What does a good life look like to you?',
+      'What is something you wish more people asked you about?' ] },
+    { key:'fun', name:'Random & fun', sub:'just for laughs', q:[
+      'What is the weirdest thing you have ever eaten?',
+      'If you had a theme song, what would it be?',
+      'What is a useless talent you have?',
+      'What would your superhero name be?',
+      'If you could have dinner with anyone, who would it be?',
+      'Describe a perfect ordinary day.',
+      'What is the funniest thing that happened to you this year?',
+      'If animals could talk, which one would be the rudest?' ] }
+  ],
   stops: [
     { key:'start', page:'rooms/living-room.html',  name:'Living Room', short:'Living', desc:'Where we begin.', contents:['Wide open floor to hang out (everyone starts here)','Pink sofa, TV and built-in bookshelves','Table in the middle'],  lockedNote:'We start here when Sasha is ready.', unlockMsg:'The Living Room is now open.' },
     { key:'partners', name:'Room 48', plain:true, desc:'Find your partner.', zone:[7,40,24,46], lockedMsg:'Room 48 is locked for now. You’ll get a ping when it opens.', unlockMsg:'Room 48 is open! Go in and find your partner.', actionLabel:'Go in' }
@@ -947,7 +1140,7 @@ const PINKROOM=[
 const DOOR_RECTS=(()=>{   // the door to Room 48: drawn in the lounge AND in the partner room. "48" is carved into the upper panel (dark groove, light lip on the lower-right edge).
   const y=40, a=[[7,y,24,46,'#2c1a22'],[9,y+2,20,42,'#7a3a5c'],[11,y+4,16,16,'#6a2f4f'],[11,y+4,16,1,'#b98aa4'],[11,y+23,7,18,'#6a2f4f'],[20,y+23,7,18,'#6a2f4f'],[11,y+23,7,1,'#b98aa4'],[20,y+23,7,1,'#b98aa4'],[25,y+22,3,3,'#e8c14a'],[26,y+23,1,1,'#fff3b0'],[7,y+46,24,1,'rgba(0,0,0,.18)']];
   const G={4:['101','101','111','001','001'],8:['111','101','111','101','111']};
-  [['#b98aa4',1],['#2a1020',0]].forEach(([c,o])=>[4,8].forEach((d,k)=>G[d].forEach((row,py)=>[...row].forEach((v,px)=>{ if(v==='1') a.push([12+k*8+px*2+o,y+7+py*2+o,2,2,c]) }))));
+  [['#b98aa4',1],['#2a1020',0]].forEach(([c,o])=>[4,8].forEach((d,k)=>G[d].forEach((row,py)=>[...row].forEach((v,px)=>{ if(v==='1') a.push([15+k*5+px+o,y+10+py+o,1,1,c]) }))));
   return a;
 })();
 const ROOM2=(()=>{
@@ -999,13 +1192,6 @@ const ROOM2=(()=>{
   const VINE=(pts,c)=>{const o=[];pts.forEach((q,i)=>{if(i)o.push(...LINE(pts[i-1][0],pts[i-1][1],q[0],q[1],'#2f6a2a'));const sd=i%2?1:-1;o.push(...LEAF(q[0],q[1],q[0]+sd*3,q[1]+2.5,1.5,c))});return o};
   const POT=(x,y,w,h)=>[[x,y,w,2,'#d08a52'],[x,y,w,1,'#e8b27a'],[x+1,y+2,w-2,h-3,'#b5683a'],[x+1,y+2,2,h-3,'#d08a52'],[x+w-3,y+2,2,h-3,'#8a4a2a'],[x+2,y+h-1,w-4,1,'#7a3f24'],[x+1,y+2,w-2,1,'#7a3f24']];
   const GRN=['#9fcf55','#5f9e3a','#2e6a2e','#1b4a2a'],DRK=['#6fb04a','#38803a','#1b562c','#103820'];
-  /* tall floor plant in the left corner */
-  a.push(...LINE(10,100,10,124,'#3a6a2a'),...LINE(11,100,11,124,'#5a8a3a'));
-  [[11,118,2,106,3.4],[11,118,21,108,3.4],[11,108,1,95,4],[11,108,21,96,4],[11,101,5,86,3.6],[11,101,17,86,3.6],[11,97,11,80,3.6]].forEach(([bx,by,tx,ty,w],i)=>a.push(...LEAF(bx,by,tx,ty,w,i%2?DRK:GRN)));
-  a.push(...OV(11,134,8,1.6,'rgba(0,0,0,.28)'),...POT(5,122,13,12));
-  /* bushy plant in the right corner */
-  [[109,114,98,106,3.4],[109,114,100,94,3.8],[109,114,108,88,3.8],[109,114,116,92,3.8],[109,114,119,103,3.4],[109,114,103,99,3],[109,114,114,99,3]].forEach(([bx,by,tx,ty,w],i)=>a.push(...LEAF(bx,by,tx,ty,w,i%2?GRN:DRK)));
-  a.push(...OV(109,127,8,1.6,'rgba(0,0,0,.28)'),...POT(103,115,13,11));
   /* ivy draped over the Paris print and the bookshelf */
   a.push(...VINE([[7,8],[10,6],[13,7],[16,6],[19,7],[22,6],[25,7],[28,9],[29,13],[28,17],[29,21],[28,25]],GRN),...VINE([[6,9],[5,13],[6,17]],DRK));
   a.push(...VINE([[107,26],[110,25],[113,25],[115,27],[116,31],[115,35],[116,39],[115,43],[116,47]],DRK),...VINE([[94,27],[93,31],[94,35],[93,39]],GRN));
@@ -1017,12 +1203,6 @@ const ROOM2=(()=>{
     a.push(...POT(hx-4,7,9,5));
     a.push(...LEAF(hx-3,10,hx-8,14,1.6,DRK),...LEAF(hx+3,10,hx+8,14,1.6,GRN),...LEAF(hx-1,11,hx-3,16,1.4,GRN),...LEAF(hx+1,11,hx+3,16,1.4,DRK));
   });
-  /* ---- the lush houseplant beside the sofa, in a glazed pot with a gold band ---- */
-  {const L1=['#b6e060','#6fb04a','#2e7a38','#1b4a2a'],L2=['#8fd058','#4a9a40','#1f5f30','#123a22'];
-   const bx=101,by=79;
-   [[-14,-26,4.2],[-9,-34,4.6],[-3,-38,4.6],[3,-37,4.6],[9,-33,4.6],[14,-25,4.2],[-17,-16,4],[17,-15,4],[-6,-24,3.6],[6,-24,3.6],[-12,-12,3.2],[12,-11,3.2],[0,-28,3.6]].forEach(([dx,dy,w],i)=>a.push(...LEAF(bx,by,bx+dx,by+dy,w,i%2?L1:L2)));
-   a.push(...OV(bx,89,9,1.7,'rgba(0,0,0,.3)'),[bx-7,by+2,15,10,'#1a3a50'],[bx-6,by+3,13,9,'#2c5a78'],[bx-6,by+3,3,9,'#4a86a8'],[bx+3,by+3,3,9,'#1a3a50'],[bx-7,by+2,15,2,'#e8c14a'],[bx-7,by+2,15,1,'#f3d98a'],[bx-6,by+7,13,1,'#e8c14a'],[bx-5,by+11,11,1,'#122a3a']);
-  }
   /* ---- ambient lighting: the room itself is dimmed, then every light source is drawn bright on top and its glow (in ROOM2_FX) is what lights the room ---- */
   const D=[],LT=[],LC=[],PD=(...r)=>D.push(r),PL=(...r)=>LT.push(r);   /* D = the dim layer, LT = light sources (chandelier + wall lamps): both are drawn on top of the whole scene, dim first, lights above it */
   PD(-600,-600,1320,1350,'rgba(26,8,48,.34)');   /* huge on purpose: on a tall phone the screen shows extra wall + floor beyond the 120x150 room, and the dim has to cover that too */
@@ -1401,15 +1581,20 @@ function startSasha(d){ setTimeout(()=>{ if(!opened){$('sashaBubble').classList.
 
   /* fake loading screen -> text over the Earth -> Earth/city/room animation */
   const ld=$('loadScreen'), LOAD_MS=4900;
-  if(reduce){ld.style.display='none';earth.classList.add('go')}
+  /* returning guests get their own short loading screen (see retLoad at the bottom), so the first-time intro and START GAME stay out of the way */
+  window.__RET=(()=>{ if(!CONFIG.returnLoadScreen) return false; try{ const m=JSON.parse(localStorage.getItem('tpl_me')||'null'); return !!(m&&m.look&&(isHost||CONFIG.rememberGuests)&&sessionStorage.getItem('tpl_ret')!=='1') }catch(e){ return false } })();
+  if(window.__RET){}
+  else if(reduce){ld.style.display='none';earth.classList.add('go')}
   else{
     const blocks=ld.querySelectorAll('#loadBar i'), lp=$('loadPct');
     /* the classic: race to 99%, hang there for 3 agonizing seconds, then snap to 100% */
     const setLoad=n=>{lp.textContent='loading '+n+'%';const on=n>=100?10:Math.floor(n/10);blocks.forEach((b,k)=>b.classList.toggle('on',k<on))};
     [[0,0],[8,150],[19,300],[37,480],[58,680],[79,900],[93,1150],[99,1400],[100,4400]].forEach(([n,t])=>setTimeout(()=>setLoad(n),t));
     /* at 100% a START GAME button appears; pressing it unlocks the sound and starts the intro */
-    const slot=document.createElement('div'); slot.id='loadSlot'; lp.parentNode.insertBefore(slot,lp); slot.appendChild(lp);   // the % text and the button share one slot right under the bar
-    setTimeout(()=>{ const b=document.createElement('button'); b.id='loadStart'; b.type='button'; b.textContent='START GAME'; slot.appendChild(b); lp.style.display='none'; b.style.display='block';
+    /* when it hits 100% the bar fades away and START GAME takes its exact place */
+    const bar=$('loadBar'), mid=document.createElement('div'); mid.id='loadMid'; bar.parentNode.insertBefore(mid,bar); mid.appendChild(bar);
+    setTimeout(()=>{ const b=document.createElement('button'); b.id='loadStart'; b.type='button'; b.textContent='START GAME'; mid.appendChild(b); lp.style.visibility='hidden'; bar.classList.add('done');
+      requestAnimationFrame(()=>requestAnimationFrame(()=>b.classList.add('show')));
       b.onclick=()=>{ b.onclick=null; try{SFX.unlock()}catch(e){} b.remove(); ld.classList.add('gone'); earth.classList.add('go'); setTimeout(()=>ld.style.display='none',1000); startGo() } },4800);
   }
   const startRoom=()=>setTimeout(()=>$('scene').classList.add('lit'),1100);
@@ -1685,9 +1870,20 @@ let _clkT=null;
 function startWallClock(){
   if(_clkT) clearInterval(_clkT);
   const set=(id,a)=>{const e=document.getElementById(id); if(e) e.setAttribute('transform','rotate('+a+' 105 9)')};
+  const pie=f=>{ if(f<=0) return ''; if(f>=.999) return 'M105 2.6A6.4 6.4 0 1 1 104.99 2.6Z'; const a=f*2*Math.PI, x=(105+6.4*Math.sin(a)).toFixed(2), y=(9-6.4*Math.cos(a)).toFixed(2); return `M105 9L105 2.6A6.4 6.4 0 ${f>.5?1:0} 1 ${x} ${y}Z` };
   const tick=()=>{
-    const d=new Date(), ms=d.getMilliseconds(), sec=d.getSeconds()+ms/1000, min=d.getMinutes()+sec/60, hr=(d.getHours()%12)+min/60;
-    set('clkS',sec*6); set('clkM',min*6); set('clkH',hr*30);
+    const fe=window.__fEnd, d=new Date(), P=document.getElementById('clkPie'), G=document.getElementById('clkDig'), T=document.getElementById('clkTxt'), H=document.getElementById('clkH');
+    if(fe){   // countdown: a pink wedge shrinks, hands count down, and the time left shows under the clock
+      const left=Math.max(0,fe-Date.now()), tot=Math.max(window.__fTot||left,1), secs=left/1000, over=left<=0, low=!over&&left<=60000;
+      set('clkS',(secs%60)*6); set('clkM',((secs/60)%60)*6); if(H) H.setAttribute('opacity','0');
+      if(P){ P.setAttribute('d',pie(Math.min(1,left/tot))); P.setAttribute('fill',low?'#ffc21a':'#ff7ab0') }
+      if(G) G.style.display='';
+      if(T){ T.textContent=Math.floor(left/60000)+':'+String(Math.floor(secs)%60).padStart(2,'0'); T.setAttribute('fill',over?(Math.floor(Date.now()/500)%2?'#ff7a9a':'#ffe29a'):low?'#ffc21a':'#ffe29a') }
+    }else{    // no timer: just the real time
+      const ms=d.getMilliseconds(), sec=d.getSeconds()+ms/1000, min=d.getMinutes()+sec/60, hr=(d.getHours()%12)+min/60;
+      set('clkS',sec*6); set('clkM',min*6); set('clkH',hr*30); if(H) H.setAttribute('opacity','1');
+      if(P) P.setAttribute('d',''); if(G) G.style.display='none';
+    }
   };
   tick(); _clkT=setInterval(tick,50);
 }
@@ -1700,15 +1896,15 @@ function buildMap(){
       <g class="nm" transform="translate(0 ${r.nmy||0})"><rect x="3" y="3" width="${nw}" height="8" fill="#000" fill-opacity=".72"/><text x="6" y="9" font-size="5" font-weight="700" font-family="Courier New,monospace" fill="#fff">${esc(s.name)}</text></g>
       <g class="here"><rect x="${W-37}" y="${H-12}" width="34" height="9" fill="#ffdd00"/><text x="${W-20}" y="${H-5.5}" text-anchor="middle" font-size="4.6" font-weight="700" font-family="Tahoma,sans-serif" fill="#000">WE'RE HERE</text></g>
     </g></g>`}).join('');
-  const INTERCOM=[[34,57,9,16,'#15121a'],[35,58,7,14,'#b8b8c2'],[35,58,7,1,'#e6e6ee'],[35,58,1,14,'#d4d4dc'],[41,58,1,14,'#8a8a94'],
-  [36,60,5,1,'#3a3a44'],[36,62,5,1,'#3a3a44'],[36,64,5,1,'#3a3a44'],[36,60,5,1,'#3a3a44'],
-  [36,66,5,3,'#0f2a1c'],[37,67,3,1,'#5fe08a'],
-  [37,70,3,2,'#d62a6b'],[37,70,1,1,'#ff9ab8'],[35,72,7,1,'#7a7a84']];   // little wall intercom next to the door
+  const INTERCOM=[[32,58,6,13,'#15121a'],[33,59,4,11,'#b8b8c2'],[33,59,4,1,'#e6e6ee'],[33,59,1,11,'#d4d4dc'],[36,59,1,11,'#8a8a94'],
+  [34,62,2,1,'#3a3a44'],[34,64,2,1,'#3a3a44'],
+  [34,66,2,2,'#0f2a1c'],[34,66,1,1,'#5fe08a'],
+  [34,69,2,1,'#d62a6b'],[34,69,1,1,'#ff9ab8']];   // little wall intercom next to the door
 /* sections: spots in the room (not rooms) that the host unlocks later. zone = [x,y,w,h] in map units */
   const sections=STOPS.filter(s=>s.zone).map(s=>{
     if(s.plain){ const [x,y,w,h]=s.zone;
       return `<g class="room locked" id="pin_${s.key}"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#000" fill-opacity="0"/>
-      <g class="icm"><rect x="31" y="56" width="14" height="22" fill="#000" fill-opacity="0"/>${R(INTERCOM)}<rect class="icmled" x="40" y="59" width="1" height="1" fill="#ff3b3b"/></g></g>` }
+      <g class="icm"><rect x="31" y="57" width="8" height="15" fill="#000" fill-opacity="0"/>${R(INTERCOM)}<rect class="icmled" x="35" y="60" width="1" height="1" fill="#ff3b3b"/></g></g>` }
     const [x,y,w,h]=s.zone, lab=(s.short||s.name), lw=Math.min(w-2,lab.length*2.9+4), cx=x+w/2, cy=y+h/2, k=Math.min(1.1,w/16,h/28), top=cy-(16*k+2+6.6)/2, py=top+16*k+2;
     return `<g class="room locked" id="pin_${s.key}"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#000" fill-opacity="0"/>
       <g class="lk"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#1b1733" fill-opacity=".76"/><rect x="${x+1}" y="${y+1}" width="${w-2}" height="${h-2}" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width=".8" stroke-dasharray="3 2"/><g transform="translate(${cx-6.5*k} ${top}) scale(${k})">${R(LOCK)}</g><rect x="${cx-lw/2}" y="${py}" width="${lw}" height="6.6" fill="#15121a" fill-opacity=".92"/><text x="${cx}" y="${py+4.9}" text-anchor="middle" font-size="4.4" font-weight="700" font-family="Courier New,monospace" fill="#e0a85e">${esc(lab)}</text></g>
@@ -1720,7 +1916,9 @@ function buildMap(){
   const guide=`<g id="guide"><g transform="translate(90 70) scale(1.45)"><ellipse cx="8" cy="22.6" rx="7" ry="1.6" fill="#000" opacity=".25"/><g class="gbob"><svg width="16" height="23" viewBox="0 0 16 23" overflow="visible">${R(hostRects())}</svg></g><text x="8" y="29.5" text-anchor="middle" font-size="4.4" font-weight="700" font-family="Trebuchet MS,sans-serif" fill="#e8c14a" stroke="#15121a" stroke-width="1.3" paint-order="stroke">${esc(CONFIG.hostName||'Sasha')}</text><rect class="twk" x="2" y="-9" width="1" height="3" fill="#ffe680"/><rect class="twk" x="1" y="-8" width="3" height="1" fill="#ffe680"/></g></g>`;
   const scanl=Array.from({length:13},(_,i)=>`<rect x="37" y="${20+i*2}" width="50" height="1" fill="#fff" fill-opacity=".05"/>`).join('');
   const linkbox=`<g id="linkbox" style="cursor:pointer"><rect x="31" y="13" width="62" height="40" fill="#000" fill-opacity="0"/>${R(TV_RECTS)}<g class="scr-on"><rect class="scr-fx" x="37" y="19" width="50" height="27" fill="#2a3a5a"><animate attributeName="fill" values="#24365a;#3a2a5a;#2a4a5a;#24365a" dur="3.2s" repeatCount="indefinite"/></rect>${scanl}</g><polygon points="37,19 60,19 47,46 37,46" fill="#fff" fill-opacity=".06"/><rect x="85" y="47" width="1" height="1" fill="#ff4040" class="led"><animate attributeName="opacity" values="1;.2;1" dur="1.3s" repeatCount="indefinite"/></rect></g>`;
-  $('map').innerHTML=`<svg viewBox="0 0 120 150">${DEFS}<rect width="120" height="150" fill="#15131a"/>${rooms}${sections}<g id="wallClock" style="pointer-events:none"><line id="clkH" x1="105" y1="9" x2="105" y2="5.8" stroke="#2a2630" stroke-width="1.1" stroke-linecap="round"/><line id="clkM" x1="105" y1="9" x2="105" y2="4" stroke="#2a2630" stroke-width=".7" stroke-linecap="round"/><line id="clkS" x1="105" y1="10.4" x2="105" y2="3.6" stroke="#d65a5a" stroke-width=".35"/><circle cx="105" cy="9" r=".8" fill="#d65a5a"/></g>${guide}${linkbox}<g style="pointer-events:none">${window.ROOM2_DIM||''}</g><g class="fx" style="pointer-events:none">${window.ROOM2_LIGHTS||''}${window.ROOM2_FX||''}</g></svg>`; startWallClock();
+  if(!window.__bunSrc){ const bi=document.querySelector('image.bun'); window.__bunSrc=bi?bi.getAttribute('href'):'' }   // the sleeping bunny from the intro, curled up on the sofa
+  const sofaBun=window.__bunSrc?`<svg x="67.5" y="49.6" width="19.4" height="14" viewBox="0 0 54 39" overflow="hidden" style="pointer-events:none"><image class="sofabun" href="${window.__bunSrc}" width="540" height="39" style="image-rendering:pixelated"/></svg>`:'';
+  $('map').innerHTML=`<svg viewBox="0 0 120 150">${DEFS}<rect width="120" height="150" fill="#15131a"/>${rooms}${sofaBun}${sections}<g id="wallClock" style="pointer-events:none"><path id="clkPie" d="" fill="#ff7ab0" fill-opacity=".9"/><line id="clkH" x1="105" y1="9" x2="105" y2="5.8" stroke="#2a2630" stroke-width="1.1" stroke-linecap="round"/><line id="clkM" x1="105" y1="9" x2="105" y2="4" stroke="#2a2630" stroke-width=".7" stroke-linecap="round"/><line id="clkS" x1="105" y1="10.4" x2="105" y2="3.6" stroke="#d65a5a" stroke-width=".35"/><circle cx="105" cy="9" r=".8" fill="#d65a5a"/><g id="clkDig" style="display:none"><rect x="97.5" y="18.4" width="15" height="5.8" rx=".8" fill="#15121a" fill-opacity=".88" stroke="#c9a23a" stroke-width=".4"/><text id="clkTxt" x="105" y="22.5" text-anchor="middle" font-size="4.2" font-weight="700" font-family="Courier New,monospace" fill="#ffe29a">0:00</text></g></g>${guide}${linkbox}<g style="pointer-events:none">${window.ROOM2_DIM||''}</g><g class="fx" style="pointer-events:none">${window.ROOM2_LIGHTS||''}${window.ROOM2_FX||''}</g></svg>`; startWallClock();
   $('linkbox').onclick=ev=>{ev.stopPropagation();openTV()}; applyBoxLock();
   STOPS.forEach(s=>{const el=$('pin_'+s.key); if(el) el.onclick=function(ev){if(s.key==='start'){walkTap(ev);return}
     if(this.classList.contains('locked')&&s.key!=='partners'){this.classList.remove('shake');void this.getBoundingClientRect();this.classList.add('shake');toast({title:'Locked',body:(s.lockedMsg||CONFIG.lockedMsg).replace('{room}',s.name),holdMs:2800,vibrate:[40,40,40]});return}
@@ -1758,6 +1956,44 @@ let doorWalk=0;
 function doorSpot(){ const z=STOP('partners').zone||[7,40,24,46], b=floorBox(wSc);
   return {nx:Math.max(0,Math.min(1,(z[0]+z[2]/2-b.sw/2-b.x0)/b.w)), ny:0} }   // standing right in front of the door
 function walkToDoor(then){ walkToSpot(doorSpot(),then) }
+/* the lounge door swings open (hinged on the left, warm light spilling out), THEN we go through */
+let doorAnim=0;
+function openDoorThen(then){
+  const svg=$('map')&&$('map').querySelector('svg'); if(!svg||doorAnim){ then(); return }
+  doorAnim=1; const old=svg.querySelector('#doorFx'); if(old) old.remove();
+  const g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.id='doorFx';
+  g.innerHTML=`<defs><linearGradient id="dfg" x1="0" x2="1"><stop offset="0" stop-color="#2a1030"/><stop offset="1" stop-color="#ffd59a"/></linearGradient></defs>`
+    +`<rect x="9" y="42" width="20" height="44" fill="url(#dfg)"/><rect x="7" y="40" width="24" height="2" fill="#2c1a22"/><rect x="7" y="40" width="2" height="46" fill="#2c1a22"/><rect x="29" y="40" width="2" height="46" fill="#2c1a22"/>`
+    +`<g id="dfLeaf">${R(DOOR_RECTS)}</g>`;
+  const pp=svg.querySelector('#ppl'); svg.insertBefore(g,pp||null);
+  const leaf=g.querySelector('#dfLeaf'), t0=performance.now(), D=650;
+  try{ icBeep(180,.12,'triangle'); setTimeout(()=>icBeep(140,.18,'triangle'),380) }catch(e){}
+  (function f(now){
+    const k=Math.min(1,(now-t0)/D), e=1-Math.pow(1-k,3), sx=1-.82*e;
+    leaf.setAttribute('transform',`translate(7 0) scale(${sx.toFixed(3)} 1) translate(-7 0)`);
+    if(k<1) return requestAnimationFrame(f);
+    setTimeout(()=>{ doorAnim=0; then(); setTimeout(()=>g.remove(),400) },280);
+  })(t0);
+}
+/* a door that swings open (open=true) or shut (open=false) in any pixel-room svg; D=1 snaps it straight to the end state */
+function doorSwing(svg,id,beforeEl,open,D,then){
+  if(!svg){ if(then) then(); return }
+  let g=svg.querySelector('#'+id);
+  if(!g){ g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.id=id; g.setAttribute('pointer-events','none');
+    g.innerHTML=`<defs><linearGradient id="${id}G" x1="0" x2="1"><stop offset="0" stop-color="#2a1030"/><stop offset="1" stop-color="#ffd59a"/></linearGradient></defs>`
+      +`<rect x="9" y="42" width="20" height="44" fill="url(#${id}G)"/><rect x="7" y="40" width="24" height="2" fill="#2c1a22"/><rect x="7" y="40" width="2" height="46" fill="#2c1a22"/><rect x="29" y="40" width="2" height="46" fill="#2c1a22"/>`
+      +`<g id="${id}L">${R(DOOR_RECTS)}</g>`;
+    svg.insertBefore(g,beforeEl||null) }
+  const leaf=g.querySelector('#'+id+'L'), t0=performance.now();
+  if(D>1){ try{ icBeep(open?180:140,.12,'triangle') }catch(e){} }
+  (function f(now){
+    const k=D>1?Math.min(1,(now-t0)/D):1, e=1-Math.pow(1-k,3), p=open?e:1-e;
+    leaf.setAttribute('transform',`translate(7 0) scale(${(1-.82*p).toFixed(3)} 1) translate(-7 0)`);
+    if(k<1) return requestAnimationFrame(f);
+    if(!open) g.remove();
+    if(then) then();
+  })(t0);
+}
 function walkToSpot(s,then){
   const w=me&&walkers[me.id];
   if(doorWalk) return;
@@ -1790,18 +2026,18 @@ let staticEl=null, staticRaf=0, staticSnd=null;
 function tvStaticStart(fromEl){
   tvStaticStop();
   const ov=document.createElement('div'); ov.id='tvStatic';
-  ov.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#fff;overflow:hidden;touch-action:none';
-  const cv=document.createElement('canvas'); cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;opacity:0;transition:opacity .12s';
+  ov.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#0a0a10;overflow:hidden;touch-action:none';
+  const cv=document.createElement('canvas'); cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated';
   const roll=document.createElement('div'); roll.style.cssText='position:absolute;left:0;right:0;height:22%;background:linear-gradient(transparent,rgba(255,255,255,.14),transparent);animation:tvRoll 1.8s linear infinite';
   const scan=document.createElement('div'); scan.style.cssText='position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px)';
   ov.append(cv,roll,scan); document.body.appendChild(ov); staticEl=ov;
   // grow out of the plasma screen so it feels like the TV takes over the whole screen
   const W=innerWidth,H=innerHeight; let r=null; try{ r=fromEl&&fromEl.getBoundingClientRect() }catch(e){}
-  if(r&&r.width>0){ ov.style.clipPath=`inset(${r.top}px ${W-r.right}px ${H-r.bottom}px ${r.left}px)`; void ov.offsetWidth; ov.style.transition='clip-path .45s cubic-bezier(.6,0,.2,1)'; ov.style.clipPath='inset(0 0 0 0)' }
+  if(r&&r.width>0){ ov.style.clipPath=`inset(${r.top}px ${W-r.right}px ${H-r.bottom}px ${r.left}px)`;   // 1) static plays on the little screen
+    setTimeout(()=>{ ov.style.transition='clip-path .7s cubic-bezier(.6,0,.2,1)'; void ov.offsetWidth; ov.style.clipPath='inset(0 0 0 0)' },650) }   // 2) then it grows to fill the whole screen
   const sc=Math.max(2,Math.round(Math.min(W,H)/130)), w=Math.ceil(W/sc), h=Math.ceil(H/sc); cv.width=w; cv.height=h;
   const x=cv.getContext('2d'), img=x.createImageData(w,h), d=img.data;
   (function fr(){ for(let i=0;i<d.length;i+=4){const v=(Math.random()*255)|0; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255} x.putImageData(img,0,0); staticRaf=requestAnimationFrame(fr) })();
-  setTimeout(()=>{ cv.style.opacity=1 },60);
   try{   // white-noise hiss
     const A=new (window.AudioContext||window.webkitAudioContext)(), n=A.sampleRate, b=A.createBuffer(1,n,A.sampleRate), c=b.getChannelData(0);
     for(let i=0;i<n;i++) c[i]=Math.random()*2-1;
@@ -1826,12 +2062,14 @@ function openTV(){
   if(l){ l.classList.remove('locked'); l.classList.add('turning') }
   try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
   tvStaticStart(l&&l.querySelector('.scr-fx'));
-  setTimeout(()=>{ sessionStorage.setItem('tpl_ret','1'); location.href=page+(isHost?(page.includes('?')?'&':'?')+'host=1':'') },1400);   // host goes to the host version of the TV page
+  setTimeout(()=>{ sessionStorage.setItem('tpl_ret','1'); location.href=page+(isHost?(page.includes('?')?'&':'?')+'host=1':'') },1800);   // host goes to the host version of the TV page
 }
 function placeAtDoor(){   // coming back out of the door: you appear in front of it and step into the room
   const w=me&&walkers[me.id]; if(!w) return; const s=doorSpot();
   w.x=s.nx; w.y=s.ny; w.tx=s.nx; w.ty=Math.min(1,s.ny+.22);
   ref(`${E}/attendees/${me.id}/pos`).set({x:+w.tx.toFixed(3),y:+w.ty.toFixed(3)});
+  const sv=$('map')&&$('map').querySelector('svg');
+  if(sv) doorSwing(sv,'doorBackFx',sv.querySelector('#ppl'),true,1,()=>setTimeout(()=>doorSwing(sv,'doorBackFx',null,false,450),1000));   // you come out of an open door, then it shuts
 }
 /* ---------- blue spot on the floor where you're headed ---------- */
 let spotTimer=0;
@@ -1850,24 +2088,38 @@ function tapSpot(x,y,secs){
 const EMOTES={jump:{e:'\u2757',dur:.8},spin:{e:'\uD83C\uDF00',dur:.9},dance:{e:'\uD83D\uDC83',dur:2.4},wave:{e:'\uD83D\uDC4B',dur:1.8},heart:{e:'\u2764\uFE0F',dur:2},highfive:{e:'\u270B',dur:1.6}};
 const SELF_MOVES=[['jump','Jump'],['spin','Spin'],['dance','Dance'],['wave','Wave'],['heart','Send love']];
 const OTHER_MOVES=[['wave','Wave at'],['highfive','High five'],['dance','Dance with'],['heart','Send love to']];
-function closeCharMenu(){const m=$('charMenu'); if(m)m.remove()}
-function openCharMenu(id){
-  closeCharMenu(); const g=guests.find(x=>x.id===id); if(!g)return;
-  const mine=me&&id===me.id, m=document.createElement('div'); m.id='charMenu';
+function closeCharMenu(){const m=$('charMenu'); if(m)m.remove(); const r=$('charRing'); if(r)r.remove()}
+/* tap yourself: three little circles pop out around you (passport / jump / spin). Tap anywhere else and they go. Tap someone else: just their passport. */
+function showPassport(g,mine){
+  const m=document.createElement('div'); m.id='charMenu';
   m.style.cssText='position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(21,18,26,.62)';
   const pass=window.passHTML?window.passHTML(g,mine):'<div style="background:#fff;color:#000;padding:12px">'+esc(g.name||'')+'</div>';
-  m.innerHTML=`<div style="width:100%;max-width:340px;max-height:100%;overflow:auto">${pass}<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">`
-    +(mine?SELF_MOVES:OTHER_MOVES).map(([k,l])=>`<button data-m="${k}" type="button" style="flex:1 1 40%;padding:9px 6px;border:2px solid #15121a;background:#fff;color:#000;font:700 12px Trebuchet MS,sans-serif;cursor:pointer">${EMOTES[k].e} ${l}${mine?'':' '+esc(String(g.name||'').slice(0,10))}</button>`).join('')
-    +`</div></div>`;
+  m.innerHTML=`<div style="width:100%;max-width:340px;max-height:100%;overflow:auto">${pass}</div>`;
   document.body.appendChild(m);
-  m.onclick=e=>{ if(e.target===m){closeCharMenu();return}
-    const k=e.target.closest('button')?.dataset.m; if(!k)return; e.stopPropagation(); closeCharMenu(); doEmote(k,mine?null:id)};
+  m.onclick=e=>{ if(e.target===m) closeCharMenu() };
+}
+let ringClosedAt=0;
+document.addEventListener('pointerdown',e=>{ const r=$('charRing'); if(r&&!r.contains(e.target)){ r.remove(); ringClosedAt=Date.now() } },true);
+function openCharMenu(id){
+  const had=!!$('charRing'); closeCharMenu(); const g=guests.find(x=>x.id===id); if(!g)return;
+  const mine=me&&id===me.id;
+  if(!mine){ showPassport(g,false); return }
+  if(had||Date.now()-ringClosedAt<350) return;   // tapping yourself again puts the circles away
+  const w=walkers[id]; if(!w||!w.el) return;
+  const r=w.el.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2, rad=Math.max(r.height*.78,46), D=40;
+  const ring=document.createElement('div'); ring.id='charRing';
+  const items=[['pass','🛂','Passport',-150],['jump','⬆️','Jump',-90],['spin','🌀','Spin',-30]];
+  ring.innerHTML=items.map(([k,ic,l,a],i)=>{const x=cx+Math.cos(a*Math.PI/180)*rad,y=cy+Math.sin(a*Math.PI/180)*rad;
+    return `<button type="button" data-k="${k}" aria-label="${l}" title="${l}" style="left:${Math.max(D/2+4,Math.min(innerWidth-D/2-4,x))-D/2}px;top:${Math.max(D/2+4,y)-D/2}px;animation-delay:${i*60}ms">${ic}</button>`}).join('');
+  document.body.appendChild(ring);
+  ring.onclick=e=>{ const k=e.target.closest('button')?.dataset.k; if(!k)return; e.stopPropagation();
+    if(k==='pass'){ closeCharMenu(); showPassport(g,true) } else { closeCharMenu(); doEmote(k,null) } };
 }
 document.addEventListener('click',e=>{   // edit my own Instagram from my passport
   const a=e.target.closest('[data-igedit]'); if(!a||!me)return; e.preventDefault(); e.stopPropagation();
   const v=prompt('Your Instagram @handle or link (leave empty to remove)',me.ig?'@'+me.ig:''); if(v===null)return;
   me.ig=igHandle(v); localStorage.setItem('tpl_me',JSON.stringify(me)); ref(`${E}/attendees/${me.id}`).update({ig:me.ig});
-  if($('charMenu')) openCharMenu(me.id);
+  if($('charMenu')){ closeCharMenu(); showPassport(me,true) }
 });
 function doEmote(type,to){
   if(!me||!walkers[me.id])return;
@@ -1947,7 +2199,7 @@ function renderPeople(){
 function enterStop(key){
   const s=STOP(key);
   if(key==='partners'){   // tapping the door shows the intercom straight away; once you've got the code (and the door is open) it walks you in
-    if((!CONFIG.partnerDoor.code||doorPinOff||doorOk())) return walkToDoor(openPartnerRoom);
+    if((!CONFIG.partnerDoor.code||doorPinOff||doorOk())) return walkToDoor(()=>openDoorThen(openPartnerRoom));
     return openIntercom() }
   if(s.page){sessionStorage.setItem('tpl_ret','1');location.href=s.page;return}   // room has its own page
   $('stopTitle').textContent=s.name; $('stopDesc').textContent=s.desc;
@@ -2080,7 +2332,7 @@ function renderReveal(all){
   if(!box.classList.contains('show')&&navigator.vibrate) navigator.vibrate([100,50,200]);
   box.classList.add('show');
 }
-function listenPairings(){ ref(`${E}/pairings`).on('value',s=>{lastPairings=s.val();renderReveal(lastPairings);syncDoorLock();if(prOpen){ if(!isHost&&!window.myPartners) closePartnerRoom(true); else renderPartnerRoom() }}) }
+function listenPairings(){ listenFloatTimer(); ref(`${E}/pairings`).on('value',s=>{lastPairings=s.val();renderReveal(lastPairings);syncDoorLock();if(prOpen){ if(!isHost&&!window.myPartners) closePartnerRoom(true); else renderPartnerRoom() }}) }
 $('btnRevealClose').onclick=()=>$('reveal').classList.remove('show');
 $('btnRevealHide').onclick=()=>{if(window.myPartners)localStorage.setItem('tpl_hide_reveal',sig(window.myPartners));$('reveal').classList.remove('show')};
 
@@ -2138,6 +2390,18 @@ function syncDeck(){
 /* ---------- PAIRS: one tap matches everyone + starts the timer ---------- */
 let pairsNow=null, pairEnd=null, pairTickId=null, pairFired=false;
 const fmtT=ms=>{const t=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(t/60),s=t%60;return m+':'+String(s).padStart(2,'0')};
+/* ---------- the floating timer: always there for the host (top right), and for guests only in the last 5 minutes ---------- */
+let fEnd=null, fTotal=0, fTimerId=0, fGoneAt=0;
+function listenFloatTimer(){
+  ref(`${E}/pairsTimerEnd`).on('value',s=>{ fEnd=s.val()||null; fTotal=0; fGoneAt=0; floatTick(); clearInterval(fTimerId); if(fEnd) fTimerId=setInterval(floatTick,250) });
+}
+function floatTick(){   // no floating pill any more: the wall clock in the room shows the countdown
+  const old=document.getElementById('floatTimer'); if(old) old.remove();
+  const left=fEnd?fEnd-Date.now():null;
+  if(left!==null&&left>fTotal) fTotal=left;
+  window.__fEnd=fEnd||null; window.__fTot=fTotal;
+}
+
 function syncPairs(){
   const on=!!pairsNow, n=on?Object.keys(pairsNow).length:0;
   $('pairCard').classList.toggle('live',on);
@@ -2162,7 +2426,8 @@ function renderPairEditor(){
   const inG=new Set(G.flat()), loose=guests.filter(g=>!inG.has(g.id));
   const opts=cur=>G.map((_,i)=>`<option value="${i}"${cur===i?' selected':''}>Group ${i+1}</option>`).join('')+'<option value="new">+ New group</option>';
   box.innerHTML=G.map((g,i)=>`<div class="pe-g"><div class="pe-h">GROUP ${i+1}${g.length>2?' \u00b7 TRIO':g.length===1?' \u00b7 ALONE':''}</div>`
-      +g.map(id=>`<label class="pe-m"><span>${esc(nm(id))}</span><select data-pe="${esc(id)}">${opts(i)}</select></label>`).join('')+'</div>').join('')
+      +g.map(id=>`<label class="pe-m"><span>${esc(nm(id))}</span><select data-pe="${esc(id)}">${opts(i)}</select></label>`).join('')
+      +`<label class="pe-m pe-add"><span>+ Add someone</span><select data-pa="${i}"><option value="" selected>Choose\u2026</option>${guests.filter(x=>!g.includes(x.id)).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select></label></div>`).join('')
     +(loose.length?`<div class="pe-g"><div class="pe-h">NOT IN A GROUP</div>`+loose.map(g=>`<label class="pe-m"><span>${esc(g.name)}</span><select data-pe="${esc(g.id)}"><option value="" selected>Pick a group\u2026</option>${opts(-1)}</select></label>`).join('')+'</div>':'');
 }
 function savePairs(G){
@@ -2171,8 +2436,10 @@ function savePairs(G){
   ref(`${E}/pairings`).set(mine); ref(`${E}/pairs`).set(pairs);
 }
 $('pairEditor').onchange=e=>{
-  const sel=e.target.closest('select[data-pe]'); if(!sel||sel.value==='') return;
-  const id=sel.dataset.pe, G=pairGroups(); let target;
+  const add=e.target.closest('select[data-pa]');
+  const sel=add||e.target.closest('select[data-pe]'); if(!sel||sel.value==='') return;
+  const id=add?add.value:sel.dataset.pe, G=pairGroups(); let target;
+  if(add){ target=G[+add.dataset.pa]; if(!target) return; const out=G.map(g=>g===target?g:g.filter(x=>x!==id)); if(!target.includes(id)) target.push(id); guard(async()=>savePairs(out)); return }
   if(sel.value==='new'){ target=[]; G.push(target) } else target=G[+sel.value];
   if(!target) return;
   const out=G.map(g=>g===target?g:g.filter(x=>x!==id)); if(!target.includes(id)) target.push(id);
@@ -2239,25 +2506,254 @@ $('btnReset').onclick=async()=>{
    ===================================================================== */
 const PD=CONFIG.partnerDoor;
 const prEl=document.createElement('div'); prEl.id='partnerRoom';
-prEl.innerHTML='<div id="prScene"></div>';
+prEl.innerHTML='<div id="prScene"></div><button type="button" id="prTopicBtn"></button><div id="prPicker"><div class="pk-box"><div class="pk-bar"><span>TOPICS.exe</span><button type="button" id="pkX" aria-label="Close">\u00d7</button></div><div class="pk-head"><div class="pk-title"></div><div class="pk-sub"></div></div><div class="pk-list" id="pkList"></div><div class="pk-extra" id="pkExtra"></div></div></div><div id="prPanel"><div class="prq-eye" id="prqEye"></div><div class="prq-row"><button type="button" id="prqBack" aria-label="Previous question">\u2039</button><div class="prq-text ph" id="prqText"></div><button type="button" id="prqNext" aria-label="Next question">\u203a</button></div><div class="prq-hint">not feeling this one? spin again or change the topic</div></div>';
 $('screen-lounge').appendChild(prEl);
-let prOpen=false;
-function openPartnerRoom(){ prOpen=true; prEl.classList.add('open'); renderPartnerRoom() }
-function closePartnerRoom(auto){ prOpen=false; prEl.classList.remove('open'); if(auto) toast({body:PD.closedMsg,holdMs:3000}) }
-let prLeaving=0;
-function leavePartnerRoom(){   // tap the door: your character walks to it, steps through, and you're back in the lounge
-  if(prLeaving||!prOpen) return;
-  const m=prEl.querySelector('#prMe'); if(!m){ closePartnerRoom(); placeAtDoor(); return }
-  prLeaving=1; const cx=+m.dataset.cx, fy=130, tx=19, ty=92, t0=performance.now(), D=1000;
+let prOpen=false, prLeaving=0;
+/* ---------- PARTNER ROOM: a table with glowing objects, walk around behind it, tap an object to draw a question ---------- */
+const PR_N=8;   // slices on the wheel (one per glowing object). The questions themselves come from CONFIG.topics.
+const TOPICS=CONFIG.topics||[], TOPIC_MIX='__mix';
+const PR_OBJS=[
+  {n:'candle',g:'#ffb347',r:[[2,2,3,6,'#fff1dc'],[2,2,3,1,'#fff'],[3,0,1,2,'#ffb347'],[3,0,1,1,'#ffe9a0'],[1,8,5,1,'#c9a23a']]},
+  {n:'rose',g:'#ff5f8a',r:[[2,0,3,3,'#e8486c'],[1,1,5,2,'#d62a6b'],[3,1,1,1,'#ff9ab8'],[3,3,1,5,'#3f8a52'],[1,4,2,1,'#3f8a52'],[4,5,2,1,'#3f8a52']]},
+  {n:'teacup',g:'#9fd6ff',r:[[2,0,1,2,'#cfd8e3'],[4,1,1,2,'#cfd8e3'],[1,3,5,4,'#f3efe6'],[1,3,5,1,'#fff'],[6,4,1,2,'#f3efe6'],[0,7,7,1,'#c9b898']]},
+  {n:'key',g:'#ffd66b',r:[[0,2,3,3,'#e8c14a'],[1,3,1,1,'#2a1020'],[3,3,5,1,'#e8c14a'],[6,4,1,2,'#e8c14a'],[4,4,1,1,'#e8c14a']]},
+  {n:'letter',g:'#ffd0e0',r:[[0,1,8,7,'#f3efe6'],[0,1,8,1,'#fff'],[1,2,2,1,'#c9b898'],[5,2,2,1,'#c9b898'],[3,4,2,3,'#d62a6b'],[3,4,1,1,'#ff9ab8']]},
+  {n:'book',g:'#8fb7ff',r:[[0,1,7,7,'#2c5a78'],[0,1,7,1,'#4a86a8'],[1,1,1,7,'#1a3a50'],[2,4,4,1,'#e8c14a'],[0,8,7,1,'#122a3a']]},
+  {n:'lantern',g:'#ffe29a',r:[[2,0,3,1,'#8a6a20'],[1,1,5,1,'#c9a23a'],[1,2,5,5,'#ffd66b'],[2,3,3,3,'#fff0b0'],[1,7,5,1,'#c9a23a']]},
+  {n:'ring',g:'#b894ff',r:[[0,3,7,5,'#6a2f4f'],[0,3,7,1,'#b98aa4'],[2,1,3,3,'#9fd6ff'],[3,0,1,1,'#fff'],[3,2,1,1,'#fff']]}
+];
+const PR={key:null,topic:undefined,rt:null,pos:{},cur:{},log:{},view:null,rot:0,spinning:0,animTs:0,shown:undefined,rp:null,rq:null,rv:null,raf:0,last:0,leaving:0},PR_S=1.15, PR_X=[10,112], PR_Y=[110,132], PR_DOOR={x:19,y:95}, PR_SEG=360/PR_N, PR_WC={x:82,y:58,r:30};
+const prGroup=()=>{ const mine=(window.myPartners||[]).map(p=>guests.find(g=>g.id===p.id)||p); return [{...me},...mine] };
+const prKey=()=>[me.id,...(window.myPartners||[]).map(p=>p.id)].sort().join('_').replace(/[.#$\[\]\/]/g,'_');
+const prSpawn=i=>({x:38+i*14,y:112+(i%2)*6});
+function prAttach(){
+  const key=prKey(); if(PR.key===key) return; prDetach(); PR.key=key; PR.pos={}; PR.log={}; PR.view=null; PR.shown=undefined;
+  PR.rp=ref(`${E}/rooms/${key}/pos`); PR.rq=ref(`${E}/rooms/${key}/log`); PR.rv=ref(`${E}/rooms/${key}/view`); PR.rt=ref(`${E}/rooms/${key}/topic`); PR.topic=undefined;
+  PR.cbP=sn=>{ const v=sn.val()||{}; Object.keys(v).forEach(id=>{ if(id!==me.id||!PR.pos[id]) PR.pos[id]=v[id] }) };
+  PR.cbQ=sn=>{ PR.log=Object.assign({},PR.log,sn.val()||{}); prqRender() };   // every spin is kept so you can go back through them
+  PR.cbV=sn=>{   // the wheel is shared: whoever spins, everyone in the group watches it land on the same question
+    const v=sn.val(); if(!v||(PR.view&&v.ts<PR.view.ts)) return;
+    if(v.spin&&Date.now()-v.ts<7000&&v.ts!==PR.animTs){ PR.view=v; prSpinAnim(v) }
+    else if(!(v.ts===PR.animTs&&PR.spinning)){ PR.view=v; if(!PR.spinning){ prRot(-(v.i*PR_SEG)); prqRender() } }
+  };
+  PR.cbT=sn=>{ const v=sn.val(); PR.topic=(v&&(v===TOPIC_MIX||TOPICS.some(t=>t.key===v)))?v:null; prTopicSync(true) };   // the topic is shared: pick it once, both phones follow
+  PR.rp.on('value',PR.cbP); PR.rq.on('value',PR.cbQ); PR.rv.on('value',PR.cbV); PR.rt.on('value',PR.cbT);
+  if(PR.cur[me.id]&&!PR.pos[me.id]) setTimeout(()=>{ if(prOpen&&PR.key===key&&!PR.leaving) prSetPos(PR.cur[me.id].x,PR.cur[me.id].y) },0);   // regrouped while inside: stay where you are
+}
+function prDetach(){ if(PR.rp){ try{PR.rp.off('value',PR.cbP);PR.rq.off('value',PR.cbQ);PR.rv.off('value',PR.cbV);PR.rt.off('value',PR.cbT)}catch(e){} } PR.rp=PR.rq=PR.rv=PR.rt=null; PR.key=null; PR.topic=undefined }
+const prRot=a=>{ PR.rot=a; const w=prEl.querySelector('#prWheelRot'); if(w) w.setAttribute('transform',`rotate(${a.toFixed(2)} ${PR_WC.x} ${PR_WC.y})`) };
+function prSetPos(x,y){ x=Math.max(PR_X[0],Math.min(PR_X[1],x)); y=Math.max(PR_Y[0],Math.min(PR_Y[1],y));
+  { const wx=PR_WC.x, wy=PR_WC.y+8, wr=0, ddx=x-wx, ddy=y-wy, dd=Math.hypot(ddx,ddy); if(dd<wr){ if(dd<.1){ x=wx-wr; y=wy } else { x=wx+ddx/dd*wr; y=wy+ddy/dd*wr } x=Math.max(PR_X[0],Math.min(PR_X[1],x)); y=Math.max(PR_Y[0],Math.min(PR_Y[1],y)) } }   // walk around the wheel, not through it
+  PR.pos[me.id]={x,y}; if(PR.key) ref(`${E}/rooms/${PR.key}/pos/${me.id}`).set({x:+x.toFixed(1),y:+y.toFixed(1)}) }
+function openPartnerRoom(){
+  prOpen=true; prLeaving=0; PR.leaving=0; PR.key=null; prAttach(); PR.cur[me.id]={x:PR_DOOR.x,y:PR_DOOR.y+1,face:1,mv:0};
+  prEl.classList.add('open'); renderPartnerRoom(); prqRender(); prPickerAuto=false; prPickerClose(); prTopicSync(); clearInterval(prTimerId); prTimerTick(); prTimerId=setInterval(prTimerTick,250);
+  const sp=prSpawn(0), sv0=prEl.querySelector('svg');
+  doorSwing(sv0,'prDoorFx',sv0&&sv0.querySelector('#prChars'),true,1);   // the door is already open when you arrive
+  setTimeout(()=>{ if(prOpen&&!PR.leaving) prSetPos(sp.x,sp.y) },450);   // step out and walk to your place beside it
+  setTimeout(()=>{ const s2=prEl.querySelector('svg'); if(prOpen) doorSwing(s2,'prDoorFx',s2&&s2.querySelector('#prChars'),false,500) },1250);   // door swings shut behind you
+  PR.last=performance.now(); cancelAnimationFrame(PR.raf); PR.raf=requestAnimationFrame(prTick);
+}
+function closePartnerRoom(auto){ prOpen=false; prPickerClose(); clearInterval(prTimerId); prTimerTick(); cancelAnimationFrame(PR.raf); prDetach(); prEl.classList.remove('open'); if(auto) toast({body:PD.closedMsg,holdMs:3000}) }
+function leavePartnerRoom(){   // tap the door: you walk to it, it swings open, you step through, it shuts behind you
+  if(prLeaving||!prOpen) return; prLeaving=1; PR.leaving=1;
+  const put=(x,y)=>{ PR.pos[me.id]={x,y}; if(PR.key) ref(`${E}/rooms/${PR.key}/pos/${me.id}`).set(PR.pos[me.id]) };
+  const sv=()=>prEl.querySelector('svg'), ch=()=>{ const q=sv(); return q&&q.querySelector('#prChars') };
+  put(PR_DOOR.x,PR_DOOR.y);
+  const t0=performance.now();
+  (function w(){ const c=PR.cur[me.id], near=c&&Math.hypot(c.x-PR_DOOR.x,c.y-PR_DOOR.y)<1.5;
+    if(near||performance.now()-t0>3000){
+      doorSwing(sv(),'prDoorFx',ch(),true,600,()=>{
+        put(PR_DOOR.x,PR_DOOR.y-3);   // step into the doorway
+        setTimeout(()=>{ const g=prEl.querySelector('.prc.me'); if(g){g.style.transition='opacity .25s';g.style.opacity=0}
+          setTimeout(()=>doorSwing(sv(),'prDoorFx',ch(),false,450,()=>{ prLeaving=0; PR.leaving=0; closePartnerRoom(); placeAtDoor() }),260) },420) });
+      return }
+    requestAnimationFrame(w) })();
+}
+/* the question card at the bottom: one shared question for the whole group, with back / next through the spins so far */
+const prHist=()=>Object.keys(PR.log).map(k=>({k,i:PR.log[k].i,t:PR.log[k].t,q:PR.log[k].q,ts:PR.log[k].ts||0})).sort((a,b)=>a.ts-b.ts);
+const prTopicName=k=>k===TOPIC_MIX?CONFIG.topicMixLabel:((TOPICS.find(t=>t.key===k)||{}).name||'');
+const prQText=v=>{ if(!v) return null; const t=TOPICS.find(x=>x.key===v.t); return (t&&t.q[v.q])||null };
+function prqEye(at,n,tk){
+  const names=(window.myPartners||[]).map(p=>String(p.name||'').split(' ')[0]).filter(Boolean), who=names.length?names.join(' or '):'your partner';
+  return 'Ask '+who+' a question'+(n>1?' · '+(at+1)+'/'+n:'');
+}
+function prqRender(){
+  const eye=$('prqEye'), tx=$('prqText'), pn=$('prPanel'); if(!eye||!prOpen||PR.spinning) return;
+  const v=PR.view&&PR.view.k?PR.view:null, h=prHist(), at=v?h.findIndex(x=>x.k===v.k):-1;
+  $('prqBack').disabled=!(at>0); $('prqNext').disabled=!(at>=0&&at<h.length-1);
+  $('prqBack').style.visibility=$('prqNext').style.visibility=(h.length>1)?'visible':'hidden';
+  const key=v?v.k:null; if(PR.shown===key){ if(v) eye.textContent=prqEye(at,h.length,v.t); return }
+  const first=PR.shown===undefined; PR.shown=key;
+  if(!v||!prQText(v)){ eye.textContent=''; tx.className='prq-text ph'; tx.textContent=PR.topic?'Tap the wheel to see your question…':'Pick a topic to get started…'; return }
+  if(first){ eye.textContent=prqEye(at,h.length,v.t); tx.className='prq-text'; tx.textContent=prQText(v); return }
+  tx.classList.add('swap'); pn.classList.add('flash');
+  setTimeout(()=>{ if(PR.shown!==key) return; eye.textContent=prqEye(prHist().findIndex(x=>x.k===key),prHist().length,v.t); tx.textContent=prQText(v); tx.className='prq-text' },220);
+  setTimeout(()=>pn.classList.remove('flash'),700);
+}
+function prGo(dir){
+  if(PR.spinning||!PR.view) return;
+  const h=prHist(), at=h.findIndex(x=>x.k===PR.view.k), to=h[at+dir]; if(!to) return;
+  PR.view={k:to.k,i:to.i,t:to.t,q:to.q,ts:Math.max(Date.now(),PR.view.ts+1),spin:0}; prRot(-(to.i*PR_SEG)); prqRender(); if(PR.key) ref(`${E}/rooms/${PR.key}/view`).set(PR.view);
+}
+$('prqBack').onclick=()=>prGo(-1); $('prqNext').onclick=()=>prGo(1);
+/* spinning: any of you can tap the wheel; the result is drawn once and written for everyone, so all screens land on the same slice */
+function prSpin(){
+  if(PR.spinning||prLeaving) return;
+  if(!PR.topic){ prPickerOpen(); return }   // no topic yet: choose one first
+  const h=prHist(), cand=[];
+  TOPICS.forEach(t=>{ if(PR.topic===TOPIC_MIX||PR.topic===t.key) t.q.forEach((_,q)=>cand.push({t:t.key,q})) });
+  if(!cand.length) return;
+  const seen=new Set(h.map(x=>x.t+':'+x.q)), last=h.length?h[h.length-1]:null;
+  let pool=cand.filter(c=>!seen.has(c.t+':'+c.q));   // no repeats until the topic has been used up, then it starts over
+  if(!pool.length) pool=cand.filter(c=>!(last&&last.t===c.t&&last.q===c.q));
+  if(!pool.length) pool=cand;
+  const pick=pool[Math.floor(Math.random()*pool.length)], i=Math.floor(Math.random()*PR_N);   // the wheel slice is just for show
+  const ts=Date.now(), k=ts+'_'+String(me.id).replace(/[.#$\[\]\/]/g,'_'), v={k,i,t:pick.t,q:pick.q,ts,spin:1,by:me.id};
+  PR.log[k]={i,t:pick.t,q:pick.q,ts,by:me.id}; PR.view=v;
+  prSpinAnim(v);   // mark as spinning first, so the question stays hidden until the wheel lands
+  if(PR.key){ ref(`${E}/rooms/${PR.key}/log/${k}`).set({i,t:pick.t,q:pick.q,ts,by:me.id}); ref(`${E}/rooms/${PR.key}/view`).set(v) }
+}
+function prSpinAnim(v){
+  if(PR.spinning&&PR.animTs===v.ts) return;
+  PR.spinning=1; PR.animTs=v.ts; PR.view=v;
+  { const tx=$('prqText'), ey=$('prqEye'); if(tx){ tx.className='prq-text ph'; tx.textContent='Spinning…' } if(ey) ey.textContent=''; PR.shown=null }
+  const r0=PR.rot, jit=(((v.ts%97)/97)-.5)*PR_SEG*.5, base=-(v.i*PR_SEG)+jit, r1=r0+360*4+(((base-r0)%360)+360)%360, D=3600, t0=performance.now();
+  let lastSeg=Math.floor(-r0/PR_SEG), w=prEl.querySelector('#prWheel'); if(w) w.classList.add('spin');
   (function f(now){
-    const k=Math.min(1,(now-t0)/D), x=cx+(tx-cx)*k, y=fy+(ty-fy)*k-Math.abs(Math.sin(k*Math.PI*5))*2, sc=1-.45*k;
-    m.setAttribute('transform',`translate(${x} ${y}) scale(${sc}) translate(${-cx} ${-fy})`);
+    if(!prOpen){ PR.spinning=0; return }
+    const k=Math.min(1,(now-t0)/D), e=1-Math.pow(1-k,3), a=r0+(r1-r0)*e; prRot(a);
+    { const ph=((((a-PR_SEG/2)/PR_SEG)%1)+1)%1, pt=prEl.querySelector('#prPtr'); if(pt) pt.setAttribute('transform',`rotate(${(-ph*ph*22).toFixed(1)} ${PR_WC.x} ${PR_WC.y-PR_WC.r-7})`) }   // the pointer gets pushed by each peg, then snaps back
+    const sg=Math.floor(-a/PR_SEG); if(sg!==lastSeg){ lastSeg=sg; try{ icBeep(420+(sg%3)*60,.03,'square') }catch(e){} }
     if(k<1) return requestAnimationFrame(f);
-    m.style.transition='opacity .25s'; m.style.opacity=0;   // steps through the door
-    setTimeout(()=>{ prLeaving=0; closePartnerRoom(); placeAtDoor() },300);
+    PR.spinning=0; prRot(-(v.i*PR_SEG)+jit); const ww=prEl.querySelector('#prWheel'); if(ww) ww.classList.remove('spin');
+    try{ icBeep(660,.07,'triangle'); setTimeout(()=>icBeep(990,.1,'triangle'),90) }catch(e){}
+    prLandFx(v.i);
+    prqRender();
   })(t0);
 }
-$('prScene').onclick=e=>{ if(e.target.closest('#prDoor')) leavePartnerRoom() };
+/* when the wheel lands: the winning slice flashes, the rim studs blink, the pointer wobbles to a stop and sparkles burst out */
+function prLandFx(i){
+  const svg=prEl.querySelector('svg'); if(!svg) return;
+  const {x:cx,y:cy,r}=PR_WC, rot=prEl.querySelector('#prWheelRot'), wh=prEl.querySelector('#prWheel'), NS='http://www.w3.org/2000/svg';
+  if(rot){ const a0=i*PR_SEG-PR_SEG/2, a1=i*PR_SEG+PR_SEG/2, P=a=>[(cx+r*Math.sin(a*Math.PI/180)).toFixed(2),(cy-r*Math.cos(a*Math.PI/180)).toFixed(2)], p0=P(a0), p1=P(a1);
+    rot.insertAdjacentHTML('beforeend',`<path class="prwin" d="M${cx} ${cy}L${p0[0]} ${p0[1]}A${r} ${r} 0 0 1 ${p1[0]} ${p1[1]}Z" fill="#fff" stroke="#ffe14a" stroke-width="1.4" pointer-events="none"/>`);
+    setTimeout(()=>{ rot.querySelectorAll('.prwin').forEach(e=>e.remove()) },2600) }
+  if(wh){ wh.classList.add('win'); setTimeout(()=>wh.classList.remove('win'),2200) }
+  const pt=prEl.querySelector('#prPtr'), t0=performance.now();
+  (function wob(now){ const t=(now-t0)/1000; if(!pt||t>.9||!prOpen){ if(pt) pt.removeAttribute('transform'); return }
+    pt.setAttribute('transform',`rotate(${(-9*Math.exp(-t*5)*Math.cos(t*20)).toFixed(2)} ${cx} ${cy-r-7})`); requestAnimationFrame(wob) })(t0);
+  let g=svg.querySelector('#prFx'); if(g) g.remove(); g=document.createElementNS(NS,'g'); g.id='prFx'; g.setAttribute('pointer-events','none'); svg.appendChild(g);
+  const COLS=['#ff7ab0','#1cc3ff','#ffc21a','#b13bff','#ffffff'];
+  const ps=Array.from({length:24},(_,n)=>{ const ang=Math.random()*Math.PI*2, sp=18+Math.random()*34; return {x:cx,y:cy-r*.2,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp-14,s:1+Math.random()*1.4,c:COLS[n%COLS.length],plus:n%3===0} });
+  g.innerHTML=ps.map(p=>p.plus?`<g><rect width="${p.s*3}" height="${p.s}" x="${-p.s*1.5}" y="${-p.s/2}" fill="${p.c}"/><rect width="${p.s}" height="${p.s*3}" x="${-p.s/2}" y="${-p.s*1.5}" fill="${p.c}"/></g>`:`<rect width="${p.s}" height="${p.s}" x="${-p.s/2}" y="${-p.s/2}" fill="${p.c}"/>`).join('');
+  const els=[...g.children], T0=performance.now();
+  (function sp(now){ const t=(now-T0)/1000; if(t>1.1||!prOpen){ g.remove(); return }
+    els.forEach((e,n)=>{ const p=ps[n], x=p.x+p.vx*t, y=p.y+p.vy*t+60*t*t; e.setAttribute('transform',`translate(${x.toFixed(2)} ${y.toFixed(2)})`); e.setAttribute('opacity',Math.max(0,1-t/1.1).toFixed(2)) });
+    requestAnimationFrame(sp) })(T0);
+}
+/* moving characters: smooth walk towards each person's target, bobbing, facing the way they go, drawn back-to-front */
+function prTick(now){
+  if(!prOpen) return; const dt=Math.min(.1,(now-PR.last)/1000); PR.last=now;
+  const layer=prEl.querySelector('#prChars'); if(layer){
+    const grp=prGroup(), order=[];
+    grp.forEach((p,i)=>{
+      let el=layer.querySelector('[data-id="'+p.id+'"]'), c=PR.cur[p.id];
+      const tg=PR.pos[p.id]||(p.id===me.id?PR.cur[p.id]:prSpawn(i))||prSpawn(i);
+      if(!c){ c=PR.cur[p.id]={x:tg.x,y:tg.y,face:1,mv:0} }
+      const dx=tg.x-c.x, dy=tg.y-c.y, d=Math.hypot(dx,dy), step=48*dt;
+      if(d>.2){ const k=Math.min(1,step/d); c.x+=dx*k; c.y+=dy*k; c.mv=1; if(Math.abs(dx)>.3) c.face=dx>0?1:-1 } else { c.mv=0 }
+      if(!el){
+        const mine=p.id===me.id, W=16*PR_S, H=23*PR_S;
+        layer.insertAdjacentHTML('beforeend',`<g class="prc${mine?' me':''}" data-id="${esc(p.id)}"><g class="prcb"><svg x="${-W/2}" y="${-H}" width="${W}" height="${H}" viewBox="0 0 16 23" overflow="visible">${R(spriteRects(p.look||DEFLOOK))}</svg></g>`
+          +(mine?`<path d="M-3 ${-H-5}h6l-3 3.4z" fill="#ffdd00" stroke="#15121a" stroke-width=".5"/>`:'')
+          +`<text y="5.2" text-anchor="middle" font-size="4.4" font-weight="700" font-family="Trebuchet MS,sans-serif" fill="#fff" stroke="#15121a" stroke-width="1.2" paint-order="stroke">${esc(String(p.name||'').slice(0,9))}</text></g>`);
+        el=layer.querySelector('[data-id="'+p.id+'"]');
+      }
+      const bob=c.mv?-Math.abs(Math.sin(now/90))*1.1:0;
+      el.setAttribute('transform',`translate(${c.x.toFixed(2)} ${c.y.toFixed(2)})`);
+      el.firstChild.setAttribute('transform',`translate(0 ${bob.toFixed(2)}) scale(${c.face} 1)`);
+      order.push([c.y,el]);
+    });
+    layer.querySelectorAll('.prc').forEach(el=>{ if(!grp.some(p=>String(p.id)===el.dataset.id)) el.remove() });   // someone left the group
+    order.sort((a,b)=>a[0]-b[0]).forEach(([,el],k)=>{ if(layer.children[k]!==el) layer.insertBefore(el,layer.children[k]||null) });
+  }
+  PR.raf=requestAnimationFrame(prTick);
+}
+/* ---------- WALL CLOCK in the pairs room: a little pixel LED clock. Counts down the host's timer (red); with no timer running it just tells the time (amber). ---------- */
+let prTimerId=0;
+const PR_DIG=['111101101101111','010110010010111','111001111100111','111001111001111','101101111001001','111100111001111','111100111101111','111001001001001','111101111101111','111101111001111'];
+const PR_CLK={x:31,y:9};
+function prClockSVG(){
+  return `<g id="prClock" transform="translate(${PR_CLK.x} ${PR_CLK.y})" shape-rendering="crispEdges"><rect x="-2" y="-2" width="35" height="19" fill="#ff3b3b" fill-opacity=".08"/><rect x="1" y="16" width="31" height="1" fill="#000" fill-opacity=".28"/>`
+    +`<rect width="31" height="15" fill="#15121a"/><rect x="1" y="1" width="29" height="13" fill="#5b4a66"/><rect x="1" y="1" width="29" height="1" fill="#9a88a8"/><rect x="1" y="1" width="1" height="13" fill="#9a88a8"/><rect x="29" y="2" width="1" height="12" fill="#3a2f45"/><rect x="2" y="13" width="28" height="1" fill="#3a2f45"/>`
+    +`<rect x="3" y="3" width="25" height="9" fill="#1a0508"/><g id="prClockD"></g></g>`;
+}
+function prClockDraw(chars,colon,col){
+  const g=prEl.querySelector('#prClockD'); if(!g) return;
+  const X=[7,11,17,21], OFF='#3a0c12'; let o='';
+  chars.forEach((ch,k)=>{ const lit=PR_DIG[ch];
+    for(let p=0;p<15;p++){ if(PR_DIG[8][p]==='1') o+=`<rect x="${X[k]+p%3}" y="${5+Math.floor(p/3)}" width="1" height="1" fill="${lit[p]==='1'?col:OFF}"/>` } });
+  const c=colon?col:OFF; o+=`<rect x="15" y="6" width="1" height="1" fill="${c}"/><rect x="15" y="8" width="1" height="1" fill="${c}"/>`;
+  g.innerHTML=o;
+}
+function prTimerTick(){
+  if(!prOpen) return; const end=window.__fEnd||null, now=Date.now();
+  if(end){
+    const left=end-now;
+    if(left<=0){ prClockDraw([0,0,0,0],Math.floor(now/500)%2===0,'#ff3b3b'); return }   // time's up: 00:00 blinks
+    const t=Math.ceil(left/1000), m=Math.min(99,Math.floor(t/60)), sc=t%60;
+    prClockDraw([Math.floor(m/10),m%10,Math.floor(sc/10),sc%10],true,left<60000?'#ff8a3c':'#ff3b3b');
+  }else{
+    const d=new Date(), h=d.getHours(), mi=d.getMinutes();
+    prClockDraw([Math.floor(h/10),h%10,Math.floor(mi/10),mi%10],Math.floor(now/1000)%2===0,'#ffc21a');
+  }
+}
+/* ---------- TOPIC PICKER: choose a topic (or Surprise me / Mix), switch any time; the choice is shared with your partner ---------- */
+let prPickerAuto=false;
+function prTopicSync(fromDb){
+  const b=$('prTopicBtn'); if(!b) return;
+  b.innerHTML=PR.topic?('<small>Topic</small><span>'+esc(prTopicName(PR.topic))+'</span>'):'<small>Start here</small><span>Pick a topic</span>';
+  b.classList.toggle('none',!PR.topic);
+  if(PR.topic===undefined) return;
+  if(fromDb&&PR.topic&&prPickerIsOpen()&&prPickerAuto) prPickerClose();   // your partner picked first: you're both set
+  if(!PR.topic&&prOpen&&!prPickerAuto) { prPickerAuto=true; setTimeout(()=>{ if(prOpen&&!PR.topic&&!PR.leaving) prPickerOpen(true) },900) }   // first time in: ask
+  prqRender();
+}
+const prPickerIsOpen=()=>$('prPicker').classList.contains('open');
+const PK_COL=['#ffdd00','#ff3399','#1cc3ff','#b13bff','#35e06a','#ff8a3c','#7fa6d6','#ff6b6b'];
+const pkFolder=c=>`<svg viewBox="0 0 16 13"><rect width="7" height="3" fill="#000"/><rect y="2" width="16" height="11" fill="#000"/><rect x="1" y="1" width="5" height="2" fill="${c}"/><rect x="1" y="3" width="14" height="9" fill="${c}"/><rect x="1" y="3" width="14" height="1" fill="#fff" fill-opacity=".55"/><rect x="1" y="11" width="14" height="1" fill="#000" fill-opacity=".28"/></svg>`;
+const pkDie='<svg viewBox="0 0 7 7"><rect width="7" height="7" fill="#000"/><rect x="1" y="1" width="5" height="5" fill="#fff"/><rect x="2" y="2" width="1" height="1" fill="#000"/><rect x="4" y="4" width="1" height="1" fill="#000"/><rect x="4" y="2" width="1" height="1" fill="#000"/><rect x="2" y="4" width="1" height="1" fill="#000"/></svg>';
+const pkStack='<svg viewBox="0 0 7 7"><rect width="5" height="1" fill="#000"/><rect width="1" height="5" fill="#000"/><rect x="1" y="1" width="3" height="3" fill="#ff3399"/><rect x="2" y="2" width="5" height="1" fill="#000"/><rect x="2" y="2" width="1" height="5" fill="#000"/><rect x="3" y="3" width="3" height="3" fill="#1cc3ff"/><rect x="2" y="6" width="5" height="1" fill="#000"/><rect x="6" y="2" width="1" height="5" fill="#000"/></svg>';
+function prPickerOpen(auto){
+  const el=$('prPicker'), cur=PR.topic;
+  el.querySelector('.pk-title').textContent=CONFIG.topicsTitle||'Pick a topic';
+  el.querySelector('.pk-sub').textContent=CONFIG.topicsSub||'';
+  $('pkX').style.display=cur?'':'none';
+  $('pkList').innerHTML=TOPICS.map((t,n)=>`<button type="button" class="pk-it${cur===t.key?' on':''}" data-t="${esc(t.key)}" title="${esc(t.sub||'')}">${pkFolder(PK_COL[n%PK_COL.length])}<b>${esc(t.name)}</b></button>`).join('');
+  $('pkExtra').innerHTML=`<button type="button" class="pk-btn${cur===TOPIC_MIX?' on':''}" data-t="${TOPIC_MIX}">${pkStack}<span>${esc(CONFIG.topicMixLabel)}</span></button><button type="button" class="pk-btn" data-t="__rnd">${pkDie}<span>${esc(CONFIG.topicRandomLabel)}</span></button>`;
+  el.classList.add('open'); prPickerAuto=!!auto||prPickerAuto;
+}
+function prPickerClose(){ $('prPicker').classList.remove('open') }
+function prSetTopic(k){
+  if(k==='__rnd'){ const o=TOPICS.filter(t=>t.key!==PR.topic); k=(o.length?o:TOPICS)[Math.floor(Math.random()*(o.length||TOPICS.length))].key }
+  if(!k) return;
+  PR.topic=k; prTopicSync(); prPickerClose();
+  if(PR.key) ref(`${E}/rooms/${PR.key}/topic`).set(k);
+  setTimeout(()=>{ if(prOpen&&!PR.spinning&&!prLeaving) prSpin() },250);   // draw a first question from it straight away
+}
+$('prTopicBtn').onclick=()=>prPickerOpen();
+$('pkX').onclick=prPickerClose;
+$('pkList').onclick=$('pkExtra').onclick=e=>{ const b=e.target.closest('.pk-it,.pk-btn'); if(b) prSetTopic(b.dataset.t) };
+prEl.addEventListener('click',e=>{
+  if(!prOpen||prLeaving||e.target.closest('#prPanel,#prTopicBtn,#prPicker')) return;
+  if(e.target.closest('#prDoor')){ leavePartnerRoom(); return }
+  if(e.target.closest('#prWheel')){ prSpin(); return }
+  const svg=prEl.querySelector('svg'); if(!svg) return;
+  const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; const q=pt.matrixTransform(svg.getScreenCTM().inverse());
+  prSetPos(q.x,q.y);   // tap the floor: walk there
+});
+
 /* ---------- INTERCOM: tap the door, type the one shared code, get in. Remembered per guest, so it's only asked once. ---------- */
 const doorKey='tpl_door_'+CONFIG.eventId;
 const doorOk=()=>!!me&&localStorage.getItem(doorKey)===me.id;
@@ -2279,7 +2775,7 @@ function tryCode(){
   if(v===norm(PD.code)){
     try{localStorage.setItem(doorKey,me.id)}catch(e){}
     m.textContent=PD.intercomOk; m.className='icmsg ok'; $('icLed').className='icled ok'; if(SFX.ready())SFX.icOk(); else{icBeep(880,.12); setTimeout(()=>icBeep(1320,.2),130)} if(navigator.vibrate) navigator.vibrate([60,40,120]);
-    setTimeout(()=>{ closeIntercom(); openPartnerRoom() },900);
+    setTimeout(()=>{ closeIntercom(); walkToDoor(()=>openDoorThen(openPartnerRoom)) },900);
   }else{
     m.textContent=PD.intercomWrong; m.className='icmsg bad'; $('icLed').className='icled bad'; if(SFX.ready())SFX.icBad(); else icBeep(150,.35,'sawtooth'); if(navigator.vibrate) navigator.vibrate(200);
     const u=icEl.querySelector('.icunit'); u.classList.remove('shake'); void u.offsetWidth; u.classList.add('shake'); $('icIn').select();
@@ -2290,36 +2786,57 @@ icEl.onclick=e=>{if(e.target===icEl){SFX.icClose();closeIntercom()}};
 function fitPR(){ const s=prEl.querySelector('svg'),r=prEl.getBoundingClientRect(); if(!s||!r.width||!r.height)return;
   const ar=r.width/r.height,W=Math.max(120,150*ar),H=Math.max(150,120/ar); s.setAttribute('viewBox',`${60-W/2} ${75-H/2} ${W} ${H}`) }
 addEventListener('resize',()=>{if(prOpen)fitPR()});
+function prWheelSVG(){
+  const {x:cx,y:cy,r}=PR_WC, N=PR_N, COL=['#1cc3ff','#b13bff'], P=(a,rr)=>[(cx+rr*Math.sin(a*Math.PI/180)).toFixed(2),(cy-rr*Math.cos(a*Math.PI/180)).toFixed(2)];
+  let seg='', pegs='';
+  for(let k=0;k<N;k++){ const a0=k*PR_SEG-PR_SEG/2, a1=k*PR_SEG+PR_SEG/2, p0=P(a0,r), p1=P(a1,r);
+    seg+=`<path d="M${cx} ${cy}L${p0[0]} ${p0[1]}A${r} ${r} 0 0 1 ${p1[0]} ${p1[1]}Z" fill="${COL[k%2]}" stroke="#5b17a8" stroke-width=".9"/>`;
+    seg+=`<g transform="rotate(${k*PR_SEG} ${cx} ${cy}) translate(${cx-2.5} ${cy-r*.74-2.5})">${R([[0,0,5,5,'#ffc21a'],[0,0,5,1,'#fff27a'],[0,0,1,5,'#fff27a'],[4,1,1,4,'#e08a00'],[1,4,4,1,'#e08a00']])}</g>`;
+    const q=P(a0,r+1.5); pegs+=`<rect class="prpeg" x="${(q[0]-1).toFixed(2)}" y="${(q[1]-1).toFixed(2)}" width="2" height="2" fill="#ffe14a"/>` }
+  return `<g id="prWheel" style="cursor:pointer"><circle class="prglow" cx="${cx}" cy="${cy}" r="${r+7}" fill="#ff7a9a" opacity=".3"/>`
+    +`<circle cx="${cx}" cy="${cy}" r="${r+4.2}" fill="#2a0a18"/><circle cx="${cx}" cy="${cy}" r="${r+3.6}" fill="#ff7a9a"/><circle cx="${cx}" cy="${cy}" r="${r+2.6}" fill="#d4143c"/>`
+    +`<g id="prWheelRot" transform="rotate(${PR.rot.toFixed(2)} ${cx} ${cy})">${seg}${pegs}</g>`
+    +`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#d4143c" stroke-width="1"/>`
+    +`<circle cx="${cx}" cy="${cy}" r="6" fill="#ffc21a" stroke="#d98a00" stroke-width="1"/><rect x="${cx-3.4}" y="${cy-3.4}" width="4" height="4" fill="#fff27a"/><rect x="${cx-1}" y="${cy-1}" width="3.6" height="3.6" fill="#e08a00" fill-opacity=".6"/>`
+    +`<g id="prPtr"><path d="M${cx-5.5} ${cy-r-7}h11l-5.5 10z" fill="#ffc21a" stroke="#8a5a00" stroke-width=".9"/><rect x="${cx-3}" y="${cy-r-6}" width="6" height="2" fill="#fff27a"/></g>`
+    +`<circle cx="${cx}" cy="${cy}" r="${r+4}" fill="#000" fill-opacity="0"/></g>`;
+}
 function renderPartnerRoom(){
-  if(prLeaving) return;
-  const mine=(window.myPartners||[]).map(p=>guests.find(g=>g.id===p.id)||p), grp=[{...me,mine:1},...mine], n=grp.length, found=mine.length>0;
-  const sc=n<=2?2.4:n===3?2:1.6, gap=8, x0=60-(n*16*sc+(n-1)*gap)/2, px='style="font-family:var(--px)"';
+  if(!prOpen) return; prAttach();
   const W=(x,y,w,h,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
-  const T=(x,y,s,c,t,ex='')=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="${s}" fill="${c}" ${ex}>${esc(t)}</text>`;
-  let o=`<defs><pattern id="prwall" width="16" height="8" patternUnits="userSpaceOnUse">${W(0,0,16,8,'#5b3f8c')}${W(0,0,8,8,'#654699')}</pattern></defs>`
-   +W(-600,-600,1320,688,'url(#prwall)')+`<rect x="-600" y="88" width="1320" height="662" fill="url(#pw2)"/>`+W(-600,85,1320,3,'#2f1f4d')
-   +R(Array.from({length:19},(_,i)=>[2+i*6.4,3+(i%2)*2,2,2,i%3?'#ffd66b':'#ff9ab8']))
-   +W(34,12,76,40,'#c0c0c0')+W(35,13,74,7,'#000080')+T(72,18.3,3.6,'#fff','partners.exe',px)+W(38,23,68,24,'#fff')
-   +T(72,31,6,found?'#d62a6b':'#808080',found?PD.found:PD.none,px)+T(72,37.5,3.4,'#303030',found?(n>2?PD.foundGroup:PD.foundPair):PD.noneSub,px)
-   +W(42,40,60,4,'#808080')+W(43,41,found?58:6,2,'#000080')
-   +`<g id="prDoor" style="cursor:pointer">${R(DOOR_RECTS)}<rect x="2" y="38" width="34" height="58" fill="#000" fill-opacity="0"/></g>`
-   +R([[40,62,72,14,'#2e8a8a'],[36,74,80,12,'#3aa3a3'],[34,68,8,18,'#2e8a8a'],[108,68,8,18,'#2e8a8a'],[76,74,1,12,'#2e8a8a'],
-       [108,78,10,10,'#c46e50'],...OV(113,70,7,9,'#3f8a52'),
-       ...OV(60,127,52,14,'#d65a7a'),...OV(60,126,48,12,'#f7b8cb'),...OV(60,126,40,9,'#d65a7a')])
-   +[[10,26],[104,22],[102,54],[40,54]].map(([x,y],i)=>`<g class="prheart" style="animation-delay:${i*.6}s">${R(HEART(x,y,i%2?'#ff9ab8':'#ffd0e0'))}</g>`).join('');
-  grp.forEach((p,i)=>{
-    const cx=x0+i*(16*sc+gap)+8*sc, top=130-23*sc, c=p.mine?['YOU','#ffdd00','#000',14]:['PARTNER','#ff3399','#fff',22];
-    o+=(p.mine?`<g id="prMe" data-cx="${cx}">`:'')+`<g class="prbob" style="animation-delay:${i*.3}s"><svg x="${cx-8*sc}" y="${top}" width="${16*sc}" height="${23*sc}" viewBox="0 0 16 23" overflow="visible">${R(spriteRects(p.look||DEFLOOK))}</svg></g>`
-      +W(cx-c[3]/2,top-8,c[3],6,c[1])+T(cx,top-3.4,3.4,c[2],c[0],px)
-      +T(cx,136,4.8,'#fff',String(p.name||'').slice(0,12),'font-weight="700" stroke="#15121a" stroke-width="1.3" paint-order="stroke" font-family="Trebuchet MS,sans-serif"')
-      +(p.mine?'</g>':'');
-  });
+  let o=`<defs><pattern id="prwall" width="16" height="16" patternUnits="userSpaceOnUse">${W(0,0,16,16,'#43237a')}${W(0,0,8,16,'#4b2a86')}${W(7,6,2,2,'#6a45b0')}${W(0,0,1,16,'#38196a')}</pattern><pattern id="prfloor" width="16" height="8" patternUnits="userSpaceOnUse">${W(0,0,16,8,'#7a2150')}${W(0,0,8,4,'#8c2a5e')}${W(8,4,8,4,'#8c2a5e')}${W(0,0,16,1,'#a23c72')}</pattern></defs>`
+   +W(-600,-600,1320,688,'url(#prwall)')+`<rect x="-600" y="88" width="1320" height="662" fill="url(#prfloor)"/>`+W(-600,72,1320,12,'#33165c')+W(-600,72,1320,2,'#ff7a9a')+W(-600,84,1320,4,'#5a1f6e')+W(-600,84,1320,1,'#ffc21a')
+   +W(-600,0,1320,8,'#2a1048')+W(-600,8,1320,1,'#ffc21a')+R(Array.from({length:20},(_,i)=>[i*6.4+1,3,2,2,['#ff7a9a','#1cc3ff','#ffc21a','#b13bff'][i%4]]))
+   +`<g id="prDoor" style="cursor:pointer">${R(DOOR_RECTS)}<rect x="2" y="38" width="34" height="58" fill="#000" fill-opacity="0"/></g>`+prClockSVG()
+   +`<g transform="translate(12 0)">`+R([[63,88,14,9,'#6a0f2e'],[63,88,3,9,'#4a0820'],[72,88,5,9,'#7a1236'],[59,96,22,3,'#8f1535'],[55,99,30,3,'#a01a3c'],[51,102,38,3,'#b81d45'],[49,105,42,3,'#ff6b8e'],[49,108,42,1,'#6a0f2e']])+`</g>`
+   +prWheelSVG()
+   +`<g id="prChars"></g>`
+   /* the wheel sits behind everyone: tap it to spin */
+   +`<g transform="translate(8 10) scale(1.4)"><g class="prbob">`+R([[4,0,1,1,'#f3efe6'],[3,1,3,1,'#f3efe6'],[3,2,3,1,'#f3efe6'],[0,3,9,1,'#f3efe6'],[1,4,7,1,'#f3efe6'],[2,5,5,1,'#f3efe6'],[2,6,5,1,'#f3efe6'],[1,7,2,1,'#f3efe6'],[6,7,2,1,'#f3efe6'],[0,8,2,1,'#f3efe6'],[7,8,2,1,'#f3efe6'],[3,4,1,1,'#2a2a38'],[5,4,1,1,'#2a2a38'],[4,5,1,1,'#f0a6c8'],[7,2,1,1,'#ffe29a'],[1,5,1,1,'#9fd6ff']])+`</g></g>`;
   $('prScene').innerHTML=`<svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 120 150">${o}</svg>`; fitPR();
 }
 const returning=sessionStorage.getItem('tpl_ret')==='1'; sessionStorage.removeItem('tpl_ret');   // coming back from a room page skips the intro
+/* second visit and later: the SASHA’S HOUSE loading screen (no START GAME), a different load every time, and it never hangs on 99%. Then the room opens. */
+function retLoad(done){
+  const ld=$('loadScreen');
+  if(!ld||matchMedia('(prefers-reduced-motion:reduce)').matches){ done(); return }
+  document.body.appendChild(ld); ld.style.cssText='position:fixed;inset:0;z-index:10001;display:flex';
+  const blocks=ld.querySelectorAll('#loadBar i'), lp=$('loadPct');
+  const setLoad=n=>{ lp.textContent='loading '+n+'%'; const on=n>=100?10:Math.floor(n/10); blocks.forEach((b,k)=>b.classList.toggle('on',k<on)) };
+  setLoad(0);
+  let n=0,t=150,hangs=Math.random()<.5?1:2; const seq=[];
+  while(n<100){
+    n=Math.min(100,n+3+Math.floor(Math.random()*19)); if(n>=95) n=100;   // jump straight to 100, never sit on 99
+    t+=60+Math.random()*190;
+    if(hangs>0&&n>15&&n<85&&Math.random()<.3){ t+=300+Math.random()*600; hangs-- }   // a little hiccup somewhere in the middle
+    seq.push([n,t]);
+  }
+  seq.forEach(([v,ms])=>setTimeout(()=>setLoad(v),ms));
+  setTimeout(()=>{ ld.classList.add('gone'); done(); setTimeout(()=>ld.remove(),1000) },t+450);
+}
 const announce=()=>ref(`${E}/attendees/${me.id}`).update({...me,...(isHost?{isHost:true}:{}),joinedAt:Date.now()});
 if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in before on this browser: straight to the room
-  announce(); enterLounge();
+  announce(); if(window.__RET) retLoad(enterLounge); else enterLounge();
   if(!isHost) ref(`${E}/kicked/${me.id}`).once('value').then(sn=>{ if(sn.val()){ localStorage.removeItem('tpl_me'); location.reload() } });   // kicked guests start over
 }else{
   if(isHost) $('inName').value=CONFIG.hostName||'Sasha';
@@ -2439,8 +2956,8 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
     tip:px(['..KKKK..','.KWWWWK.','.KKKKKK.','KBBBYBBK','KBBYYYBK','KBBBYBBK','KBBBBBBK','.KKKKKK.']),
     star:px(['....Y....','....Y....','...YYY...','YYYYYYYYY','.YYYYYYY.','..YYYYY..','..YYOYY..','.YYO.OYY.','.YO...OY.'])};
   const dock=document.createElement('div'); dock.id='dock';
-  dock.innerHTML=`<button class="dbtn" data-t="ppl" type="button">${I.ppl}PEOPLE<span class="bd" id="dbd">0</span></button>`
-    +`<button class="dbtn" data-tip type="button">${I.tip}TIP JAR</button>`
+  dock.innerHTML=`<button class="dbtn" data-t="ppl" type="button" style="display:none">${I.ppl}PEOPLE<span class="bd" id="dbd">0</span></button>`
+    +`<button class="dbtn" data-tip type="button" style="width:auto;flex:0 1 auto;min-width:96px;padding:0 8px;text-align:center;line-height:1.3;white-space:nowrap">${I.tip}<span>SUPPORT THE<br>CREATOR</span></button>`
     +`<button class="dbtn" data-t="sasha" id="dbSasha" type="button" style="display:none">${I.star}SASHA</button>`
     +`<button class="dbtn help" data-help type="button" aria-label="Replay the tour">?</button><div id="tray"></div>`;
   const sheet=document.createElement('div'); sheet.id='sheet';
@@ -2521,7 +3038,7 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
     const si=document.getElementById('srch'); if(si){si.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=document.getElementById('srch');n.focus();n.setSelectionRange(pos,pos)}}
   }
   dock.onclick=e=>{const b=e.target.closest('.dbtn'); if(!b) return; if('help' in b.dataset){startTour(true);return}
-    if('tip' in b.dataset){ const u=(CONFIG.tipUrl||'').trim(); if(u) window.open(u,'_blank','noopener'); else toast({title:'Tip jar',body:'The tip jar link is coming soon!',holdMs:2500}); return} const t=b.dataset.t; tab=(tab===t)?null:t; viewing=null; viewMail=null; q=''; render()};
+    if('tip' in b.dataset){ const u=(CONFIG.tipUrl||'').trim(); if(u) window.open(u,'_blank','noopener'); else toast({title:'Donations',body:'The donation link is coming soon!',holdMs:2500}); return} const t=b.dataset.t; tab=(tab===t)?null:t; viewing=null; viewMail=null; q=''; render()};
   sheet.onclick=e=>{
     if(e.target.closest('[data-x]')){tab=null;render();return}
     if(e.target.closest('[data-back]')){viewing=null;render();return}
@@ -2543,9 +3060,7 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
   new MutationObserver(fitRoom).observe(mapEl,{childList:true}); addEventListener('resize',fitRoom); fitRoom();
   /* ---- TOUR: spotlight each part of the screen and say what it's for ---- */
   const STEPS=[
-    {sel:'#mapwrap',t:'THE ROOM',x:'This is the room. Tap the floor to walk around. Tap your character to see your passport, or tap anyone else to see theirs (and their Instagram).'},
-    {sel:'[data-t=ppl]',t:'PEOPLE',x:'Search for anyone here and peek at their passport.'},
-    {sel:'[data-tip]',t:'TIP JAR',x:'Enjoying the night? Leave a tip here.'}
+    {sel:'[data-tip]',t:'DONATIONS',x:'If you enjoy these types of events, you can send a donation. It would help create similar projects in the future.'}
   ];
   let tourOn=null;
   function endTour(){ if(!tourOn) return; tourOn.remove(); tourOn=null; try{localStorage.setItem('tpl_toured','1')}catch(e){} }
@@ -2583,8 +3098,55 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
 </script>
 <style>
 /* ===== PARTNER ROOM ===== */
-#partnerRoom{position:absolute;left:0;right:0;top:0;bottom:calc(var(--dock) + env(safe-area-inset-bottom,0px));z-index:50;display:none;background:#2a1c4a}
+#partnerRoom{position:absolute;left:0;right:0;top:0;bottom:calc(var(--dock) + env(safe-area-inset-bottom,0px));z-index:50;display:none;background:#3b1f6b}
 #partnerRoom.open{display:block;animation:fade .3s}
+#partnerRoom #prPanel{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:34px 22px 12px;text-align:center;background:linear-gradient(180deg,rgba(18,8,33,0) 0%,rgba(18,8,33,.82) 34%,rgba(18,8,33,.96) 100%);color:#f1e8ff;pointer-events:none;transition:box-shadow .3s}
+#prPanel.flash{box-shadow:0 -10px 40px rgba(255,209,102,.3)}
+
+
+/* ===== PAIRS ROOM UI: same Windows-98 / pixel language as the rest of the game. Pixelify Sans for reading, Press Start 2P for tiny labels ===== */
+#partnerRoom{--pix:'Pixelify Sans','Trebuchet MS',system-ui,sans-serif}
+#partnerRoom #prPanel{left:8px;right:8px;bottom:8px;padding:0;text-align:left;background:var(--silver);color:#000;border:2px solid;border-color:var(--raised);outline:1px solid var(--night);box-shadow:3px 3px 0 var(--night)}
+.prq-eye{display:block;padding:5px 8px;min-height:22px;font:400 8px/1.5 var(--px);letter-spacing:.04em;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,var(--navy),#1084d0)}
+.prq-eye:empty::before{content:'QUESTION.exe'}
+.prq-row{display:flex;align-items:stretch;gap:6px;margin:8px 8px 0}
+.prq-text{flex:1;min-width:0;min-height:78px;display:flex;align-items:center;justify-content:center;padding:8px 10px;text-align:center;background:#fffdf6;border:2px solid;border-color:var(--sunken);box-shadow:inset 1px 1px 0 #000;font:600 21px/1.25 var(--pix);letter-spacing:.01em;color:#15121a;text-wrap:balance;transition:opacity .25s}
+.prq-text.ph{font:400 17px/1.35 var(--pix);color:#555}
+.prq-text.swap{opacity:0}
+#prqBack,#prqNext{pointer-events:auto;flex:none;align-self:center;width:30px;height:34px;padding:0;background:var(--silver);color:#000;border:2px solid;border-color:var(--raised);outline:1px solid var(--night);border-radius:0;font:400 10px/1 var(--px);cursor:pointer}
+#prqBack:active,#prqNext:active{border-color:var(--sunken);transform:translate(1px,1px)}
+#prqBack:disabled,#prqNext:disabled{color:#808080;text-shadow:1px 1px 0 #fff;cursor:default}
+.prq-hint{margin:0;padding:5px 8px 7px;font:400 13px/1.25 var(--pix);color:#404040;text-align:center}
+#prTopicBtn{position:absolute;top:12px;left:12px;z-index:3;max-width:calc(100% - 24px);display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:7px 12px 8px 10px;text-align:left;background:var(--silver);color:#000;border:2px solid;border-color:var(--raised);outline:1px solid var(--night);border-radius:0;box-shadow:3px 3px 0 var(--night);cursor:pointer}
+#prTopicBtn small{font:400 7px/1 var(--px);letter-spacing:.08em;text-transform:uppercase;color:var(--navy)}
+#prTopicBtn span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 17px/1.1 var(--pix)}
+#prTopicBtn span::after{content:'';display:inline-block;margin-left:9px;border:4px solid transparent;border-top:5px solid #000;border-bottom:0;vertical-align:2px}
+#prTopicBtn.none{background:var(--navy);color:#ffdd00;animation:prblink 1s steps(2,start) infinite}
+#prTopicBtn.none small{color:#fff}#prTopicBtn.none span::after{border-top-color:#ffdd00}
+@keyframes prblink{50%{filter:brightness(1.35)}}
+#prTopicBtn:active{border-color:var(--sunken);transform:translate(1px,1px);box-shadow:2px 2px 0 var(--night)}
+#prPicker{position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;padding:14px;background:rgba(21,18,26,.84)}
+#prPicker.open{display:flex;animation:fade .2s}
+#prPicker .pk-box{width:100%;max-width:400px;max-height:100%;display:flex;flex-direction:column;background:var(--silver);color:#000;border:2px solid;border-color:var(--raised);outline:1px solid var(--night);box-shadow:4px 4px 0 var(--night)}
+#prPicker .pk-bar{flex:none;display:flex;align-items:center;justify-content:space-between;padding:4px 4px 4px 8px;font:400 8px/1.2 var(--px);letter-spacing:.04em;color:#fff;background:linear-gradient(90deg,var(--navy),#1084d0)}
+#prPicker #pkX{width:18px;height:16px;padding:0 0 1px;display:flex;align-items:center;justify-content:center;font:700 12px/1 var(--pix);color:#000;background:var(--silver);border:2px solid;border-color:var(--raised);border-radius:0;cursor:pointer}
+#prPicker #pkX:active{border-color:var(--sunken)}
+#prPicker .pk-head{flex:none;padding:12px 14px 4px}
+#prPicker .pk-title{font:700 28px/1.05 var(--pix);letter-spacing:.01em;color:#000}
+#prPicker .pk-sub{margin-top:6px;font:400 15px/1.3 var(--pix);color:#404040}
+#prPicker .pk-list{margin:8px 10px 0;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);gap:2px 0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 2px;background:#fff;border:2px solid;border-color:var(--sunken);box-shadow:inset 1px 1px 0 #000}
+#prPicker .pk-it{display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px 3px 6px;background:transparent;border:0;border-radius:0;cursor:pointer;color:#000;font-family:var(--pix)}
+#prPicker .pk-it svg{display:block;width:38px;height:31px;shape-rendering:crispEdges}
+#prPicker .pk-it b{display:block;max-width:100%;padding:1px 3px;font:500 13.5px/1.15 var(--pix);word-break:break-word}
+#prPicker .pk-it:active b,#prPicker .pk-it.on b{background:var(--navy);color:#fff;outline:1px dotted #ffdd00;outline-offset:-1px}
+#prPicker .pk-extra{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
+#prPicker .pk-btn{display:flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:6px 8px;font:600 15px/1.1 var(--pix);color:#000;background:var(--silver);border:2px solid;border-color:var(--raised);outline:1px solid var(--night);border-radius:0;cursor:pointer}
+#prPicker .pk-btn:active,#prPicker .pk-btn.on{border-color:var(--sunken);transform:translate(1px,1px)}
+#prPicker .pk-btn svg{width:14px;height:14px;flex:none;shape-rendering:crispEdges}
+#partnerRoom #prWheel.spin .prglow{animation:none;opacity:.5}
+#partnerRoom .prglow{animation:prglow 2.6s ease-in-out infinite}
+@keyframes prglow{50%{opacity:.12}}
+
 #intercom{position:absolute;left:0;right:0;top:0;bottom:calc(var(--dock) + env(safe-area-inset-bottom,0px));z-index:51;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(21,18,26,.82)}
 #intercom.open{display:flex;animation:fade .2s}
 #intercom .icunit{position:relative;width:100%;max-width:250px;padding:16px 16px 18px;display:flex;flex-direction:column;align-items:stretch;gap:12px;background:linear-gradient(160deg,#cfcfd4,#9a9aa2);border:3px solid #15121a;border-radius:6px;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #6a6a72,5px 5px 0 #15121a}
@@ -2608,10 +3170,16 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
 #intercom .shake{animation:icshake .35s steps(6)}
 @keyframes icshake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 #prScene{position:absolute;inset:0}
-#prScene svg{display:block;width:100%;height:100%;shape-rendering:crispEdges}
+#prScene>svg{display:block;width:100%;height:100%;shape-rendering:crispEdges}
 .prbob{animation:prbob 1.1s steps(1) infinite}
 @keyframes prbob{50%{transform:translateY(-1.2px)}}
 .prheart{animation:prfloat 2.4s steps(6) infinite}
+.prwin{animation:prwinfx .55s ease-in-out 4}
+@keyframes prwinfx{0%,100%{fill-opacity:.05}50%{fill-opacity:.65}}
+#prWheel.win .prpeg{animation:prpeg .25s steps(1) 8}
+@keyframes prpeg{0%{fill:#ffe14a}50%{fill:#fff}100%{fill:#ffe14a}}
+.prbob{animation:prbob 2.4s steps(4) infinite}
+@keyframes prbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @keyframes prfloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-12px);opacity:0}}
 .kickx{margin-left:auto;font:400 7px var(--px);text-decoration:none;color:#fff;background:#c0392b;border:2px solid #15121a;padding:5px 6px;cursor:pointer}
 /* ===== HOST CONTROLS (run-of-show cards, same idea as the Paris file, in this Y2K look) ===== */
@@ -2648,6 +3216,7 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
 #pairEditor{padding-top:6px}
 .pe-g{margin:0 0 8px;padding:6px 8px;background:#fff;border:2px solid;border-color:var(--sunken);outline:1px solid var(--night)}
 .pe-h{font:400 7px/1.4 var(--px);color:#7a2bd6;margin-bottom:4px}
+.pe-add span{color:#7a2bd6;font-weight:700}
 .pe-m{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dotted #b0b0b0;font:700 14px var(--body);color:#000}
 .pe-m:last-child{border-bottom:0}
 .pe-m span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -2665,6 +3234,23 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
 .hc-clock em{font:400 8px/1 var(--px);font-style:normal;color:#5fe08a;text-transform:uppercase}
 .hc-clock.over b,.hc-clock.over em{color:#ff7a7a;animation:hcblink 1s steps(2) infinite}
 @keyframes hcblink{50%{opacity:.25}}
+#charRing button{position:fixed;z-index:9000;width:40px;height:40px;padding:0;border-radius:50%;border:2px solid #15121a;background:#e8e4f4;box-shadow:0 2px 0 #15121a,inset 0 -3px 0 rgba(0,0,0,.12);font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;animation:ringPop .22s cubic-bezier(.2,1.4,.4,1) backwards}
+#charRing button:active{transform:translateY(2px);box-shadow:0 0 0 #15121a}
+@keyframes ringPop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+#floatTimer{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;z-index:9000;pointer-events:none;display:flex;align-items:baseline;gap:6px;padding:7px 12px 9px;border-radius:999px;background:rgba(20,10,38,.58);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(241,232,255,.16);box-shadow:0 2px 10px rgba(0,0,0,.28);color:#f1e8ff;opacity:0;transform:translateY(-6px);transition:opacity .5s ease,transform .5s ease;overflow:hidden}
+#floatTimer.on{opacity:.9;transform:none}
+#floatTimer .ftdot{align-self:center;width:6px;height:6px;border-radius:50%;background:#b894ff;box-shadow:0 0 6px rgba(184,148,255,.8);animation:ftpulse 2.4s ease-in-out infinite}
+#floatTimer .ftt{font:400 11px/1 var(--px);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+#floatTimer .ftl{font:400 9px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:rgba(241,232,255,.55)}
+#floatTimer .ftbar{position:absolute;left:12px;right:12px;bottom:3px;height:2px;border-radius:2px;background:rgba(241,232,255,.12);overflow:hidden;text-decoration:none}
+#floatTimer .ftbar s{display:block;height:100%;width:100%;background:linear-gradient(90deg,#b894ff,#ff9ac8);border-radius:2px;transition:width .3s linear;text-decoration:none}
+#floatTimer.low .ftdot{background:#ffd166;box-shadow:0 0 6px rgba(255,209,102,.8);animation-duration:1s}
+#floatTimer.low .ftt{color:#ffe29a}
+#floatTimer.over .ftdot{background:#ff7a9c;box-shadow:0 0 6px rgba(255,122,156,.8)}
+#floatTimer.over .ftt,#floatTimer.over .ftl{color:#ffb3c6}
+@keyframes ftpulse{50%{opacity:.35;transform:scale(.8)}}
+@media (prefers-reduced-motion:reduce){#floatTimer .ftdot{animation:none}}
+
 /* sticky Now bar (host only) */
 #nextBar{left:6px;right:6px;max-width:460px;margin:0 auto;padding:6px 6px 6px 10px;background:var(--silver);color:#000;border:2px solid;border-color:var(--raised);outline:1px solid var(--night);box-shadow:3px 3px 0 var(--night);gap:8px;z-index:50}
 #nextBar .eyebrow{color:#7a2bd6;font-size:7px}
