@@ -785,13 +785,13 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
 </div>
 
 <!-- SASHA'S NOTE -->
-<div id="noteOv" role="dialog" aria-modal="true" aria-label="Donations">
+<div id="noteOv" role="dialog" aria-modal="true" aria-label="Pay rent">
   <div class="notepaper">
     <i class="tape t1"></i><i class="tape t2"></i>
     <button type="button" class="notex" id="noteX" aria-label="Close">&times;</button>
-    <p class="notehead">Donations</p>
-    <p class="notetext">If you want to fund the production and see similar events in the future, you can leave a donation.</p>
-    <a class="notelink" id="noteDonate" href="https://www.privat24.ua/send/k5bib" target="_blank" rel="noopener">Leave a donation &rarr;</a>
+    <p class="notehead">Pay rent</p>
+    <p class="notetext">Wanna help Sasha organize similar events in the future? Click here to send a <b>donation</b>. (˶ᵔ ᵕ ᵔ˶)</p>
+    <a class="notelink" id="noteDonate" href="https://www.privat24.ua/send/k5bib" target="_blank" rel="noopener">Pay rent &rarr;</a>
   </div>
 </div>
 
@@ -936,7 +936,7 @@ const CONFIG = {
   rooms:[ { key:'cafe', name:'The Internet Floor', short:'Internet Floor', legacy:true } ],
   tv:{ page:'best-liar-in-town.html', title:'BEST LIAR IN TOWN' },   // the TV in the ROOMMATES room (floor 1): tapping it turns it on and opens this page
   tvMain:{ gif:'' },   // the TV in the main room (floor 0) does not open anything; put a gif/image URL here to show it on the screen
-  tipUrl:'https://www.privat24.ua/send/k5bib',   // DONATIONS: paste your donation link here (e.g. 'https://...'). Empty = the button says "coming soon"
+  tipUrl:'https://www.privat24.ua/send/k5bib',   // PAY RENT: paste your payment link here (e.g. 'https://...'). Empty = the button says "coming soon"
   partnerDoor: {   // texts for the partner door + the room behind it
     found:'MATCH FOUND!', foundPair:'say hi to your partner!', foundGroup:'say hi to your group!',
     none:'NO MATCH YET', noneSub:'ask Sasha to pair you up',
@@ -1194,7 +1194,8 @@ const E=`events/${CONFIG.eventId}`;
 /* =====================================================================
    STATE + HELPERS
    ===================================================================== */
-const isHost=new URLSearchParams(location.search).get('host')==='1';
+const isProj=new URLSearchParams(location.search).get('projector')==='1';   // ?projector=1 -> read-only big-screen view of the room
+const isHost=!isProj&&new URLSearchParams(location.search).get('host')==='1';
 let me=JSON.parse(localStorage.getItem('tpl_me')||'null');
 let guests=[];
 const $=id=>document.getElementById(id);
@@ -2184,6 +2185,7 @@ function startWallClock(){
   };
   tick(); _clkT=setInterval(tick,50);
 }
+const ML_LEFT=160;   // extra room to the LEFT of the original room (only visible/walkable on wide screens)
 const ML_RIGHT=250;   // the main room's right edge: the original room is 0..120, the extra part you scroll to is 120..250
 /* ---- MAIN ROOM EXTENSION: lush plant, luxury floor lamp, moonlight through the window (generated pixel art) ---- */
 function pxRuns(rows){ const out=[]; Object.keys(rows).forEach(py=>{ const r=rows[py].sort((p,q)=>p[0]-q[0]); let i=0;
@@ -2288,7 +2290,9 @@ function mainExtSVG(){
   ];
   const lights=moonLight()+luxLamp()+luxLampShade();
   let dim=''; for(let i=0;i<10;i++) dim+=`<rect x="${ML_RIGHT-1-i}" y="-600" width="1" height="1350" fill="rgba(18,5,36,${(.034*(10-i)).toFixed(3)})"/>`;
-  return {art:`<g transform="translate(120 0)">${base(ML_RIGHT-120,150,'pw','url(#wp)',88,'#2f2036','#8a6a40')}</g>`+R(a), dim, lights};
+  let dimL=''; for(let i=0;i<10;i++) dimL+=`<rect x="${-ML_LEFT+i}" y="-600" width="1" height="1350" fill="rgba(18,5,36,${(.034*(10-i)).toFixed(3)})"/>`;
+  dim+=dimL;
+  return {art:`<g transform="translate(${-ML_LEFT} 0)">${base(ML_LEFT,150,'pw','url(#wp)',88,'#2f2036','#8a6a40')}</g><g transform="translate(120 0)">${base(ML_RIGHT-120,150,'pw','url(#wp)',88,'#2f2036','#8a6a40')}</g>`+R(a), dim, lights};
 }
 function buildMap(){
   const rooms=STOPS.filter(s=>s.key==='start'&&ROOMS[s.key]).map(s=>{
@@ -2346,6 +2350,7 @@ const walkers={}, SPEED=30; let wRaf=0, wLast=0, wSc=1;
 const hash=s=>{let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
 const scFor=n=>n<=10?1.45:n<=24?1.15:n<=50?.85:.65;
 function floorBox(sc){const r=ROOMS.start,sw=14*sc,sh=20.1*sc;return{x0:r.x+3,y0:r.y+(r.wh||22)-14,w:r.w-6-sw,h:r.h-3-sh-(r.wh||22)+14,sw,sh}}
+const minNX=b=>Math.min(0,(Math.max(-ML_LEFT+3,(window.__viewX0||0)+3)-b.x0)/b.w);   // 0 on phones; negative on wide screens = walk into the left part
 const maxNX=b=>Math.max(1,(ML_RIGHT-6-b.sw-b.x0)/b.w);
 const maxNY=b=>Math.max(1,((window.__floorBot||147)-b.sh-b.y0)/b.h);   // the floor now goes down to the bottom of the screen; 1 = the old edge, bigger = further down
 function walkTap(ev){
@@ -2358,7 +2363,7 @@ function walkTap(ev){
     if(q.x>=X-1&&q.x<=X+b.sw+1&&q.y>=Y-3&&q.y<=Y+b.sh+1&&Y>hitY){hit=id;hitY=Y}}
   if(hit){ev.stopPropagation();openCharMenu(hit);return}
   closeCharMenu();
-  const nx=Math.max(0,Math.min(maxNX(b),(q.x-b.sw/2-b.x0)/b.w)), ny=Math.max(0,Math.min(maxNY(b),(q.y-b.sh-b.y0)/b.h));
+  const nx=Math.max(minNX(b),Math.min(maxNX(b),(q.x-b.sw/2-b.x0)/b.w)), ny=Math.max(0,Math.min(maxNY(b),(q.y-b.sh-b.y0)/b.h));
   const me_=walkers[me.id], dist=Math.hypot((nx-me_.x)*b.w,(ny-me_.y)*b.h);
   me_.tx=nx; me_.ty=ny;
   tapSpot(b.x0+nx*b.w+b.sw/2, b.y0+ny*b.h+b.sh, dist/SPEED);
@@ -2535,7 +2540,7 @@ function doEmote(type,to){
   if(!to){send();return}
   // walk up next to them first, then do it
   const b=floorBox(wSc),t=walkers[to],w=walkers[me.id]; if(!t)return send();
-  const off=(b.sw*1.05)/b.w, nx=Math.max(0,Math.min(1,t.x+(t.x>.5?off:-off))), ny=Math.max(0,Math.min(1,t.y));
+  const off=(b.sw*1.05)/b.w, nx=Math.max(minNX(b),Math.min(maxNX(b),t.x+(t.x>.5?off:-off))), ny=Math.max(0,Math.min(1,t.y));
   const dist=Math.hypot((nx-w.x)*b.w,(ny-w.y)*b.h);
   w.tx=nx;w.ty=ny; ref(`${E}/attendees/${me.id}/pos`).set({x:+nx.toFixed(3),y:+ny.toFixed(3)});
   setTimeout(send,dist/SPEED*1000+150);
@@ -2570,7 +2575,7 @@ function placeAll(dt){
     if(mv&&Math.abs(dx)>.5) w.face=dx<0?-1:1;
     if(mv){ if(d<=step){w.x=w.tx;w.y=w.ty}else{w.x+=dx/d*step/b.w;w.y+=dy/d*step/b.h} }
     const Y=Math.min(b.y0+w.y*b.h,(window.__floorBot||147)-b.sh);   // never drawn below the screen on a shorter phone
-    w.el.setAttribute('transform',`translate(${b.x0+w.x*b.w} ${Y})`);
+    w.el.setAttribute('transform',`translate(${isProj?Math.max(b.x0+w.x*b.w,(window.__viewX0||0)+2):b.x0+w.x*b.w} ${Y})`);   // projector: someone on a wider screen never walks off its edge
     let bob=mv?-Math.abs(Math.sin(t*9))*1.1:0, tilt=mv?Math.sin(t*9)*2:0, spin='';
     if(w.fx){const f=w.fx,a=t-f.t0,E_=EMOTES[f.type];
       if(!E_||a>E_.dur){w.fx=null; if(w.bub){w.bub.remove();w.bub=null}}
@@ -3534,7 +3539,13 @@ function retLoad(done){
   setTimeout(()=>{ ld.classList.add('gone'); done(); setTimeout(()=>ld.remove(),1000) },t+450);
 }
 const announce=()=>ref(`${E}/attendees/${me.id}`).update({...me,...(isHost?{isHost:true}:{}),joinedAt:Date.now()});
-if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in before on this browser: straight to the room
+function enterProjector(){
+  me={id:'__projector__',name:'Projector',look:null};   // nobody: never announced, never in the roster
+  document.title="SASHA'S HOUSE · projector";
+  show('screen-lounge'); buildMap(); listenRoster(); listenHubs(); listenPairings();
+}
+if(isProj){ enterProjector() }
+else if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in before on this browser: straight to the room
   announce(); if(window.__RET) retLoad(enterLounge); else enterLounge();
   if(!isHost) ref(`${E}/kicked/${me.id}`).once('value').then(sn=>{ if(sn.val()){ localStorage.removeItem('tpl_me'); location.reload() } });   // kicked guests start over
 }else{
@@ -3674,9 +3685,16 @@ html.is-guest{--dock:0px!important}
 html.is-guest #dock{display:none!important}
 html.is-guest #screen-lounge #mapwrap,html.is-guest #partnerRoom{bottom:0!important}
 html.is-guest #nextBar{bottom:0!important}
+/* PROJECTOR (?projector=1): only the room, full screen, nothing to tap */
+html.is-proj,html.is-proj body{background:#15131a;overflow:hidden;cursor:none}
+html.is-proj #screen-lounge>*:not(.wrap),html.is-proj #screen-lounge .wrap>*:not(#mapwrap),
+html.is-proj #toasts,html.is-proj #dock,html.is-proj #mlBar,html.is-proj .mlArrow,html.is-proj #noteBtn,html.is-proj #noteOv,
+html.is-proj #tcard,html.is-proj #tourDim,html.is-proj #guideBubble,html.is-proj #nextBar,html.is-proj #reveal,html.is-proj #loadScreen{display:none!important}
+html.is-proj #map{pointer-events:none;overflow:hidden!important}
 </style>
 <script>
-if(new URLSearchParams(location.search).get('host')!=='1') document.documentElement.classList.add('is-guest');
+if(new URLSearchParams(location.search).get('host')!=='1'||new URLSearchParams(location.search).get('projector')==='1') document.documentElement.classList.add('is-guest');
+if(new URLSearchParams(location.search).get('projector')==='1') document.documentElement.classList.add('is-proj');
 </script>
 <script>
 (function(){
@@ -3771,7 +3789,7 @@ if(new URLSearchParams(location.search).get('host')!=='1') document.documentElem
     const si=document.getElementById('srch'); if(si){si.oninput=e=>{q=e.target.value;const pos=e.target.selectionStart;render();const n=document.getElementById('srch');n.focus();n.setSelectionRange(pos,pos)}}
   }
   dock.onclick=e=>{const b=e.target.closest('.dbtn'); if(!b) return; if('help' in b.dataset){startTour(true);return}
-    if('tip' in b.dataset){ const u=(CONFIG.tipUrl||'').trim(); if(u) window.open(u,'_blank','noopener'); else toast({title:'Donations',body:'The donation link is coming soon!',holdMs:2500}); return} const t=b.dataset.t; tab=(tab===t)?null:t; viewing=null; viewMail=null; q=''; render()};
+    if('tip' in b.dataset){ const u=(CONFIG.tipUrl||'').trim(); if(u) window.open(u,'_blank','noopener'); else toast({title:'Pay rent',body:'The rent link is coming soon!',holdMs:2500}); return} const t=b.dataset.t; tab=(tab===t)?null:t; viewing=null; viewMail=null; q=''; render()};
   sheet.onclick=e=>{
     if(e.target.closest('[data-x]')){tab=null;render();return}
     if(e.target.closest('[data-back]')){viewing=null;render();return}
@@ -3801,18 +3819,19 @@ if(new URLSearchParams(location.search).get('host')!=='1') document.documentElem
   function fitRoom(){
     const svg=mapEl&&mapEl.querySelector('svg'); if(!svg) return;
     const r=mapEl.getBoundingClientRect(); if(!r.width||!r.height) return;
-    const ar=r.width/r.height, W=Math.max(120,150*ar), H=Math.max(150,120/ar), x0=60-W/2, TW=Math.max(W,ML_RIGHT-x0);   // wider than the screen: scroll right for the extra part
-    svg.setAttribute('viewBox',`${x0} ${75-H/2} ${TW} ${H}`); svg.style.width=(TW*r.height/H)+'px'; window.__floorBot=75+H/2-7; mlSync();
+    let ar=r.width/r.height, W=Math.max(120,150*ar), H=Math.max(150,120/ar), x0=60-W/2, TW=Math.max(W,ML_RIGHT-x0);
+    if(isProj){ const PL=100; W=ML_RIGHT+PL; H=Math.max(150,W/ar); W=Math.max(W,H*ar); x0=ML_RIGHT-W; TW=W }   // projector: everything from the left strip to the far wall fits the screen, nothing to scroll   // wider than the screen: scroll right for the extra part
+    window.__viewX0=x0; svg.setAttribute('viewBox',`${x0} ${75-H/2} ${TW} ${H}`); svg.style.width=(TW*r.height/H)+'px'; window.__floorBot=75+H/2-7; mlSync();
     svg.setAttribute('preserveAspectRatio','xMidYMid meet');
     if(!svg.querySelector('#xback')) svg.insertAdjacentHTML('afterbegin','<g id="xback"><rect x="-600" y="-600" width="1320" height="688" fill="url(#wp)"/><rect x="-600" y="88" width="1320" height="662" fill="url(#pw)"/><rect x="-600" y="86" width="1320" height="2" fill="#e2c9c4"/></g>');
   }
   new MutationObserver(fitRoom).observe(mapEl,{childList:true}); addEventListener('resize',fitRoom); fitRoom();
   /* ---- TOUR: spotlight each part of the screen and say what it's for ---- */
   const STEPS=[
-    {sel:'[data-tip]',t:'DONATIONS',x:'If you want to fund the production and see similar events in the future, you can leave a donation. Tap here to open it.'}
+    {sel:'[data-tip]',t:'PAY RENT',x:'Wanna help Sasha organize similar events in the future? Click here to send a donation. (˶ᵔ ᵕ ᵔ˶)',xh:'Wanna help Sasha organize similar events in the future? Click here to send a <b>donation</b>. (˶ᵔ ᵕ ᵔ˶)'}
   ];
-  { const nb=document.createElement('button'); nb.id='noteBtn'; nb.type='button'; nb.setAttribute('data-tip',''); nb.setAttribute('aria-label','Donations');
-    nb.innerHTML='<svg viewBox="0 0 13 10"><path d="M0 0h13v10H0z" fill="#fbf7ea"/><path d="M0 0h13v1H0zM0 9h13v1H0zM0 0h1v10H0zM12 0h1v10h-1z" fill="#15121a"/><path d="M1 1l1 1h1l1 1h1l1 1h1l1-1h1l1-1h1l1-1z" fill="#15121a"/><path d="M1 8l3-3M12 8L9 5" stroke="#15121a" stroke-width="1" fill="none"/></svg>DONATE<i class="nd"></i>';
+  { const nb=document.createElement('button'); nb.id='noteBtn'; nb.type='button'; nb.setAttribute('data-tip',''); nb.setAttribute('aria-label','Pay rent');
+    nb.innerHTML='<svg viewBox="0 0 13 10"><path d="M0 0h13v10H0z" fill="#fbf7ea"/><path d="M0 0h13v1H0zM0 9h13v1H0zM0 0h1v10H0zM12 0h1v10h-1z" fill="#15121a"/><path d="M1 1l1 1h1l1 1h1l1 1h1l1-1h1l1-1h1l1-1z" fill="#15121a"/><path d="M1 8l3-3M12 8L9 5" stroke="#15121a" stroke-width="1" fill="none"/></svg>PAY RENT<i class="nd"></i>';
     scr.appendChild(nb); }
   let tourOn=null;
   function endTour(){ if(!tourOn) return; tourOn.remove(); tourOn=null; try{localStorage.setItem('tpl_toured','1')}catch(e){} }
@@ -3826,7 +3845,7 @@ if(new URLSearchParams(location.search).get('host')!=='1') document.documentElem
     function go(){
       const st=list[i], r=document.querySelector(st.sel).getBoundingClientRect(), pad=4, last=i===list.length-1;
       spot.style.cssText=`left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`;
-      card.innerHTML=`<div class="tt"><span>Tour.exe</span><span>${i+1}/${list.length}</span></div><div class="tb"><strong>${st.t}</strong>${esc(st.x)}</div><div class="tf"><span></span><div>${last?'':'<button data-skip type="button">SKIP</button>'}<button class="go" data-next type="button">${last?'GOT IT!':'NEXT >'}</button></div></div>`;
+      card.innerHTML=`<div class="tt"><span>Tour.exe</span><span>${i+1}/${list.length}</span></div><div class="tb"><strong>${st.t}</strong>${st.xh||esc(st.x)}</div><div class="tf"><span></span><div>${last?'':'<button data-skip type="button">SKIP</button>'}<button class="go" data-next type="button">${last?'GOT IT!':'NEXT >'}</button></div></div>`;
       const cw=card.offsetWidth, ch=card.offsetHeight, vw=innerWidth, vh=innerHeight;
       let left=Math.min(Math.max(r.left+r.width/2-cw/2,12),vw-cw-12), top;
       if(r.height>vh*.5) top=vh-ch-52-28; else if(r.top+r.height/2>vh/2) top=r.top-ch-16; else top=r.bottom+16;
