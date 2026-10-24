@@ -784,6 +784,17 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;b
   <button class="btn" id="nextGo" style="display:none">Open</button>
 </div>
 
+<!-- SASHA'S NOTE -->
+<div id="noteOv" role="dialog" aria-modal="true" aria-label="Donations">
+  <div class="notepaper">
+    <i class="tape t1"></i><i class="tape t2"></i>
+    <button type="button" class="notex" id="noteX" aria-label="Close">&times;</button>
+    <p class="notehead">Donations</p>
+    <p class="notetext">If you want to fund the production and see similar events in the future, you can leave a donation.</p>
+    <a class="notelink" id="noteDonate" href="https://www.privat24.ua/send/k5bib" target="_blank" rel="noopener">Leave a donation &rarr;</a>
+  </div>
+</div>
+
 <!-- STOP PANEL -->
 <div class="panel" id="stopPanel">
   <button class="back" onclick="closePanel()">&lt;</button>
@@ -924,8 +935,8 @@ const CONFIG = {
      To add a room, add a line here: { key:'something-unique', name:'The Internet ...' } -- it gets its own tab and its own separate state. */
   rooms:[ { key:'cafe', name:'The Internet Floor', short:'Internet Floor', legacy:true } ],
   tv:{ page:'best-liar-in-town.html', title:'BEST LIAR IN TOWN' },   // the TV in the ROOMMATES room (floor 1): tapping it turns it on and opens this page
-  tvMain:{ gif:'data:image/png;base64,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' },   // the TV in the main room (floor 0) does not open anything; put a gif/image URL here to show it on the screen
-  tipUrl:'',   // DONATIONS: paste your donation link here (e.g. 'https://...'). Empty = the button says "coming soon"
+  tvMain:{ gif:'' },   // the TV in the main room (floor 0) does not open anything; put a gif/image URL here to show it on the screen
+  tipUrl:'https://www.privat24.ua/send/k5bib',   // DONATIONS: paste your donation link here (e.g. 'https://...'). Empty = the button says "coming soon"
   partnerDoor: {   // texts for the partner door + the room behind it
     found:'MATCH FOUND!', foundPair:'say hi to your partner!', foundGroup:'say hi to your group!',
     none:'NO MATCH YET', noneSub:'ask Sasha to pair you up',
@@ -1211,7 +1222,6 @@ let lastPat=-1;
 function patienceToast(){let i;do{i=Math.floor(Math.random()*CONFIG.patience.length)}while(i===lastPat&&CONFIG.patience.length>1);lastPat=i;toast({body:CONFIG.patience[i],holdMs:3200})}
 
 const R=a=>a.map(r=>`<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" fill="${r[4]}"/>`).join('');
-const TV_LOGO='data:image/png;base64,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';   // the logo shown on the main-room TV
 const LOCK=[[3,0,7,2,'#9aa0b4'],[2,2,2,5,'#9aa0b4'],[9,2,2,5,'#9aa0b4'],[0,7,13,9,'#c9a23a'],[0,7,13,1,'#f0cd62'],[0,15,13,1,'#8a6f20'],[5,10,3,3,'#3a2f1a'],[6,13,1,2,'#3a2f1a']];
 const bookRow=(x0,x1,y,h)=>{const cs=['#7a2f4a','#2f4a6a','#a8863a','#3f6a55','#5a3f7a','#8a5a3a','#6a2f3f'];const o=[];let x=x0,i=0;while(x<x1){const w=2+(i%3===0?1:0),hh=h-(i%4===1?1:0);o.push([x,y+(h-hh),Math.min(w,x1-x),hh,cs[i%cs.length]]);x+=w;i++}return o};
 const base=(W,H,fl,wall,wh=17,bb='#c9a26a',bb2='#8a6a40')=>`<rect width="${W}" height="${H}" fill="url(#${fl})"/><rect width="${W}" height="${wh}" fill="${wall}"/><rect y="${wh-3}" width="${W}" height="2" fill="${bb}"/><rect y="${wh-1}" width="${W}" height="1" fill="${bb2}"/><rect y="${wh}" width="${W}" height="2" fill="#000" fill-opacity=".14"/>`;
@@ -1291,13 +1301,22 @@ const PINKROOM=[
   [66,96,10,5,'#f8e8e0'],...HEART(42,94,'#ff9ab8'),...HEART(95,94,'#f9d0dc')],0,32)
 ];
 /* ---- THE ROOM: front-on view on a 120x150 pixel grid (big window, desk + computer, shelf, rug + table) ---- */
-const ELEV_FRAME=[[7,40,24,46,'#2b2f3a'],[8,41,22,45,'#5b6170'],[9,42,20,5,'#0f2a1c'],[13,43,1,1,'#5fe08a'],[12,44,3,1,'#5fe08a'],[24,44,3,1,'#5fe08a'],[25,45,1,1,'#5fe08a'],[18,43,2,3,'#9bffbb'],[9,47,20,1,'#2b2f3a'],[7,86,24,1,'rgba(0,0,0,.18)']];   // the elevator in the lounge AND in the roommates room: steel frame + a little floor display
+const ELEV_FRAME=[[7,40,24,46,'#2b2f3a'],[8,41,22,45,'#5b6170'],[9,42,20,5,'#0f2a1c'],[9,47,20,1,'#2b2f3a'],[7,86,24,1,'rgba(0,0,0,.18)']];   // the elevator in the lounge AND in the roommates room: steel frame + a little floor display
+/* the floor display above the elevator doors: [down button] [floor number] [up button]. A button is bright when you can go that way, dim when you can't. */
+const ELEV_DIG={0:'111101101101111',1:'010110010010111',2:'111001111100111',3:'111001111001111',4:'101101111001001',5:'111100111001111',6:'111100111101111',7:'111001001001001',8:'111101111101111'};
+function elevDisp(f,up,down){
+  const o=[], on=['#1d6b3f','#b9ffd0'], off=['#0f2a1c','#2c5a40'], d=down?on:off, u=up?on:off, g=ELEV_DIG[f]||ELEV_DIG[0];
+  o.push([9,42,7,5,d[0]],[23,42,7,5,u[0]]);
+  o.push([10,43,5,1,d[1]],[11,44,3,1,d[1]],[12,45,1,1,d[1]]);        // down arrow
+  o.push([26,43,1,1,u[1]],[25,44,3,1,u[1]],[24,45,5,1,u[1]]);        // up arrow
+  for(let i=0;i<15;i++) if(g[i]==='1') o.push([18+i%3,42+Math.floor(i/3),1,1,'#ffe29a']);   // the floor number
+  return o }
 const ELEV_L=[[9,48,10,38,'#aeb4c0'],[9,48,1,38,'#d9dde5'],[11,52,6,30,'#a0a7b4'],[11,52,6,1,'#d9dde5'],[18,48,1,38,'#6b7280'],[17,52,1,30,'#8b92a0']];
 const ELEV_R=[[19,48,10,38,'#9aa1ae'],[28,48,1,38,'#6b7280'],[21,52,6,30,'#8e95a3'],[21,52,6,1,'#c7ccd6'],[19,48,1,38,'#4b5160'],[21,52,1,30,'#b4bac6']];
 const DOOR_RECTS=[...ELEV_FRAME,...ELEV_L,...ELEV_R];
 /* the sliding doors: g holds the opening + two leaves (clipped to the opening). p: 0 = shut, 1 = wide open */
 function elevInner(id){ return `<defs><clipPath id="${id}C"><rect x="9" y="48" width="20" height="38"/></clipPath></defs>`
-  +R(ELEV_FRAME)+`<rect x="9" y="48" width="20" height="38" fill="#f1d9a0"/><rect x="9" y="48" width="20" height="3" fill="#c9a23a"/><rect x="9" y="82" width="20" height="4" fill="#8a6a3a"/>`
+  +R(ELEV_FRAME)+R(id==='prDoorFx'?elevDisp(1,0,1):elevDisp(0,1,0))+`<rect x="9" y="48" width="20" height="38" fill="#f1d9a0"/><rect x="9" y="48" width="20" height="3" fill="#c9a23a"/><rect x="9" y="82" width="20" height="4" fill="#8a6a3a"/>`
   +`<g clip-path="url(#${id}C)"><g id="${id}L">${R(ELEV_L)}</g><g id="${id}R">${R(ELEV_R)}</g></g>` }
 function elevSet(g,id,p){ const l=g.querySelector('#'+id+'L'), r=g.querySelector('#'+id+'R'); if(l) l.setAttribute('transform',`translate(${(-10*p).toFixed(2)} 0)`); if(r) r.setAttribute('transform',`translate(${(10*p).toFixed(2)} 0)`) }
 
@@ -1311,7 +1330,7 @@ const ROOM2=(()=>{
   /* wall clock (hands are live, see startWallClock) */
   a.push(...OV(105,9,8,8,'#c9a23a'),...OV(105,9,7,7,'#efe0c8'));P(105,3,1,1,'#2a2630');P(105,15,1,1,'#2a2630');P(99,9,1,1,'#2a2630');P(111,9,1,1,'#2a2630');
   /* the partner door */
-  a.push(...DOOR_RECTS);
+  a.push(...DOOR_RECTS,...elevDisp(0,1,0));
   /* bookshelf */
   P(94,26,22,60,'#3b2430');P(96,28,18,56,'#1f1218');P(94,26,22,1,'#c9a23a');
   [41,54,67].forEach(y=>P(94,y,22,2,'#4a2f3a'));P(94,84,22,2,'#2c1a22');
@@ -2166,6 +2185,80 @@ function startWallClock(){
   tick(); _clkT=setInterval(tick,50);
 }
 const ML_RIGHT=250;   // the main room's right edge: the original room is 0..120, the extra part you scroll to is 120..250
+/* ---- MAIN ROOM EXTENSION: lush plant, luxury floor lamp, moonlight through the window (generated pixel art) ---- */
+function pxRuns(rows){ const out=[]; Object.keys(rows).forEach(py=>{ const r=rows[py].sort((p,q)=>p[0]-q[0]); let i=0;
+  while(i<r.length){ let j=i; while(j+1<r.length&&r[j+1][0]===r[j][0]+1&&r[j+1][1]===r[i][1]) j++; out.push([r[i][0],+py,r[j][0]-r[i][0]+1,1,r[i][1]]); i=j+1 } }); return out }
+/* a pointed leaf: centre, angle (deg, 0 = right, -90 = up), half-length A, half-width B, palette [dark,mid,light,rib]. Light comes from the window on the right. */
+function pxLeaf(cx,cy,deg,A,B,pal){ const t=deg*Math.PI/180, c=Math.cos(t), s=Math.sin(t), M=Math.ceil(A)+1, rows={};
+  for(let py=Math.floor(cy-M);py<=Math.ceil(cy+M);py++) for(let px=Math.floor(cx-M);px<=Math.ceil(cx+M);px++){
+    const dx=px+.5-cx, dy=py+.5-cy, u=dx*c+dy*s, v=-dx*s+dy*c; if(Math.abs(u)>A) continue;
+    const lim=B*(1-(u/A)*(u/A)); if(Math.abs(v)>lim+.01) continue;
+    const m=(dx-dy)/(A+B); let col=pal[1]; if(m>.3) col=pal[2]; else if(m<-.3) col=pal[0];
+    if(Math.abs(v)<.5&&u>-A*.85) col=pal[3];
+    (rows[py]=rows[py]||[]).push([px,col]) }
+  return pxRuns(rows) }
+function pxLine(x0,y0,x1,y1,col){ const rows={}, n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0))||1;
+  for(let i=0;i<=n;i++){ const x=Math.round(x0+(x1-x0)*i/n), y=Math.round(y0+(y1-y0)*i/n); (rows[y]=rows[y]||[]).push([x,col]) } return pxRuns(rows) }
+function lushPlant(){
+  const P1=['#1f4d2b','#2f6a3a','#4a9a56','#173d22'], P2=['#2f6a3a','#3f8a4a','#6fbe6a','#1f4d2b'], P3=['#3f8a4a','#5fae5a','#9be08a','#2f6a3a'];
+  const CX=133, CY=79, SX=.72, SA=.88, OX=3, o=[];
+  // pot: glazed terracotta with a gold band
+  const pot=[];
+  pot.push([122,79,16,3,'#d9985f'],[122,79,16,1,'#f0c08a'],[122,81,16,1,'#a85a3a'],
+    [124,82,12,9,'#b5683a'],[124,82,2,9,'#d08a52'],[134,82,2,9,'#8a4a2a'],
+    [124,85,12,1,'#e8c14a'],[124,87,12,1,'#c9a23a'],[126,86,1,1,'#f6e08a'],[128,86,1,1,'#f6e08a'],[130,86,1,1,'#f6e08a'],[132,86,1,1,'#f6e08a'],
+    [125,91,10,1,'#7a3f24'],[123,92,14,1,'#5a2e1a'],[124,79,12,2,'#3b2418']);
+  pot.forEach(r=>o.push([r[0]+OX,r[1],r[2],r[3],r[4]]));
+  // stem ends: [dx, dy, angle, A, B, layer]   layer 0 = back (deepest green), 1 = middle, 2 = front (brightest)
+  const L=[[-9,-27,-140,6,2.8,0],[9,-28,-42,6,2.8,0],[0,-34,-90,6.5,3,0],[-8,-35,-118,6,2.6,0],[7,-36,-64,6,2.6,0],
+    [-4,-25,-106,7,3,1],[5,-26,-76,7,3,1],[-9,-17,-128,7,3,1],[9,-18,-52,7,3,1],[0,-17,-90,6.5,3,1],[-11,-10,-156,6.5,2.8,1],[11,-11,-24,6.5,2.8,1],
+    [-6,-7,-146,6,2.6,2],[6,-8,-34,6,2.6,2],[-9,-2,172,6,2.4,2],[9,-3,8,6,2.4,2],[-2,-10,-100,5.5,2.4,2],[3,-11,-80,5.5,2.4,2]];
+  const PAL=[P1,P2,P3];
+  L.forEach(l=>{ o.push(...pxLine(CX,CY,CX+l[0]*SX,CY+l[1],'#2f5a2a')) });
+  for(let layer=0;layer<3;layer++) L.forEach(l=>{ if(l[5]!==layer) return; const t=l[2]*Math.PI/180, cx=CX+l[0]*SX+Math.cos(t)*l[3]*SA*.9, cy=CY+l[1]+Math.sin(t)*l[3]*SA*.9; o.push(...pxLeaf(cx,cy,l[2],l[3]*SA,l[4],PAL[layer])) });
+  // trailing vines draped over the pot
+  o.push(...pxLine(124+OX,80,122+OX,86,'#3f8a4a'),...pxLine(122+OX,86,123+OX,90,'#3f8a4a'),...pxLine(136+OX,80,138+OX,85,'#3f8a4a'),...pxLine(138+OX,85,137+OX,89,'#3f8a4a'));
+  [[122,83,150],[122,88,40],[123,90,170],[138,83,30],[138,87,150],[137,90,20]].forEach(v=>o.push(...pxLeaf(v[0]+OX,v[1],v[2],2.6,1.3,P3)));
+  // a few small pink blossoms at the leaf tips
+  [[-9,-27,-140,6],[9,-28,-42,6],[0,-34,-90,6.5],[-11,-10,-156,6.5]].forEach(l=>{ const t=l[2]*Math.PI/180, x=Math.round(CX+l[0]*SX+Math.cos(t)*l[3]*SA*1.7), y=Math.round(CY+l[1]+Math.sin(t)*l[3]*SA*1.7);
+    o.push([x-1,y,3,1,'#ff9ab8'],[x,y-1,1,3,'#ff9ab8'],[x,y-1,1,1,'#ffd0e0'],[x,y,1,1,'#ffe29a']) });
+  return o }
+/* the floor lamp's brass base + stem (the glowing shade is drawn in the lights layer so it stays bright) */
+function luxLampBase(){
+  return [[194,92,13,1,'#4a360c'],[195,91,11,1,'#8a6a20'],[196,90,9,1,'#c9a23a'],[196,90,3,1,'#f6e08a'],[197,89,7,1,'#e8c14a'],[197,89,2,1,'#fff0b0'],[198,88,5,1,'#c9a23a'],[199,86,3,2,'#8a6a20'],
+    [200,58,2,29,'#c9a23a'],[200,58,1,29,'#f6e08a'],[201,58,1,29,'#8a6a20'],
+    [198,84,5,2,'#e8c14a'],[198,84,5,1,'#fff0b0'],[198,72,5,2,'#e8c14a'],[198,72,5,1,'#fff0b0'],[198,62,5,2,'#e8c14a'],[198,62,5,1,'#fff0b0'],
+    [199,76,3,1,'#e8c14a'],[198,77,5,3,'#e8c14a'],[199,80,3,1,'#c9a23a'],[199,77,1,1,'#fff6d0'],[201,78,2,2,'#8a6a20']] }
+function luxLampShade(){
+  let s='', rows=[];
+  for(let r=0;r<14;r++){ const w=2*Math.round(5+3*r/13), x0=201-w/2, y=42+r;
+    s+=`<rect x="${x0}" y="${y}" width="${w}" height="1" fill="#ffe6a6"/><rect x="${x0+2}" y="${y}" width="${w-4}" height="1" fill="#fff3cc"/>`;
+    if(r>1&&r<12) s+=`<rect x="199" y="${y}" width="4" height="1" fill="#fffbe8"/>`;
+    for(let k=1;k<5;k++) s+=`<rect x="${x0+Math.round(k/5*(w-1))}" y="${y}" width="1" height="1" fill="#f0cf86" opacity=".8"/>`;
+    s+=`<rect x="${x0}" y="${y}" width="1" height="1" fill="#d9a94a"/><rect x="${x0+w-1}" y="${y}" width="1" height="1" fill="#d9a94a"/>` }
+  s+=`<rect x="195" y="41" width="12" height="1" fill="#e8c14a"/><rect x="195" y="41" width="6" height="1" fill="#fff0b0"/>`
+    +`<rect x="192" y="56" width="18" height="1" fill="#c9a23a"/><rect x="192" y="56" width="9" height="1" fill="#f6e08a"/><rect x="192" y="57" width="18" height="1" fill="#8a6a20"/>`;
+  for(let i=0;i<9;i++){ s+=`<rect x="${192+2*i}" y="58" width="1" height="1" fill="#f6e08a"/>`; if(i%2) s+=`<rect x="${192+2*i}" y="59" width="1" height="1" fill="#fff6d8"/>` }
+  s+=`<rect x="200" y="38" width="2" height="1" fill="#fff0b0"/><rect x="200" y="39" width="2" height="1" fill="#e8c14a"/><rect x="200" y="40" width="2" height="1" fill="#c9a23a"/>`
+    +`<rect class="twk" x="206" y="39" width="1" height="3" fill="#fff6d0"/><rect class="twk" x="205" y="40" width="3" height="1" fill="#fff6d0"/>`;
+  return s }
+function luxLamp(){   // soft warm light: many faint layers so there are no hard rings
+  let s=''; for(let i=0;i<9;i++){ const k=1-i/9; s+=`<ellipse cx="201" cy="50" rx="${(30*k).toFixed(1)}" ry="${(30*k).toFixed(1)}" fill="#ffd98a" opacity=".016"/>` }
+  for(let i=0;i<6;i++){ const k=1-i/6; s+=`<ellipse cx="201" cy="97" rx="${(27*k).toFixed(1)}" ry="${(6*k).toFixed(2)}" fill="#ffd98a" opacity=".022"/>` }
+  s+=`<polygon points="194,58 208,58 222,97 180,97" fill="#ffd98a" opacity=".04"/><ellipse cx="201" cy="37" rx="9" ry="5" fill="#ffe9b0" opacity=".08"/>`;
+  return s }
+/* moonlight: a cool lavender glow around the window, a halo round the moon, and the four panes cast onto the floor and rug */
+function moonLight(){
+  let s=`<ellipse cx="170" cy="36" rx="34" ry="36" fill="#cfc8ff" opacity=".035"/><ellipse cx="170" cy="36" rx="25" ry="27" fill="#cfc8ff" opacity=".035"/>`
+    +`<ellipse cx="179" cy="22" rx="9" ry="9" fill="#fff3c0" opacity=".06"/><ellipse cx="179" cy="22" rx="5.5" ry="5.5" fill="#fff3c0" opacity=".08"/>`
+    +`<rect x="150" y="62" width="40" height="1" fill="#e6e0ff" opacity=".3"/>`;
+  const TL=[160,97], TR=[188,97], BL=[184,131], g=.05;
+  const pt=(u,v)=>(TL[0]+u*(TR[0]-TL[0])+v*(BL[0]-TL[0])).toFixed(1)+','+(TL[1]+u*(TR[1]-TL[1])+v*(BL[1]-TL[1])).toFixed(1);
+  for(let i=0;i<2;i++) for(let j=0;j<2;j++){ const u0=i*.5+(i?g:0), u1=(i+1)*.5-(i?0:g), v0=j*.5+(j?g:0), v1=(j+1)*.5-(j?0:g), m=.08;
+    s+=`<polygon points="${pt(u0,v0)} ${pt(u1,v0)} ${pt(u1,v1)} ${pt(u0,v1)}" fill="#d6d2ff" opacity=".09"/>`
+      +`<polygon points="${pt(u0+m,v0+m)} ${pt(u1-m,v0+m)} ${pt(u1-m,v1-m)} ${pt(u0+m,v1-m)}" fill="#ece8ff" opacity=".07"/>` }
+  return s }
+
 function mainExtSVG(){
   const GD='#c9a23a', a=[
    /* wall lamp-less calm wall, a window onto a night skyline with curtains */
@@ -2181,11 +2274,10 @@ function mainExtSVG(){
    /* two framed pictures above the second sofa */
    [214,20,17,21,GD],[215,21,15,19,'#2a1a3a'],[217,23,11,15,'#d68a9a'],[219,26,7,7,'#fff0f5'],[220,34,5,2,'#a8506a'],
    [236,30,12,15,GD],[237,31,10,13,'#1f3a4a'],[239,33,6,9,'#7fd6c0'],[241,35,2,2,'#fff'],
-   /* big plant in the corner next to the old bookshelf */
-   [128,56,2,22,'#2f6a3a'],[121,60,8,3,'#3f8a4a'],[131,58,9,3,'#3f8a4a'],[122,66,9,3,'#2f6a3a'],[130,64,10,3,'#4fa05a'],[124,72,6,3,'#4fa05a'],[131,70,8,3,'#2f6a3a'],[125,53,5,3,'#4fa05a'],[129,50,4,3,'#3f8a4a'],
-   [124,78,12,14,'#a85a3a'],[124,78,12,2,'#c9703f'],[125,90,10,2,'#8a4a2a'],
-   /* floor lamp */
-   [200,55,1,37,GD],[197,91,7,2,'#8a6a20'],[196,44,9,11,'#ffd66b'],[197,45,7,9,'#fff0b0'],[196,44,9,1,'#c9a23a'],
+   /* big lush plant in the corner next to the old bookshelf */
+   ...lushPlant(),
+   /* floor lamp (brass base and stem; the silk shade glows in the lights layer) */
+   ...luxLampBase(),
    /* second sofa */
    [210,64,32,16,'#2f5a48'],[210,64,32,2,'#3f7a60'],[205,70,7,22,'#264a3a'],[205,70,7,2,'#3f7a60'],[240,70,7,22,'#264a3a'],[240,70,7,2,'#3f7a60'],
    [211,78,30,13,'#3b6e58'],[211,78,30,2,'#4b8a70'],[226,79,1,12,'#2a4a3a'],[207,92,3,2,GD],[243,92,3,2,GD],
@@ -2194,7 +2286,7 @@ function mainExtSVG(){
    [160,108,70,32,'#6a2f5f'],[162,110,66,28,'#8a3f7a'],[166,114,58,20,'#6a2f5f'],[160,108,70,1,'#e8b86a'],[160,139,70,1,'#e8b86a'],[160,108,1,32,'#e8b86a'],[229,108,1,32,'#e8b86a'],
    [178,118,30,6,'#6a4a30'],[178,118,30,1,'#8a6a40'],[180,124,2,4,'#4a3220'],[204,124,2,4,'#4a3220'],[190,115,3,3,'#f3efe6'],[193,116,1,2,'#f3efe6']
   ];
-  const lights=`<polygon points="152,90 188,90 206,146 138,146" fill="#9fb8ff" opacity=".07"/><ellipse cx="200.5" cy="52" rx="20" ry="24" fill="#ffd66b" opacity=".09"/><ellipse cx="200.5" cy="52" rx="10" ry="12" fill="#ffd66b" opacity=".12"/><ellipse cx="200.5" cy="96" rx="22" ry="5" fill="#ffd66b" opacity=".12"/><rect x="196" y="44" width="9" height="11" fill="#ffe9a0"/><rect x="197" y="45" width="7" height="9" fill="#fff6d0"/>`;
+  const lights=moonLight()+luxLamp()+luxLampShade();
   let dim=''; for(let i=0;i<10;i++) dim+=`<rect x="${ML_RIGHT-1-i}" y="-600" width="1" height="1350" fill="rgba(18,5,36,${(.034*(10-i)).toFixed(3)})"/>`;
   return {art:`<g transform="translate(120 0)">${base(ML_RIGHT-120,150,'pw','url(#wp)',88,'#2f2036','#8a6a40')}</g>`+R(a), dim, lights};
 }
@@ -2226,10 +2318,17 @@ function buildMap(){
   const guide=`<g id="guide"><g transform="translate(90 70) scale(1.45)"><ellipse cx="8" cy="22.6" rx="7" ry="1.6" fill="#000" opacity=".25"/><g class="gbob"><svg width="16" height="23" viewBox="0 0 16 23" overflow="visible">${R(hostRects())}</svg></g><text x="8" y="29.5" text-anchor="middle" font-size="4.4" font-weight="700" font-family="Trebuchet MS,sans-serif" fill="#e8c14a" stroke="#15121a" stroke-width="1.3" paint-order="stroke">${esc(CONFIG.hostName||'Sasha')}</text><rect class="twk" x="2" y="-9" width="1" height="3" fill="#ffe680"/><rect class="twk" x="1" y="-8" width="3" height="1" fill="#ffe680"/></g></g>`;
   const scanl=Array.from({length:13},(_,i)=>`<rect x="37" y="${20+i*2}" width="50" height="1" fill="#fff" fill-opacity=".05"/>`).join('');
   const tvGif=(CONFIG.tvMain&&CONFIG.tvMain.gif)||'';
-  const linkbox=`<g id="linkbox" style="cursor:default"><rect x="31" y="13" width="62" height="40" fill="#000" fill-opacity="0"/>${R(TV_RECTS)}<g class="scr-on"><rect class="scr-fx" x="37" y="19" width="50" height="27" fill="#2a3a5a"><animate attributeName="fill" values="#24365a;#3a2a5a;#2a4a5a;#24365a" dur="3.2s" repeatCount="indefinite"/></rect>${scanl}</g>${tvGif?`<image href="${esc(tvGif)}" x="37" y="19" width="50" height="27" preserveAspectRatio="xMidYMid slice"/>`:`<image href="${TV_LOGO}" x="48.5" y="19" width="27" height="27" preserveAspectRatio="xMidYMid slice" style="image-rendering:auto;pointer-events:none"/><g opacity=".45" style="pointer-events:none">${scanl}</g>`}<polygon points="37,19 60,19 47,46 37,46" fill="#fff" fill-opacity=".06"/><rect x="85" y="47" width="1" height="1" fill="#ff4040" class="led"><animate attributeName="opacity" values="1;.2;1" dur="1.3s" repeatCount="indefinite"/></rect></g>`;
+  const linkbox=`<g id="linkbox" style="cursor:default"><rect x="31" y="13" width="62" height="40" fill="#000" fill-opacity="0"/>${R(TV_RECTS)}<polygon points="37,19 60,19 47,46 37,46" fill="#fff" fill-opacity=".06"/><rect x="85" y="47" width="1" height="1" fill="#ff4040" class="led"><animate attributeName="opacity" values="1;.2;1" dur="1.3s" repeatCount="indefinite"/></rect></g>`;
   if(!window.__bunSrc){ const bi=document.querySelector('image.bun'); window.__bunSrc=bi?bi.getAttribute('href'):'' }   // the sleeping bunny from the intro, curled up on the sofa
   const sofaBun=window.__bunSrc?`<svg x="67.5" y="49.6" width="19.4" height="14" viewBox="0 0 54 39" overflow="hidden" style="pointer-events:none"><image class="sofabun" href="${window.__bunSrc}" width="540" height="39" style="image-rendering:pixelated"/></svg>`:'';
   const MX=mainExtSVG();
+  const NOTE=`<g id="wallNote" style="cursor:pointer"><rect x="111" y="0" width="9" height="17" fill="#000" fill-opacity="0"/>`+R([
+    [115,4,6,10,'rgba(0,0,0,.3)'],
+    [114,3,6,10,'#f7f1e3'],[114,12,6,1,'#e2d8bf'],[119,3,1,10,'#ebe2cb'],
+    [115,6,4,1,'#2a3a8a'],[115,8,3,1,'#2a3a8a'],[115,10,4,1,'#2a3a8a'],
+    [115,1,4,3,'rgba(255,238,160,.85)'],[115,1,4,1,'rgba(21,18,26,.25)']
+  ])+`<rect class="twk" x="112" y="2" width="1" height="1" fill="#ffe680"/></g>`;
+  
   $('map').innerHTML=`<svg viewBox="0 0 120 150">${DEFS}<rect width="120" height="150" fill="#15131a"/>${rooms}${MX.art}${sofaBun}${sections}<g id="wallClock" style="pointer-events:none"><path id="clkPie" d="" fill="#ff7ab0" fill-opacity=".9"/><line id="clkH" x1="105" y1="9" x2="105" y2="5.8" stroke="#2a2630" stroke-width="1.1" stroke-linecap="round"/><line id="clkM" x1="105" y1="9" x2="105" y2="4" stroke="#2a2630" stroke-width=".7" stroke-linecap="round"/><line id="clkS" x1="105" y1="10.4" x2="105" y2="3.6" stroke="#d65a5a" stroke-width=".35"/><circle cx="105" cy="9" r=".8" fill="#d65a5a"/></g>${guide}${linkbox}<g style="pointer-events:none">${window.ROOM2_DIM||''}${MX.dim}</g><g class="fx" style="pointer-events:none">${window.ROOM2_LIGHTS||''}${window.ROOM2_FX||''}${MX.lights}</g></svg>`; startWallClock();
   $('linkbox').onclick=ev=>{ev.stopPropagation()};   // the main-room TV doesn't open anything (the linked TV is in the roommates room) applyBoxLock();
   STOPS.forEach(s=>{const el=$('pin_'+s.key); if(el) el.onclick=function(ev){if(s.key==='start'){walkTap(ev);return}
@@ -2491,7 +2590,7 @@ function placeAll(dt){
   list.sort((p,q)=>p[0]-q[0]);   // lower on screen = drawn in front
   list.forEach(([,el],i)=>{if(g.children[i]!==el)g.insertBefore(el,g.children[i]||null)});
 }
-function tick(now){const dt=Math.min(.1,(now-wLast)/1000);wLast=now;placeAll(dt);wRaf=requestAnimationFrame(tick)}
+function tick(now){const dt=Math.min(.1,(now-wLast)/1000);wLast=now;if(!document.documentElement.classList.contains('inPR'))placeAll(dt);wRaf=requestAnimationFrame(tick)}   // main room is parked while you are on another floor
 function renderPeople(){
   const svg=$('map').querySelector('svg'); if(!svg) return;
   const o=svg.querySelector('#ppl'); if(o) o.remove();
@@ -2886,8 +2985,9 @@ const prRot=a=>{ PR.rot=a; const w=prEl.querySelector('#prWheelRot'); if(w) w.se
 function prSetPos(x,y){ x=Math.max(PR_X[0],Math.min(PR_X[1],x)); y=Math.max(PR_Y[0],Math.min(PR_Y[1],y));
   { const wx=PR_WC.x, wy=PR_WC.y+8, wr=0, ddx=x-wx, ddy=y-wy, dd=Math.hypot(ddx,ddy); if(dd<wr){ if(dd<.1){ x=wx-wr; y=wy } else { x=wx+ddx/dd*wr; y=wy+ddy/dd*wr } x=Math.max(PR_X[0],Math.min(PR_X[1],x)); y=Math.max(PR_Y[0],Math.min(PR_Y[1],y)) } }   // walk around the wheel, not through it
   PR.pos[me.id]={x,y}; if(PR.key) ref(`${E}/rooms/${PR.key}/pos/${me.id}`).set({x:+x.toFixed(1),y:+y.toFixed(1)}) }
+function parkMain(on){ document.documentElement.classList.toggle('inPR',on); try{ const sv=$('map').querySelector('svg'); if(sv&&sv.pauseAnimations){ on?sv.pauseAnimations():sv.unpauseAnimations() } }catch(e){} }
 function openPartnerRoom(){
-  prOpen=true; prLeaving=0; PR.leaving=0; PR.key=null; prAttach(); PR.cur[me.id]={x:PR_DOOR.x,y:PR_DOOR.y+1,face:1,mv:0};
+  parkMain(true); prOpen=true; prLeaving=0; PR.leaving=0; PR.key=null; prAttach(); PR.cur[me.id]={x:PR_DOOR.x,y:PR_DOOR.y+1,face:1,mv:0};
   prEl.classList.add('open'); prqShow(false); renderPartnerRoom(); prqRender(); prPickerAuto=false; prPickerClose(); prTopicSync(); clearInterval(prTimerId); prTimerTick(); prTimerId=setInterval(prTimerTick,250);
   const sp=prSpawn(0), sv0=prEl.querySelector('svg');
   doorSwing(sv0,'prDoorFx',sv0&&sv0.querySelector('#prChars'),true,1);   // the door is already open when you arrive
@@ -2897,7 +2997,7 @@ function openPartnerRoom(){
   setTimeout(()=>{ if(prOpen&&!PR.leaving) prTourStart(false) },900);   // first visit: a short tour
   setTimeout(prPeek,2000);
 }
-function closePartnerRoom(auto){ prOpen=false; prqShow(false); prTourOn=0; { const T=$('prTour'); if(T) T.classList.remove('on') } prPickerClose(); clearInterval(prTimerId); prTimerTick(); cancelAnimationFrame(PR.raf); prDetach(); prEl.classList.remove('open'); if(auto) toast({body:PD.closedMsg,holdMs:3000}) }
+function closePartnerRoom(auto){ parkMain(false); prOpen=false; prqShow(false); prTourOn=0; { const T=$('prTour'); if(T) T.classList.remove('on') } prPickerClose(); clearInterval(prTimerId); prTimerTick(); cancelAnimationFrame(PR.raf); prDetach(); prEl.classList.remove('open'); if(auto) toast({body:PD.closedMsg,holdMs:3000}) }
 function leavePartnerRoom(){   // tap the door: you walk to it, it swings open, you step through, it shuts behind you
   if(prLeaving||!prOpen) return; prLeaving=1; PR.leaving=1;
   const put=(x,y)=>{ PR.pos[me.id]={x,y}; if(PR.key) ref(`${E}/rooms/${PR.key}/pos/${me.id}`).set(PR.pos[me.id]) };
@@ -3063,13 +3163,13 @@ let prTimerId=0;
 const PR_DIG=['111101101101111','010110010010111','111001111100111','111001111001111','101101111001001','111100111001111','111100111101111','111001001001001','111101111101111','111101111001111'];
 const PR_CLK={x:31,y:9};
 function prClockSVG(){
-  return `<g id="prClock" transform="translate(${PR_CLK.x} ${PR_CLK.y})" shape-rendering="crispEdges"><rect x="-2" y="-2" width="35" height="19" fill="#ff3b3b" fill-opacity=".08"/><rect x="1" y="16" width="31" height="1" fill="#000" fill-opacity=".28"/>`
-    +`<rect width="31" height="15" fill="#15121a"/><rect x="1" y="1" width="29" height="13" fill="#5b4a66"/><rect x="1" y="1" width="29" height="1" fill="#9a88a8"/><rect x="1" y="1" width="1" height="13" fill="#9a88a8"/><rect x="29" y="2" width="1" height="12" fill="#3a2f45"/><rect x="2" y="13" width="28" height="1" fill="#3a2f45"/>`
-    +`<rect x="3" y="3" width="25" height="9" fill="#1a0508"/><g id="prClockD"></g></g>`;
+  return `<g id="prClock" transform="translate(${PR_CLK.x} ${PR_CLK.y})" shape-rendering="crispEdges"><rect x="-2" y="-2" width="35" height="19" fill="#3df5ff" fill-opacity=".06"/><rect x="1" y="16" width="31" height="1" fill="#000" fill-opacity=".28"/>`
+    +`<rect width="31" height="15" fill="#15121a"/><rect x="1" y="1" width="29" height="13" fill="#1a2548"/><rect x="1" y="1" width="29" height="1" fill="#2d4a8f"/><rect x="1" y="1" width="1" height="13" fill="#2d4a8f"/><rect x="29" y="2" width="1" height="12" fill="#0e1736"/><rect x="2" y="13" width="28" height="1" fill="#0e1736"/>`
+    +`<rect x="3" y="3" width="25" height="9" fill="#04101a"/><g id="prClockD"></g></g>`;
 }
 function prClockDraw(chars,colon,col){
   const g=prEl.querySelector('#prClockD'); if(!g) return;
-  const X=[7,11,17,21], OFF='#3a0c12'; let o='';
+  const X=[7,11,17,21], OFF='#0b2a38'; let o='';
   chars.forEach((ch,k)=>{ const lit=PR_DIG[ch];
     for(let p=0;p<15;p++){ if(PR_DIG[8][p]==='1') o+=`<rect x="${X[k]+p%3}" y="${5+Math.floor(p/3)}" width="1" height="1" fill="${lit[p]==='1'?col:OFF}"/>` } });
   const c=colon?col:OFF; o+=`<rect x="15" y="6" width="1" height="1" fill="${c}"/><rect x="15" y="8" width="1" height="1" fill="${c}"/>`;
@@ -3081,10 +3181,10 @@ function prTimerTick(){
     const left=end-now;
     if(left<=0){ prClockDraw([0,0,0,0],Math.floor(now/500)%2===0,'#ff3b3b'); return }   // time's up: 00:00 blinks
     const t=Math.ceil(left/1000), m=Math.min(99,Math.floor(t/60)), sc=t%60;
-    prClockDraw([Math.floor(m/10),m%10,Math.floor(sc/10),sc%10],true,left<60000?'#ff8a3c':'#ff3b3b');
+    prClockDraw([Math.floor(m/10),m%10,Math.floor(sc/10),sc%10],true,left<60000?'#ff8a3c':'#5fffc8');
   }else{
     const d=new Date(), h=d.getHours(), mi=d.getMinutes();
-    prClockDraw([Math.floor(h/10),h%10,Math.floor(mi/10),mi%10],Math.floor(now/1000)%2===0,'#ffc21a');
+    prClockDraw([Math.floor(h/10),h%10,Math.floor(mi/10),mi%10],Math.floor(now/1000)%2===0,'#3df5ff');
   }
 }
 /* ---------- TOPIC PICKER: choose a topic (or Surprise me / Mix), switch any time; the choice is shared with your partner ---------- */
@@ -3181,7 +3281,7 @@ function rideBuildingSVG(){
 function elevatorRide(from,to){
   const up=to>from, dist=Math.abs(to-from), wait=ms=>new Promise(r=>setTimeout(r,ms));
   const ov=document.createElement('div'); ov.id='ride';
-  ov.innerHTML=`<div id="rideBld"><div id="rideHud"><small>FLOOR</small><div><b id="rideArrow">${up?'\u25B2':'\u25BC'}</b> <span id="rideNum">${from}</span></div></div><div id="rideCam">${rideBuildingSVG()}</div></div><div class="rdoor l"></div><div class="rdoor r"></div>`;
+  ov.innerHTML=`<div id="rideBld"><div id="rideHud"><small>FLOOR</small><div><b id="rideArrow">${up?'\u25B2':'\u25BC'}</b> <span id="rideNum">${from}</span></div></div><div id="rideCam">${rideBuildingSVG()}</div></div>`;
   document.body.appendChild(ov);
   let acted=false; const act=()=>{ if(acted) return; acted=true; if(to===1) openPartnerRoom(); else leavePartnerRoom() };
   const car=ov.querySelector('#rideCar'), cable=ov.querySelector('#rideCable'), hl=ov.querySelector('#rideHl'), num=ov.querySelector('#rideNum'), bld=ov.querySelector('#rideBld'), cam=ov.querySelector('#rideCam');
@@ -3190,12 +3290,9 @@ function elevatorRide(from,to){
   const ding=(big)=>{ try{ icBeep(988,.1,'triangle'); if(big) setTimeout(()=>icBeep(1319,.22,'triangle'),120) }catch(e){} };
   (async()=>{
     try{
-      await wait(30); ov.classList.add('go');                 // 1. the doors close over the room you were in
-      try{ icBeep(660,.12,'triangle') }catch(e){}
-      await wait(650); ov.classList.add('bump'); try{ icBeep(110,.25,'sawtooth') }catch(e){} if(navigator.vibrate) navigator.vibrate(40);
-      await wait(300);
-      if(!up) leavePartnerRoom();                             // going down: the room is left while the doors are shut
-      bld.style.opacity=1; await wait(450);                   // 2. pull back: the whole building
+      await wait(30); try{ icBeep(660,.12,'triangle') }catch(e){}
+      bld.style.opacity=1; await wait(450);                   // 1. the whole building fades in over the room (no doors)
+      if(!up) leavePartnerRoom();                             // going down: the room is left while the building covers the screen
       const T=1000+450*dist, t0=performance.now(); let last=from;
       await new Promise(res=>{ (function f(now){
         const k=Math.min(1,(now-t0)/T), e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2, p=from+(to-from)*e, r=Math.round(p);
@@ -3204,13 +3301,11 @@ function elevatorRide(from,to){
         if(k<1) requestAnimationFrame(f); else res() })(t0) });
       place(to); num.textContent=to; hl.setAttribute('opacity',0); ding(true);
       await wait(350);
-      const w=ov.querySelector('#rw'+to).getBoundingClientRect(), c=cam.getBoundingClientRect();   // 3. zoom into the window of the floor we want
-      cam.style.transformOrigin=((w.left+w.width/2-c.left))+'px '+((w.top+w.height/2-c.top))+'px';
-      cam.classList.add('zoom'); await wait(650);
-      if(up) act();                                           // 4. the new room is set up behind the closed doors...
-      bld.style.opacity=0; await wait(400);
+      await wait(650);                                        // 3. (no zoom: the building just stays in view)
+      if(up) act();                                           // 4. the new room is set up behind the building...
       if(!up){ act(); const t1=performance.now(); while((prOpen||prLeaving)&&performance.now()-t1<6000) await wait(80) }
-      await wait(150); ov.classList.remove('go','bump'); try{ icBeep(1319,.18,'triangle') }catch(e){}   // ...and the doors open on it
+      bld.style.opacity=0; await wait(400);
+      await wait(150); try{ icBeep(1319,.18,'triangle') }catch(e){}
       await wait(700);
     }catch(e){ console.warn('ride',e) }
     act(); ov.remove();
@@ -3223,7 +3318,7 @@ document.addEventListener('keydown',e=>{ if(!elOpen||e.ctrlKey||e.metaKey||e.alt
 function fitPR(){ const s=prEl.querySelector('svg'),r=prEl.getBoundingClientRect(); if(!s||!r.width||!r.height)return;
   const ar=r.width/r.height,W=Math.max(120,150*ar),H=Math.max(150,120/ar), x0=60-W/2, TW=Math.max(W,PR_RIGHT-x0);   // the room is wider than the screen now: scroll right for the extension
   s.setAttribute('viewBox',`${x0} ${75-H/2} ${TW} ${H}`); s.style.width=(TW*r.height/H)+'px';
-  const c=s.querySelector('#prClock'); if(c){ const k=.6; c.setAttribute('transform',`translate(${(60+W/2-31*k-4).toFixed(2)} ${(75-H/2+4).toFixed(2)}) scale(${k})`) }   // small clock in the top-right corner
+  const c=s.querySelector('#prClock'); if(c){ const k=.6; c.setAttribute('transform',`translate(${(60+W/2-31*k-17).toFixed(2)} ${(75-H/2+4).toFixed(2)}) scale(${k})`) }   // small clock in the top-right corner
   prPlaceTopic(); prMoreSync(); if(prTourOn) prTourShow() }
 /* the topic card sits on the wheel's table, like a sign on the front of it */
 function prPlaceTopic(){ const s=prEl.querySelector('svg'), b=$('prTopicBtn'); if(!s||!b) return; const m=s.getScreenCTM(); if(!m) return;
@@ -3276,135 +3371,142 @@ function prTourStart(force){
 }
 function prTourEnd(){ prTourOn=0; const T=$('prTour'); if(T) T.classList.remove('on'); try{ localStorage.setItem(tourKey,'1') }catch(e){} if(prOpen) prTopicSync() }
 const prHelp=document.createElement('button'); prHelp.type='button'; prHelp.id='prHelp'; prHelp.textContent='?'; prHelp.setAttribute('aria-label','How does this work?'); prHelp.onclick=()=>prTourStart(true); prEl.appendChild(prHelp);
+/* GLOBE WHEEL: a globe seen from above the pole, so it is also a web. 12 meridians = the 12 slices, rings = latitudes, glowing nodes joined by threads.
+   Question slices are plain nodes; the wildcards are bright badge nodes. The slice logic (PR_KINDS, landing, flash) is unchanged. */
 function prWheelSVG(){
-  const {x:cx,y:cy,r}=PR_WC, N=PR_N, COL=['#1cc3ff','#b13bff'], P=(a,rr)=>[(cx+rr*Math.sin(a*Math.PI/180)).toFixed(2),(cy-rr*Math.cos(a*Math.PI/180)).toFixed(2)];
-  let seg='', pegs='';
-  for(let k=0;k<N;k++){ const a0=k*PR_SEG-PR_SEG/2, a1=k*PR_SEG+PR_SEG/2, p0=P(a0,r), p1=P(a1,r);
-    const kd=PR_KINDS[k], ws=PR_WC_STYLE[kd];
-    seg+=`<path d="M${cx} ${cy}L${p0[0]} ${p0[1]}A${r} ${r} 0 0 1 ${p1[0]} ${p1[1]}Z" fill="${ws?ws[0]:COL[k%2]}" stroke="#0a1a4a" stroke-width=".9"/>`;
-    seg+=ws?`<text transform="rotate(${k*PR_SEG} ${cx} ${cy})" x="${cx}" y="${cy-r*.72+1.8}" text-anchor="middle" font-size="5.2" font-weight="700" font-family="'Press Start 2P','Courier New',monospace" fill="${ws[1]}" stroke="#fff" stroke-width=".3" paint-order="stroke" style="pointer-events:none">${ws[2].replace('<','&lt;')}</text>`
-      :`<g transform="rotate(${k*PR_SEG} ${cx} ${cy}) translate(${cx-2.5} ${cy-r*.74-2.5})">${R([[0,0,5,5,'#ffc21a'],[0,0,5,1,'#fff27a'],[0,0,1,5,'#fff27a'],[4,1,1,4,'#e08a00'],[1,4,4,1,'#e08a00']])}</g>`;
-    const q=P(a0,r+1.5); pegs+=`<rect class="prpeg" x="${(q[0]-1).toFixed(2)}" y="${(q[1]-1).toFixed(2)}" width="2" height="2" fill="#ffe14a"/>` }
-  return `<g id="prWheel" style="cursor:pointer"><circle class="prglow" cx="${cx}" cy="${cy}" r="${r+7}" fill="#3df5ff" opacity=".3"/>`
-    +`<circle cx="${cx}" cy="${cy}" r="${r+4.2}" fill="#06102a"/><circle cx="${cx}" cy="${cy}" r="${r+3.6}" fill="#3df5ff"/><circle cx="${cx}" cy="${cy}" r="${r+2.6}" fill="#ff3df2"/>`
-    +`<g id="prWheelRot" transform="rotate(${PR.rot.toFixed(2)} ${cx} ${cy})">${seg}${pegs}</g>`
-    +`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#ff3df2" stroke-width="1"/>`
-    +`<circle cx="${cx}" cy="${cy}" r="9.5" fill="#ffc21a" stroke="#d98a00" stroke-width="1.2"/><circle cx="${cx}" cy="${cy}" r="7.8" fill="none" stroke="#fff27a" stroke-width=".6" stroke-opacity=".8"/><text x="${cx}" y="${cy+1.5}" text-anchor="middle" font-size="4.4" font-family="'Press Start 2P','Courier New',monospace" font-weight="700" fill="#7a2a00" stroke="#fff27a" stroke-width=".25" paint-order="stroke" style="pointer-events:none">SPIN</text>`
-    +`<g id="prPtr"><path d="M${cx-5.5} ${cy-r-7}h11l-5.5 10z" fill="#ffc21a" stroke="#8a5a00" stroke-width=".9"/><rect x="${cx-3}" y="${cy-r-6}" width="6" height="2" fill="#fff27a"/></g>`
+  const {x:cx,y:cy,r}=PR_WC, N=PR_N, S=PR_SEG, NR=r*.72, P=(a,rr)=>[+(cx+rr*Math.sin(a*Math.PI/180)).toFixed(2),+(cy-rr*Math.cos(a*Math.PI/180)).toFixed(2)];
+  const FN="'Press Start 2P','Courier New',monospace";
+  let tint='', spokes='', nodes='', pegs='', poly=[], poly2=[];
+  for(let k=0;k<N;k++){
+    const a0=k*S-S/2, a1=k*S+S/2, p0=P(a0,r), p1=P(a1,r), q=P(a0,r+1.5), ws=PR_WC_STYLE[PR_KINDS[k]], nd=P(k*S,NR), n2=P(k*S,r*.42);
+    tint+=`<path d="M${cx} ${cy}L${p0[0]} ${p0[1]}A${r} ${r} 0 0 1 ${p1[0]} ${p1[1]}Z" fill="${ws?ws[0]:(k%2?'#3a8bff':'#0a2a6a')}" fill-opacity="${ws?0.28:0.2}"/>`;
+    spokes+=`<line x1="${cx}" y1="${cy}" x2="${p0[0]}" y2="${p0[1]}"/>`;
+    poly.push(nd.join(',')); poly2.push(n2.join(','));
+    nodes+=`<g transform="rotate(${k*S} ${cx} ${cy})">`+(false
+      ?`<circle cx="${cx}" cy="${cy-NR}" r="5.6" fill="${ws[0]}" fill-opacity=".3"/><circle cx="${cx}" cy="${cy-NR}" r="4.7" fill="${ws[0]}" stroke="#fff" stroke-width=".6"/><text x="${cx}" y="${cy-NR+1.6}" text-anchor="middle" font-size="4.2" font-weight="700" font-family="${FN}" fill="${ws[1]}" style="pointer-events:none">${ws[2].replace('<','&lt;')}</text>`
+      :`<circle cx="${cx}" cy="${cy-NR}" r="3.6" fill="#3df5ff" fill-opacity=".2"/><circle cx="${cx}" cy="${cy-NR}" r="2.3" fill="none" stroke="${ws?ws[0]:'#3df5ff'}" stroke-width="${ws?1:.5}"/><circle cx="${cx}" cy="${cy-NR}" r="1.3" fill="#eafcff"/>`)+`</g>`;
+    pegs+=`<rect class="prpeg" x="${(q[0]-1).toFixed(2)}" y="${(q[1]-1).toFixed(2)}" width="2" height="2" fill="#bfefff"/>`;
+  }
+  const land=`<g transform="translate(${cx} ${cy})" fill="#2fe0b0" fill-opacity=".2"><path d="M-20 -14L-12 -22L-3 -19L2 -12L-4 -6L-9 -8L-14 -3Z"/><path d="M8 -18L18 -14L22 -5L15 -2L11 -8Z"/><path d="M-18 6L-10 2L-4 8L-7 18L-14 20L-19 13Z"/><path d="M6 6L15 4L21 11L17 19L9 21L5 14Z"/><path d="M-3 22L4 23L2 27L-3 26Z"/></g>`;
+  const rings=[.34,.62,.9].map(f=>`<circle cx="${cx}" cy="${cy}" r="${(r*f).toFixed(2)}"/>`).join('');
+  const chords=[[0,5],[3,9],[6,11]].map(([a,b])=>{ const u=P(a*S,NR), v=P(b*S,NR); return `<line x1="${u[0]}" y1="${u[1]}" x2="${v[0]}" y2="${v[1]}"/>` }).join('');
+  const packets=[1,5,9].map((k,j)=>{ const d=(3+j*.8).toFixed(1); return `<g transform="rotate(${k*S-S/2} ${cx} ${cy})"><circle cx="${cx}" cy="${cy-9}" r=".9" fill="#fff"><animate attributeName="cy" values="${cy-9};${cy-r}" dur="${d}s" begin="${(j*.9).toFixed(1)}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.15;.8;1" dur="${d}s" begin="${(j*.9).toFixed(1)}s" repeatCount="indefinite"/></circle></g>` }).join('');
+  const defs=`<defs><radialGradient id="prgo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1f5fd0"/><stop offset=".7" stop-color="#0f2f86"/><stop offset="1" stop-color="#071a52"/></radialGradient>`
+    +`<radialGradient id="prgs" cx="36%" cy="30%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/><stop offset=".78" stop-color="#020816" stop-opacity=".15"/><stop offset="1" stop-color="#020816" stop-opacity=".62"/></radialGradient></defs>`;
+  const T=r-5;   // pin tip sits just inside the globe's edge
+  return `<g id="prWheel" style="cursor:pointer">${defs}<circle class="prglow" cx="${cx}" cy="${cy}" r="${r+7}" fill="#3df5ff" opacity=".2"/>`
+    +`<circle cx="${cx}" cy="${cy}" r="${r+4.2}" fill="#06102a"/><circle cx="${cx}" cy="${cy}" r="${r+3.6}" fill="#3df5ff"/><circle cx="${cx}" cy="${cy}" r="${r+2.6}" fill="#0a1a4a"/>`
+    +`<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#prgo)"/>`
+    +`<g id="prWheelRot" transform="rotate(${PR.rot.toFixed(2)} ${cx} ${cy})">${tint}${land}`
+    +`<g fill="none" stroke="#3df5ff" stroke-opacity=".3" stroke-width=".4">${rings}</g><g stroke="#3df5ff" stroke-opacity=".45" stroke-width=".45">${spokes}</g>`
+    +`<g stroke="#9fefff" stroke-opacity=".5" stroke-width=".5" stroke-dasharray="1.4 1.2">${chords}</g>`
+    +`<polygon points="${poly.join(' ')}" fill="none" stroke="#9fefff" stroke-opacity=".6" stroke-width=".55"/><polygon points="${poly2.join(' ')}" fill="none" stroke="#9fefff" stroke-opacity=".35" stroke-width=".45"/>`
+    +`${packets}${nodes}${pegs}</g>`
+    +`<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#prgs)" pointer-events="none"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#7fe9ff" stroke-opacity=".55" stroke-width=".7" pointer-events="none"/>`
+    +`<circle cx="${cx}" cy="${cy}" r="9.5" fill="#eafcff" stroke="#3df5ff" stroke-width="1.2"/><circle cx="${cx}" cy="${cy}" r="7.8" fill="none" stroke="#0a1a4a" stroke-width=".5" stroke-opacity=".5"/><text x="${cx}" y="${cy+1.5}" text-anchor="middle" font-size="3.1" font-family="${FN}" font-weight="700" fill="#0a1a4a" stroke="#eafcff" stroke-width=".25" paint-order="stroke" style="pointer-events:none">SPIN</text>`
+    +`<g id="prPtr"><path d="M${cx} ${cy-r+3.2}C${cx-1.2} ${cy-r+1} ${cx-5} ${cy-r-1.5} ${cx-5} ${cy-r-5}A5 5 0 1 1 ${cx+5} ${cy-r-5}C${cx+5} ${cy-r-1.5} ${cx+1.2} ${cy-r+1} ${cx} ${cy-r+3.2}Z" fill="#ffc21a" stroke="#8a5a00" stroke-width=".9"/><circle cx="${cx}" cy="${cy-r-5}" r="1.9" fill="#0a1a4a"/></g>`
     +`<circle cx="${cx}" cy="${cy}" r="${r+4}" fill="#000" fill-opacity="0"/></g>`;
 }
-/* the extension (x 120-230): an old-web homepage in a browser window, a desk with two CRT monitors, a server rack, a lava lamp, a neon ONLINE sign */
+/* the extension (x 120-230). REDESIGN: a calm night-network corner. One network map, the TV, one clean workstation, one server rack and a small hologram.
+   Cyan on deep navy. Only a few slow things move (packets on the map, a hologram that hovers, a couple of rack lights). */
 function prExtSVG(){
   const Q=(x,y,w,h,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
   const FN="'Press Start 2P','Courier New',monospace";
   const T=(x,y,s,c,txt,ex)=>`<text x="${x}" y="${y}" font-size="${s}" font-family="${FN}" fill="${c}" ${ex||''}>${txt}</text>`;
-  const led=(x,y,c,dur,begin)=>`<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"><animate attributeName="opacity" values="1;1;.15;1;.15;.15" dur="${dur}s" begin="${begin}s" repeatCount="indefinite" calcMode="discrete"/></rect>`;
+  const led=(x,y,c,dur,begin)=>`<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"><animate attributeName="opacity" values="1;1;1;.3;1;1" dur="${dur}s" begin="${begin}s" repeatCount="indefinite" calcMode="discrete"/></rect>`;
   let o='';
-  // neon ONLINE sign + wifi
-  o+=`<g><animate attributeName="opacity" values="1;1;1;.35;1;.6;1;1" dur="5s" repeatCount="indefinite"/>`
-    +T(208,12.5,5,'#3df5ff','ONLINE','text-anchor="middle" stroke="#3df5ff" stroke-opacity=".35" stroke-width="1.6"')
-    +T(208,12.5,5,'#d8fdff','ONLINE','text-anchor="middle"')
-    +Q(183,8,6,1,'#3df5ff')+Q(182,9,1,1,'#3df5ff')+Q(189,9,1,1,'#3df5ff')+Q(184,11,4,1,'#3df5ff')+Q(183,12,1,1,'#3df5ff')+Q(188,12,1,1,'#3df5ff')+Q(185,14,2,2,'#d8fdff')+`</g>`;
-  // browser window with a 1999 homepage
-  { const bx=132, by=14, bw=44, bh=47;
-    o+=`<g transform="translate(0 -5)">`+Q(bx+2,by+2,bw,bh,'#05091c')
-      +Q(bx,by,bw,bh,'#c0c0c0')+Q(bx,by,bw,1,'#fff')+Q(bx,by,1,bh,'#fff')+Q(bx+bw-1,by,1,bh,'#404040')+Q(bx,by+bh-1,bw,1,'#404040')
-      +`<rect x="${bx+2}" y="${by+2}" width="${bw-4}" height="5" fill="url(#prtb)"/>`
-      +T(bx+4,by+6,2.2,'#fff','WELCOME.HTM')
-      +Q(bx+bw-10,by+3,3,3,'#c0c0c0')+Q(bx+bw-6,by+3,3,3,'#c0c0c0')+Q(bx+bw-5,by+4,1,1,'#000')
-      +Q(bx+2,by+8,bw-4,4,'#fff')+Q(bx+2,by+8,bw-4,1,'#808080')+T(bx+3.5,by+11.2,2,'#0000cc','WWW.HELLO.NET')
-      +Q(bx+2,by+13,bw-4,bh-15,'#000033');
-    [[136,31],[170,30],[142,44],[168,41],[172,56],[137,57],[163,33]].forEach((s,i)=>{ o+=`<rect x="${s[0]}" y="${s[1]}" width="1" height="1" fill="#fff"><animate attributeName="opacity" values="1;.2;1" dur="${1.4+i*.35}s" repeatCount="indefinite"/></rect>` });
-    o+=T(154,35,3.6,'#ffee33','WELCOME','text-anchor="middle" stroke="#ff3df2" stroke-width=".35" paint-order="stroke"')
-      +T(154,39.5,2.2,'#3df5ff','TO MY HOMEPAGE','text-anchor="middle"');
-    ['#ff3b3b','#ff9a2a','#ffee33','#35e06a','#3df5ff','#3a6bff','#ff3df2'].forEach((c,i)=>{ o+=Q(136+i*5.4,41.5,5.4,1,c) });
-    o+=T(136.5,46.5,1.9,'#fff','YOU ARE VISITOR')+Q(135,47.6,22,5.6,'#000')+Q(135,47.6,22,.7,'#808080')+T(146,52,3.4,'#ff3b3b','001337','text-anchor="middle"')
-      +`<g>`+T(166,52,3,'#ffee33','NEW!','text-anchor="middle"')+`<animate attributeName="opacity" values="1;0" dur="1.2s" repeatCount="indefinite" calcMode="discrete"/></g>`
-      +Q(136,55,38,3,'#ffcc00'); for(let i=0;i<9;i++) o+=Q(138+i*4,55,2,3,'#000'); o+=`</g>`; }
-  // TV (same set as the main room, a bit smaller): tap it to go to the link when the host has turned it on
-  { const sl=Array.from({length:13},(_,i)=>`<rect x="37" y="${20+i*2}" width="50" height="1" fill="#fff" fill-opacity=".05"/>`).join('');
-    o+=`<g id="prTV" transform="translate(154 8.4) scale(.8)" style="cursor:pointer"><rect x="31" y="13" width="62" height="40" fill="#000" fill-opacity="0"/>${R(TV_RECTS)}<g class="scr-on"><rect class="scr-fx" x="37" y="19" width="50" height="27" fill="#2a3a5a"><animate attributeName="fill" values="#24365a;#3a2a5a;#2a4a5a;#24365a" dur="3.2s" repeatCount="indefinite"/></rect>${sl}</g><polygon points="37,19 60,19 47,46 37,46" fill="#fff" fill-opacity=".06"/><rect x="85" y="47" width="1" height="1" fill="#ff4040" class="led"><animate attributeName="opacity" values="1;.2;1" dur="1.3s" repeatCount="indefinite"/></rect></g>`; }
-  // floor cables (data runs along the floor from the rack to the desk)
-  const cab=(d,c)=>`<path d="${d}" fill="none" stroke="#0a1130" stroke-width="1.6" shape-rendering="crispEdges"/><path d="${d}" fill="none" stroke="${c}" stroke-width="1" stroke-dasharray="2 9" shape-rendering="crispEdges"><animate attributeName="stroke-dashoffset" from="0" to="-11" dur="1.1s" repeatCount="indefinite"/></path>`;
-  // desk
-  o+=Q(138,79,72,19,'#7a4f26')+Q(144,79,52,19,'#1f130a')+Q(138,79,6,19,'#7a4f26')+Q(138,79,1,19,'#9a6a38')
-    +Q(196,79,14,19,'#7a4f26')+Q(196,79,1,19,'#5a3a1a')+Q(198,81,10,7,'#8a5a2c')+Q(198,89,10,7,'#8a5a2c')+Q(202,84,2,1,'#e8d49a')+Q(202,92,2,1,'#e8d49a')
-    +Q(136,76,76,3,'#a8743c')+Q(136,76,76,1,'#e0b074')+Q(136,78,76,1,'#5a3a1a');
-  // beige tower PC under the desk
-  o+=Q(178,81,11,17,'#d9d2b8')+Q(178,81,1,17,'#f1ecd8')+Q(188,81,1,17,'#a89f80')+Q(180,83,7,2,'#a89f80')+Q(180,86,7,2,'#a89f80')+Q(181,89,4,1,'#000')+Q(182,93,2,2,'#a89f80')+led(186,94,'#5fff8a',1.7,0);
-  // CRT monitor 1: scrolling green terminal
-  o+=Q(142,57,24,18,'#d9d2b8')+Q(142,57,24,1,'#f1ecd8')+Q(142,57,1,18,'#f1ecd8')+Q(165,57,1,18,'#a89f80')+Q(142,74,24,1,'#a89f80')+Q(144,59,20,14,'#a89f80')+Q(145,60,18,12,'#04170c')
-    +`<clipPath id="prcrt1"><rect x="145" y="60" width="18" height="12"/></clipPath><g clip-path="url(#prcrt1)"><g><animateTransform attributeName="transform" type="translate" from="0 0" to="0 -8" dur="3.2s" repeatCount="indefinite"/>`;
-  [10,14,8,12,10,14,8,12,10,14].forEach((w,i)=>{ o+=Q(146,61.5+i*2,w,1,'#5fff8a') });
-  o+=`</g></g>`+`<rect x="146" y="70" width="2" height="1" fill="#d8ffe4"><animate attributeName="opacity" values="1;0" dur=".9s" repeatCount="indefinite" calcMode="discrete"/></rect>`+Q(149,75,12,1,'#8a8268');
-  // CRT monitor 2: "you've got mail"
-  o+=Q(168,59,24,16,'#d9d2b8')+Q(168,59,24,1,'#f1ecd8')+Q(168,59,1,16,'#f1ecd8')+Q(191,59,1,16,'#a89f80')+Q(168,74,24,1,'#a89f80')+Q(170,61,20,13,'#a89f80')+Q(171,62,18,11,'#0a2a7a')
-    +Q(176,63,8,5,'#fff')+Q(176,63,8,1,'#c0c0c0')+Q(177,64,2,1,'#c0c0c0')+Q(179,65,2,1,'#c0c0c0')+Q(181,64,2,1,'#c0c0c0')
-    +`<g>`+T(180,72,2,'#ffee33','MAIL!','text-anchor="middle"')+`<animate attributeName="opacity" values="1;0" dur="1.1s" repeatCount="indefinite" calcMode="discrete"/></g>`+Q(174,75,12,1,'#8a8268');
-  // keyboard and mouse
-  o+=Q(146,76,18,2,'#d9d2b8')+Q(146,77.4,18,.6,'#a89f80')+Q(194,76.4,3,1.6,'#d9d2b8');
-  // lava lamp
-  o+=`<circle cx="199.5" cy="68" r="8" fill="#ff3df2" opacity=".12"/>`+Q(196,73,7,3,'#ffcf40')+Q(196,73,7,1,'#fff08a')+Q(197,63,5,10,'#3a0a50')+Q(198,64,3,8,'#7a1a8a')+Q(198,60,3,3,'#ffcf40')+Q(199,59,1,1,'#fff08a')
-    +`<rect x="198.5" y="70" width="2" height="2" fill="#ff3df2"><animate attributeName="y" values="70;65;70" dur="4s" repeatCount="indefinite"/></rect>`
-    +`<rect x="199" y="66" width="1.5" height="2" fill="#ffb347"><animate attributeName="y" values="66;70;66" dur="5.5s" repeatCount="indefinite"/></rect>`;
-  // server rack (modem on top) with antennas and blinking lights
-  o+=Q(214,54,1,3,'#1a1f33')+Q(225,54,1,3,'#1a1f33')+led(214,53,'#ff3df2',2.2,.3)+led(225,53,'#3df5ff',1.9,.8)
-    +Q(212,57,16,41,'#0b0f1f')+Q(212,57,16,1,'#3a4468')+Q(212,57,1,41,'#3a4468')+Q(227,57,1,41,'#05091c');
-  const LC=['#5fff8a','#ffb347','#3df5ff','#ff3df2','#5fff8a'];
+  // ---- network map on the wall: one hub, a few nodes, three little packets travelling along the links
+  { const bx=128, by=10, bw=48, bh=44;
+    const P=[[152,36],[136,25],[139,46],[160,22],[168,31],[166,47],[149,50],[133,36]];   // 0 = hub
+    const EG=[[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[1,3],[4,5],[2,6],[7,1],[7,2]];
+    const seg=(a,b)=>`M${P[a][0]} ${P[a][1]}L${P[b][0]} ${P[b][1]}`;
+    const pk=(a,b,dur,begin)=>`<rect x="-1" y="-1" width="2" height="2" fill="#e8ffff" opacity="0"><animateMotion dur="${dur}s" begin="${begin}s" repeatCount="indefinite" path="${seg(a,b)}"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.12;.88;1" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/></rect>`;
+    o+=Q(bx-1,by-1,bw+2,bh+2,'#1b2a5a')+Q(bx,by,bw,bh,'#060c1f')
+      +Q(bx,by,bw,6,'#0c1634')+Q(bx,by+6,bw,1,'#15506e')
+      +T(bx+3,by+4.4,2.4,'#6fc9dd','NETWORK')
+      +`<g>`+Q(bx+bw-18,by+2.5,2,2,'#5fffc8')+`<animate attributeName="opacity" values="1;.35;1" dur="3.6s" repeatCount="indefinite"/></g>`
+      +T(bx+bw-3,by+4.4,2,'#5fffc8','ONLINE','text-anchor="end"')
+      +Q(bx,by+7,bw,bh-7,'url(#prdots)')
+      +`<path d="${EG.map(e=>seg(e[0],e[1])).join('')}" fill="none" stroke="#15506e" stroke-width="1"/>`;
+    for(let i=1;i<P.length;i++) o+=Q(P[i][0]-1,P[i][1]-1,3,3,'#1fa9c9')+Q(P[i][0],P[i][1],1,1,'#d8fdff');
+    o+=Q(149,33,7,7,'#15506e')+Q(150,34,5,5,'#3df5ff')+Q(151,35,3,3,'#e8ffff')
+      +pk(0,1,4,0)+pk(5,0,5.5,1.3)+pk(0,3,6.5,2.6); }
+  // ---- TV (same set as the main room, a bit smaller): static takes over when the host turns it on
+  { const sl=Array.from({length:13},(_,i)=>`<rect x="37" y="${20+i*2}" width="50" height="1" fill="#fff" fill-opacity=".04"/>`).join('');
+    o+=`<g id="prTV" transform="translate(154 8.4) scale(.8)" style="cursor:pointer"><rect x="31" y="13" width="62" height="40" fill="#000" fill-opacity="0"/>${R(TV_RECTS)}<g class="scr-on"><rect class="scr-fx" x="37" y="19" width="50" height="27" fill="#06101e"/>${sl}</g><polygon points="37,19 60,19 47,46 37,46" fill="#fff" fill-opacity=".05"/><rect class="led" x="85" y="47" width="1" height="1" style="fill:#3df5ff"/></g>`; }
+  // ---- floor cable: one quiet line from the rack to the desk with a single pulse
+  const cab=(d,L,dur)=>`<path d="${d}" fill="none" stroke="#070d22" stroke-width="1.6" shape-rendering="crispEdges"/><path d="${d}" fill="none" stroke="#0f2a52" stroke-width="1" shape-rendering="crispEdges"/><path d="${d}" fill="none" stroke="#3df5ff" stroke-width="1" stroke-dasharray="3 ${L}" shape-rendering="crispEdges"><animate attributeName="stroke-dashoffset" from="0" to="${-(L+3)}" dur="${dur}s" repeatCount="indefinite"/></path>`;
+  o+=cab('M218 98V102H141V99',84,7);
+  // ---- desk: dark top with a thin light along the front edge
+  o+=Q(138,79,72,19,'#0a1130')+Q(138,79,3,19,'#16224a')+Q(207,79,3,19,'#16224a')+Q(141,79,66,2,'#060b1e')
+    +Q(136,76,76,3,'#1a2750')+Q(136,76,76,1,'#2d4a8f')+Q(136,78,76,1,'#3df5ff');
+  // slim tower under the desk with a light strip
+  o+=Q(182,81,8,16,'#121c40')+Q(182,81,1,16,'#1b2a5a')+Q(185,82,1,13,'#1fa9c9')+led(187,94,'#5fffc8',3.2,0);
+  // monitor 1: quiet code with a blinking cursor
+  o+=Q(140,56,26,17,'#1b2a5a')+Q(141,57,24,15,'#070d22')+Q(142,58,22,13,'#04101a')+Q(152,73,2,3,'#16224a')+Q(148,75,10,1,'#243a7c')
+    +Q(143,60,10,1,'#1fa9c9')+Q(145,62,16,1,'#15506e')+Q(145,64,7,1,'#1fa9c9')+Q(143,66,13,1,'#15506e')+Q(145,68,9,1,'#1fa9c9')+Q(143,70,5,1,'#15506e')
+    +`<rect x="149" y="70" width="2" height="1" fill="#d8ffff"><animate attributeName="opacity" values="1;0" dur="1.1s" repeatCount="indefinite" calcMode="discrete"/></rect>`;
+  // monitor 2: a calm traffic graph
+  o+=Q(169,56,26,17,'#1b2a5a')+Q(170,57,24,15,'#070d22')+Q(171,58,22,13,'#04101a')+Q(181,73,2,3,'#16224a')+Q(177,75,10,1,'#243a7c')
+    +`<polygon points="172,68 172,65 175,63 178,65 181,61 184,63 187,60 190,62 192,59 192,68" fill="#3df5ff" fill-opacity=".12"/>`
+    +`<polyline points="172,65 175,63 178,65 181,61 184,63 187,60 190,62 192,59" fill="none" stroke="#3df5ff" stroke-width="1"/>`
+    +Q(172,68,20,1,'#15506e');
+  // hologram: a small crystal that hovers over an emitter on the desk
+  o+=Q(198,74,8,2,'#16224a')+Q(198,74,8,1,'#3df5ff')
+    +`<g><animateTransform attributeName="transform" type="translate" values="0 0;0 -1.5;0 0" dur="4s" repeatCount="indefinite"/>`
+    +`<polygon points="202,56 208,64 202,72 196,64" fill="#3df5ff" fill-opacity=".1" stroke="#3df5ff" stroke-width="1"/>`
+    +`<path d="M196 64h12M202 56v16" stroke="#1fa9c9" stroke-width="1" fill="none"/></g>`;
+  // server rack: dark, thin edges, two slow lights per unit
+  o+=Q(212,54,16,3,'#0b1330')+Q(212,54,16,1,'#1fa9c9')
+    +Q(212,57,16,41,'#070d22')+Q(212,57,1,41,'#1b2a5a')+Q(227,57,1,41,'#030614');
   for(let u=0;u<4;u++){ const y=58+u*9;
-    o+=Q(213,y,14,8,'#262e4a')+Q(213,y,14,1,'#3a4468')+Q(214,y+4,6,1,'#0b0f1f')+Q(214,y+6,6,1,'#0b0f1f');
-    for(let k=0;k<4;k++) o+=led(221+k*1.6,y+2,LC[(u+k)%5],1.2+((u*4+k)%5)*.37,((u*4+k)%7)*.21);
-    if(u===0) o+=T(214,y+3.4,1.8,'#9bb0e8','MODEM'); }
-  o+=Q(213,95,14,3,'#1a1f33')+Q(213,98,2,1,'#05091c')+Q(225,98,2,1,'#05091c');
-  o+=cab('M218 98V102H141V99','#ff3df2')+cab('M222 98V104H128','#3df5ff')+Q(126,103,2,2,'#3df5ff')+Q(140,98,2,2,'#ff3df2');
-  // rug: a giant mousepad with a cursor and a loading bar
-  o+=Q(100,105,112,28,'#05091c')+Q(102,107,108,24,'#3df5ff')+Q(103,108,106,22,'#0a1a4a')+Q(103,108,106,22,'url(#prrug)');
-  ['X.........','XX........','XWX.......','XWWX......','XWWWX.....','XWWWWX....','XWWWWWX...','XWWWXXXX..','XWXWX.....','XX.XWX....','X..XWX....','....XX....'].forEach((r,j)=>{ for(let i=0;i<r.length;i++){ if(r[i]!=='.') o+=Q(116+i,112+j,1,1,r[i]==='X'?'#05091c':'#fff') } });
-  o+=T(160,118,3,'#3df5ff','LOADING...');
-  for(let i=0;i<8;i++) o+=`<rect x="${160+i*6}" y="121" width="5" height="3" fill="#3df5ff" opacity=".15"><animate attributeName="opacity" values=".15;1;1" keyTimes="0;${((i+1)/9).toFixed(3)};1" dur="4s" repeatCount="indefinite" calcMode="discrete"/></rect>`;
+    o+=Q(213,y,14,8,'#10183a')+Q(213,y,14,1,'#26397a')+Q(214,y+4,7,1,'#070d22')+Q(214,y+6,7,1,'#070d22')
+      +led(223,y+2,'#3df5ff',2.6+u*.5,u*.4)+led(225,y+2,'#5fffc8',3.4+u*.3,u*.7); }
+  o+=Q(213,95,14,3,'#0b1330');
+  // ---- rug: a clean data carpet with HUD corners and a faint wifi mark (this is where everyone walks)
+  o+=Q(100,105,112,28,'#05091c')+Q(101,106,110,26,'url(#prrug)')
+    +Q(103,108,106,1,'#15506e')+Q(103,130,106,1,'#15506e')+Q(103,108,1,23,'#15506e')+Q(208,108,1,23,'#15506e');
+  [[103,108,1,1],[208,108,-1,1],[103,130,1,-1],[208,130,-1,-1]].forEach(c=>{ const x=c[0],y=c[1],sx=c[2],sy=c[3];
+    o+=Q(sx>0?x:x-4,y,5,1,'#3df5ff')+Q(x,sy>0?y:y-4,1,5,'#3df5ff') });
+  o+=`<g fill="none" stroke="#15506e" stroke-width="1"><path d="M149.5 118.5A9 9 0 0 1 162.5 118.5M151.7 121A6 6 0 0 1 160.3 121M153.8 123.5A3 3 0 0 1 158.2 123.5"/></g>`+Q(155.2,125.5,1.6,1.6,'#1fa9c9');
   return o;
 }
 
-/* the main part of the room (x 0-120): LED ticker, a desktop with icons above the elevator, glowing circuit traces down the wall */
+/* the main part of the room (x 0-120). REDESIGN: a slow data ticker, a wayfinding sign above the elevator, and thin traces that carry one pulse each */
 function prIntSVG(){
   const Q=(x,y,w,h,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
   const FN="'Press Start 2P','Courier New',monospace";
   const T=(x,y,s,c,txt,ex)=>`<text x="${x}" y="${y}" font-size="${s}" font-family="${FN}" fill="${c}" ${ex||''}>${txt}</text>`;
-  const tr=(d,c)=>`<path d="${d}" fill="none" stroke="#1a3470" stroke-width="1" shape-rendering="crispEdges"/><path d="${d}" fill="none" stroke="${c}" stroke-width="1" stroke-dasharray="2 9" shape-rendering="crispEdges"><animate attributeName="stroke-dashoffset" from="0" to="-11" dur="1.1s" repeatCount="indefinite"/></path>`;
+  const tr=(d,L,dur,begin)=>`<path d="${d}" fill="none" stroke="#10224a" stroke-width="1" shape-rendering="crispEdges"/><path d="${d}" fill="none" stroke="#3df5ff" stroke-opacity=".85" stroke-width="1" stroke-dasharray="4 ${L}" shape-rendering="crispEdges"><animate attributeName="stroke-dashoffset" from="0" to="${-(L+4)}" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/></path>`;
   let o='';
-  o+=tr('M43.5 7V70','#3df5ff')+tr('M118.5 7V66H128','#ff3df2')+tr('M-600 78H720','#3df5ff')
-    +Q(42,69,3,3,'#3df5ff')+Q(127,65,3,3,'#ff3df2');
-  // LED ticker across the top of the wall
-  const S='*** WELCOME TO THE INTERNET *** YOU HAVE 1 NEW MESSAGE *** BEST VIEWED IN 800x600 *** LOADING FRIENDS... *** ', TW=S.length*3;
-  let tk=''; for(let k=-1;k<3;k++) tk+=`<text x="${k*TW}" y="4.7" font-size="3" font-family="${FN}" fill="#ffb347" textLength="${TW}" lengthAdjust="spacing" xml:space="preserve">${S}</text>`;
-  o+=Q(-600,0,1320,6.5,'#05091c')+Q(-600,6,1320,1,'#3df5ff')+`<g><animateTransform attributeName="transform" type="translate" from="0 0" to="${-TW} 0" dur="${(TW/7).toFixed(1)}s" repeatCount="indefinite"/>${tk}</g>`;
-  // desktop with icons above the elevator door
-  o+=Q(4,10,25,28,'#05091c')+Q(2,8,25,28,'#008080')+Q(2,8,25,1,'#5fe0e0')+Q(2,8,1,28,'#5fe0e0')+Q(2,35,25,1,'#004a4a')+Q(26,8,1,28,'#004a4a');
-  const ic=(x,y,k,lab)=>{ let s='';
-    if(k==='pc') s=Q(x,y,8,6,'#d9d2b8')+Q(x+1,y+1,6,4,'#1a40c0')+Q(x+1,y+1,6,1,'#5a8aff')+Q(x+2,y+6,4,1,'#a89f80')+Q(x+1,y+7,6,1,'#d9d2b8');
-    if(k==='folder') s=Q(x,y+1,3,1,'#c9a23a')+Q(x,y+2,8,5,'#ffd84a')+Q(x,y+2,8,1,'#fff08a')+Q(x,y+6,8,1,'#c9a23a');
-    if(k==='bin') s=Q(x+1,y,6,1,'#9aa0aa')+Q(x+1,y+1,6,6,'#c4c9d2')+Q(x+2,y+2,1,4,'#6b7280')+Q(x+4,y+2,1,4,'#6b7280')+Q(x+5,y+2,1,4,'#6b7280');
-    if(k==='globe') s=Q(x+2,y,4,7,'#1a6fd1')+Q(x,y+2,8,3,'#1a6fd1')+Q(x+1,y+1,6,5,'#2a8aff')+Q(x+2,y+2,2,2,'#35e06a')+Q(x+5,y+3,2,2,'#35e06a')+Q(x+3,y+5,2,1,'#35e06a');
-    return s+T(x+4,y+10,2,'#fff',lab,'text-anchor="middle"') };
-  o+=ic(5,11,'pc','MY PC')+ic(16,11,'folder','FILES')+ic(5,24,'bin','BIN')+ic(16,24,'globe','WWW');
+  o+=tr('M43.5 7V70',63,6,0)+tr('M118.5 7V66H140',81,8,2)
+    +`<path d="M-600 78H720" fill="none" stroke="#10224a" stroke-width="1" shape-rendering="crispEdges"/>`+tr('M0 78H230',230,11,1)
+    +Q(42.5,69,2,2,'#1fa9c9')+Q(117.5,65,2,2,'#1fa9c9');
+  // wayfinding sign above the elevator: a wireframe globe and the floor name
+  o+=`<g transform="translate(0 -7)">`+Q(2,8,25,28,'#1b2a5a')+Q(3,9,23,26,'#070d22')+Q(3,9,23,1,'#1fa9c9')
+    +`<g fill="none" stroke-width="1"><circle cx="14.5" cy="19.5" r="6" stroke="#3df5ff"/><ellipse cx="14.5" cy="19.5" rx="2.6" ry="6" stroke="#1fa9c9"/><path d="M8.5 19.5h12M9.6 16h9.8M9.6 23h9.8" stroke="#1fa9c9"/></g>`
+    +T(14.5,30,2.6,'#6fc9dd','INTERNET','text-anchor="middle"')+T(14.5,34,2,'#3d7a96','FLOOR 1','text-anchor="middle"')+`</g>`;
   return o;
 }
 
 function renderPartnerRoom(){
   if(!prOpen) return; prAttach(); const keepX=$('prScene').scrollLeft;
   const W=(x,y,w,h,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
+  /* REDESIGN "night network": deep navy walls, one cyan accent, one light strip along the floor. The wheel is the brightest thing in the room. */
   let o=`<defs>
-<pattern id="prwall" width="16" height="16" patternUnits="userSpaceOnUse">${W(0,0,16,16,'#0d1736')}${W(0,0,16,1,'#142758')}${W(0,0,1,16,'#142758')}${W(0,0,2,2,'#2a4a9a')}${W(8,8,1,1,'#1d3a7a')}</pattern>
-<pattern id="prfloor" width="16" height="8" patternUnits="userSpaceOnUse">${W(0,0,16,8,'#101a3e')}${W(0,0,8,4,'#14214f')}${W(8,4,8,4,'#14214f')}${W(0,0,16,1,'#26469c')}${W(0,0,1,8,'#26469c')}${W(0,7,16,1,'#060b20')}${W(4,3,1,1,'#060b20')}${W(11,3,1,1,'#060b20')}</pattern>
-<pattern id="prwain" width="24" height="12" patternUnits="userSpaceOnUse">${W(0,0,24,12,'#0a1130')}${W(0,0,1,12,'#16296a')}${W(3,3,18,6,'#0c1740')}${W(3,3,18,1,'#16296a')}</pattern>
-<pattern id="prleds" width="20" height="4" patternUnits="userSpaceOnUse">${W(0,0,20,4,'#05091c')}${W(3,1,2,1,'#3df5ff')}${W(13,1,2,1,'#ff3df2')}</pattern>
-<pattern id="prrug" width="8" height="8" patternUnits="userSpaceOnUse">${W(0,0,8,1,'#14338a')}${W(0,0,1,8,'#14338a')}</pattern>
-<pattern id="prscan" width="4" height="3" patternUnits="userSpaceOnUse"><rect width="4" height="1" fill="#000" fill-opacity=".09"/></pattern>
-<linearGradient id="prtb" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000080"/><stop offset="1" stop-color="#1084d0"/></linearGradient></defs>`
-   +W(-600,-600,1320,688,'url(#prwall)')+`<rect x="-600" y="88" width="1320" height="662" fill="url(#prfloor)"/>`+W(-600,72,1320,12,'url(#prwain)')+W(-600,72,1320,1,'#3df5ff')+W(-600,73,1320,1,'#0e3a6a')+W(-600,84,1320,4,'url(#prleds)')+W(-600,84,1320,1,'#26469c')
+<pattern id="prwall" width="40" height="16" patternUnits="userSpaceOnUse">${W(0,0,40,16,'#0a1127')}${W(0,0,1,16,'#101b3b')}</pattern>
+<pattern id="prfloor" width="32" height="12" patternUnits="userSpaceOnUse">${W(0,0,32,12,'#0b122b')}${W(0,0,32,1,'#121e46')}${W(0,0,1,12,'#121e46')}</pattern>
+<pattern id="prwain" width="40" height="12" patternUnits="userSpaceOnUse">${W(0,0,40,12,'#091029')}${W(0,0,1,12,'#101b3b')}</pattern>
+<pattern id="prleds" width="20" height="4" patternUnits="userSpaceOnUse">${W(0,0,20,4,'#060b1e')}${W(0,1,20,1,'#3df5ff')}${W(0,2,20,1,'#15506e')}</pattern>
+<pattern id="prrug" width="8" height="8" patternUnits="userSpaceOnUse">${W(0,0,8,8,'#0a1330')}${W(0,0,1,1,'#16326e')}</pattern>
+<pattern id="prdots" width="4" height="4" patternUnits="userSpaceOnUse">${W(0,0,4,4,'#060c1f')}${W(0,0,1,1,'#0f1f48')}</pattern>
+<pattern id="prscan" width="4" height="3" patternUnits="userSpaceOnUse"><rect width="4" height="1" fill="#000" fill-opacity=".06"/></pattern>
+<filter id="prlogo" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0 0 0 0 .239  0 0 0 0 .961  0 0 0 0 1  -1 0 0 0 1"/></filter></defs>`
+   +W(-600,-600,1320,688,'url(#prwall)')+`<rect x="-600" y="88" width="1320" height="662" fill="url(#prfloor)"/>`+W(-600,72,1320,12,'url(#prwain)')+W(-600,72,1320,1,'#15506e')+W(-600,73,1320,1,'#0c2a52')+W(-600,84,1320,4,'url(#prleds)')
    +prIntSVG()
-   +`<g id="prDoor" style="cursor:pointer">${R(DOOR_RECTS)}<rect x="2" y="38" width="34" height="58" fill="#000" fill-opacity="0"/></g>`+prClockSVG()
-   +`<g transform="translate(12 0)">`+R([[63,88,14,9,'#1a2a55'],[63,88,3,9,'#0e1736'],[72,88,5,9,'#24397a'],[59,96,22,3,'#1f3366'],[55,99,30,3,'#2a4488'],[51,102,38,3,'#3556a8'],[49,105,42,3,'#3df5ff'],[49,108,42,1,'#1a2a55']])+`</g>`
+   +`<polygon points="62,7 102,7 114,88 50,88" fill="#3df5ff" fill-opacity=".03" pointer-events="none"/>`
+   +`<g id="prDoor" style="cursor:pointer" transform="translate(0 -8)">${R(DOOR_RECTS)}${R(elevDisp(1,0,1))}<rect x="2" y="38" width="34" height="58" fill="#000" fill-opacity="0"/></g>`+prClockSVG()
+   +`<g transform="translate(12 0)">`+R([[63,88,14,9,'#121c42'],[63,88,3,9,'#0b1330'],[72,88,5,9,'#1b2b60'],[59,96,22,3,'#16224f'],[55,99,30,3,'#1c2d66'],[51,102,38,3,'#243a7c'],[49,105,42,1,'#3df5ff'],[49,106,42,2,'#15506e'],[49,108,42,1,'#0b1330']])+`</g>`
    +prWheelSVG()
    +prExtSVG()
    +`<rect x="-600" y="0" width="1320" height="750" fill="url(#prscan)" pointer-events="none"/>`
@@ -3554,11 +3656,13 @@ if(me&&me.look&&(isHost||CONFIG.rememberGuests||returning)){   // signed in befo
 #ride.go .rdoor{transform:none}
 #ride.bump .rdoor{animation:ridebump .3s linear}
 @keyframes ridebump{25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-1px)}}
-#rideBld{position:absolute;inset:0;z-index:3;opacity:0;transition:opacity .4s;display:flex;align-items:center;justify-content:center;background:linear-gradient(#0d0820,#2a1450 70%,#5a2a6a)}
-#rideCam{width:min(84vw,calc(78vh*.6));transition:transform .65s cubic-bezier(.6,0,.9,.4);image-rendering:pixelated}
+#rideBld{--cw:min(84vw,calc(78vh*.6));position:absolute;inset:0;z-index:3;opacity:0;transition:opacity .4s;display:flex;align-items:flex-end;justify-content:center;background:linear-gradient(#0d0820,#2a1450 70%,#5a2a6a)}
+html.inPR #map{visibility:hidden}
+#rideBld::after{content:'';position:absolute;left:0;right:0;bottom:0;height:calc(var(--cw)*.1);background:linear-gradient(#2a5a3a 0 2px,#1b3a2a 2px)}
+#rideCam{position:relative;z-index:1;width:var(--cw);transition:transform .65s cubic-bezier(.6,0,.9,.4);image-rendering:pixelated}
 #rideCam.zoom{transform:scale(11)}
 #rideCam svg{display:block;width:100%;height:auto}
-#rideHud{position:absolute;top:5%;left:0;right:0;text-align:center;font:400 26px/1.2 var(--px);color:#fff;text-shadow:3px 3px 0 #15121a;pointer-events:none}
+#rideHud{z-index:2;position:absolute;top:5%;left:0;right:0;text-align:center;font:400 26px/1.2 var(--px);color:#fff;text-shadow:3px 3px 0 #15121a;pointer-events:none}
 #rideHud small{display:block;font-size:9px;letter-spacing:.2em;color:#ffd66b;margin-bottom:6px}
 #rideArrow{color:#35e06a;font-size:20px}
 
@@ -3705,8 +3809,11 @@ if(new URLSearchParams(location.search).get('host')!=='1') document.documentElem
   new MutationObserver(fitRoom).observe(mapEl,{childList:true}); addEventListener('resize',fitRoom); fitRoom();
   /* ---- TOUR: spotlight each part of the screen and say what it's for ---- */
   const STEPS=[
-    {sel:'[data-tip]',t:'DONATIONS',x:'If you enjoy these types of events, you can send a donation. It would help create similar projects in the future.'}
+    {sel:'[data-tip]',t:'DONATIONS',x:'If you want to fund the production and see similar events in the future, you can leave a donation. Tap here to open it.'}
   ];
+  { const nb=document.createElement('button'); nb.id='noteBtn'; nb.type='button'; nb.setAttribute('data-tip',''); nb.setAttribute('aria-label','Donations');
+    nb.innerHTML='<svg viewBox="0 0 13 10"><path d="M0 0h13v10H0z" fill="#fbf7ea"/><path d="M0 0h13v1H0zM0 9h13v1H0zM0 0h1v10H0zM12 0h1v10h-1z" fill="#15121a"/><path d="M1 1l1 1h1l1 1h1l1 1h1l1-1h1l1-1h1l1-1z" fill="#15121a"/><path d="M1 8l3-3M12 8L9 5" stroke="#15121a" stroke-width="1" fill="none"/></svg>DONATE<i class="nd"></i>';
+    scr.appendChild(nb); }
   let tourOn=null;
   function endTour(){ if(!tourOn) return; tourOn.remove(); tourOn=null; try{localStorage.setItem('tpl_toured','1')}catch(e){} }
   function startTour(force){
@@ -4042,12 +4149,52 @@ if(new URLSearchParams(location.search).get('host')!=='1') document.documentElem
 .ls-opt .ls-f2{margin-top:8px}
 .ls-msg{margin:12px 0 6px}
 .cc .in.ls-sig,.cc .in.ls-sig:focus{box-shadow:none;outline:0}
+
+/* ===== SASHA'S NOTE: paper taped to the wall ===== */
+.tape{position:absolute;top:-8px;width:34px;height:14px;background:rgba(255,248,214,.7);border:1px solid rgba(21,18,26,.18)}
+.tape.t1{left:-9px;transform:rotate(-38deg)}
+.tape.t2{right:-9px;transform:rotate(38deg)}
+#noteOv{position:fixed;inset:0;z-index:9500;background:rgba(21,18,26,.72);display:none;align-items:center;justify-content:center;padding:20px}
+#noteOv.open{display:flex}
+.notepaper{position:relative;width:100%;max-width:400px;max-height:calc(100vh - 40px);overflow:auto;padding:38px 28px 30px;background:repeating-linear-gradient(#fbf7ea 0 31px,#d6dfeb 31px 32px);color:#1a2a8a;box-shadow:3px 4px 0 rgba(0,0,0,.45);transform:rotate(-1.5deg);font-family:'Caveat','Segoe Script','Brush Script MT',cursive}
+.notepaper .tape{top:-9px;width:44px;height:16px}
+.notehead{margin:0 0 10px;font-size:38px;font-weight:600;line-height:1}
+.notehead.nh2{margin-top:22px}
+.notetext{margin:0 0 16px;font-size:30px;font-weight:600;line-height:32px}
+.notelink{display:block;font-size:34px;font-weight:600;line-height:1.2;color:#b01030;text-decoration:underline}
+.notedonate{background:none;border:0;padding:0;font-family:inherit;text-align:left;cursor:pointer}
+.notex{position:absolute;top:6px;right:8px;background:none;border:0;padding:4px 8px;color:#1a2a8a;font:600 34px/1 'Caveat',cursive;cursor:pointer}
+#noteBtn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;z-index:9000;width:46px;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;background:var(--silver,#c0c0c0);color:#000;border:2px solid;border-color:var(--raised,#fff #404040 #404040 #fff);outline:1px solid var(--night,#15121a);border-radius:0;font:400 6px/1 var(--px,'Press Start 2P',monospace);letter-spacing:.02em;cursor:pointer;box-shadow:2px 2px 0 rgba(0,0,0,.4)}
+#noteBtn:active{border-color:var(--sunken,#404040 #fff #fff #404040);transform:translate(1px,1px)}
+#noteBtn svg{width:19px;height:15px;shape-rendering:crispEdges}
+#noteBtn .nd{position:absolute;top:-5px;right:-5px;width:12px;height:12px;background:#ffd23f;border:2px solid #15121a;box-sizing:border-box;animation:hcblink 1.4s steps(2) infinite}
+#floatTimer{right:66px!important}
+
+/* ===== INTERNET FLOOR REDESIGN: calm night-network ===== */
+#partnerRoom{background:#0a1127}
+#partnerRoom .prglow{animation:prglow 5s ease-in-out infinite}
+@keyframes prglow{50%{opacity:.08}}
+@keyframes prpeg{0%{fill:#bfefff}50%{fill:#fff}100%{fill:#bfefff}}
+#prTV .scr-on{animation:plasmaIdle 5s ease-in-out infinite}
 </style>
 <script>
 (function(){ try{ var ls=document.getElementById('loadScreen');
   if(localStorage.getItem('sashaIntroSeen')) ls.classList.add('seen'); else localStorage.setItem('sashaIntroSeen','1'); }catch(e){}
   var go=function(){requestAnimationFrame(function(){requestAnimationFrame(function(){ls.classList.add('play')})})};
   if(document.readyState==='complete') go(); else addEventListener('load',go); })();
+</script>
+<script>
+(function(){
+  var ov=document.getElementById('noteOv'), map=document.getElementById('map');
+  if(!ov||!map) return;
+  function close(){ov.classList.remove('open')}
+  map.addEventListener('click',function(e){
+    if(e.target.closest && e.target.closest('#wallNote')){ e.stopPropagation(); ov.classList.add('open'); }
+  },true);
+  document.addEventListener('click',function(e){ if(e.target.closest&&e.target.closest('#noteBtn')){ var d=document.querySelector('#noteBtn .nd'); if(d) d.remove(); window.open('https://www.privat24.ua/send/k5bib','_blank','noopener'); } });
+  document.getElementById('noteX').addEventListener('click',close);
+  ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+})();
 </script>
 </body>
 </html>
