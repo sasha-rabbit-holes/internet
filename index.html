@@ -2335,7 +2335,7 @@ function buildMap(){
   
   $('map').innerHTML=`<svg viewBox="0 0 120 150">${DEFS}<rect width="120" height="150" fill="#15131a"/>${rooms}${MX.art}${sofaBun}${sections}<g id="wallClock" style="pointer-events:none"><path id="clkPie" d="" fill="#ff7ab0" fill-opacity=".9"/><line id="clkH" x1="105" y1="9" x2="105" y2="5.8" stroke="#2a2630" stroke-width="1.1" stroke-linecap="round"/><line id="clkM" x1="105" y1="9" x2="105" y2="4" stroke="#2a2630" stroke-width=".7" stroke-linecap="round"/><line id="clkS" x1="105" y1="10.4" x2="105" y2="3.6" stroke="#d65a5a" stroke-width=".35"/><circle cx="105" cy="9" r=".8" fill="#d65a5a"/></g>${guide}${linkbox}<g style="pointer-events:none">${window.ROOM2_DIM||''}${MX.dim}</g><g class="fx" style="pointer-events:none">${window.ROOM2_LIGHTS||''}${window.ROOM2_FX||''}${MX.lights}</g></svg>`; startWallClock();
   $('linkbox').onclick=ev=>{ev.stopPropagation()};   // the main-room TV doesn't open anything (the linked TV is in the roommates room) applyBoxLock();
-  STOPS.forEach(s=>{const el=$('pin_'+s.key); if(el) el.onclick=function(ev){if(s.key==='start'){walkTap(ev);return}
+  STOPS.forEach(s=>{const el=$('pin_'+s.key); if(el) el.onclick=function(ev){if(s.key==='start'){walkTap(ev);return} if(isProj) return;
     if(this.classList.contains('locked')&&s.key!=='partners'){this.classList.remove('shake');void this.getBoundingClientRect();this.classList.add('shake');toast({title:'Locked',body:(s.lockedMsg||CONFIG.lockedMsg).replace('{room}',s.name),holdMs:2800,vibrate:[40,40,40]});return}
     enterStop(s.key);
   }});
@@ -2354,7 +2354,7 @@ const minNX=b=>Math.min(0,(Math.max(-ML_LEFT+3,(window.__viewX0||0)+3)-b.x0)/b.w
 const maxNX=b=>Math.max(1,(ML_RIGHT-6-b.sw-b.x0)/b.w);
 const maxNY=b=>Math.max(1,((window.__floorBot||147)-b.sh-b.y0)/b.h);   // the floor now goes down to the bottom of the screen; 1 = the old edge, bigger = further down
 function walkTap(ev){
-  if(!me||!walkers[me.id])return;
+  if(!me||(!walkers[me.id]&&!isProj))return;
   const svg=$('map').querySelector('svg'),pt=svg.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY;
   const q=pt.matrixTransform(svg.getScreenCTM().inverse()),b=floorBox(wSc);
   // tapped a character? -> open the interaction menu instead of walking
@@ -2363,6 +2363,7 @@ function walkTap(ev){
     if(q.x>=X-1&&q.x<=X+b.sw+1&&q.y>=Y-3&&q.y<=Y+b.sh+1&&Y>hitY){hit=id;hitY=Y}}
   if(hit){ev.stopPropagation();openCharMenu(hit);return}
   closeCharMenu();
+  if(isProj) return;   // projector: nobody to walk
   const nx=Math.max(minNX(b),Math.min(maxNX(b),(q.x-b.sw/2-b.x0)/b.w)), ny=Math.max(0,Math.min(maxNY(b),(q.y-b.sh-b.y0)/b.h));
   const me_=walkers[me.id], dist=Math.hypot((nx-me_.x)*b.w,(ny-me_.y)*b.h);
   me_.tx=nx; me_.ty=ny;
@@ -3686,11 +3687,11 @@ html.is-guest #dock{display:none!important}
 html.is-guest #screen-lounge #mapwrap,html.is-guest #partnerRoom{bottom:0!important}
 html.is-guest #nextBar{bottom:0!important}
 /* PROJECTOR (?projector=1): only the room, full screen, nothing to tap */
-html.is-proj,html.is-proj body{background:#15131a;overflow:hidden;cursor:none}
+html.is-proj,html.is-proj body{background:#15131a;overflow:hidden}
 html.is-proj #screen-lounge>*:not(.wrap),html.is-proj #screen-lounge .wrap>*:not(#mapwrap),
 html.is-proj #toasts,html.is-proj #dock,html.is-proj #mlBar,html.is-proj .mlArrow,html.is-proj #noteBtn,html.is-proj #noteOv,
 html.is-proj #tcard,html.is-proj #tourDim,html.is-proj #guideBubble,html.is-proj #nextBar,html.is-proj #reveal,html.is-proj #loadScreen{display:none!important}
-html.is-proj #map{pointer-events:none;overflow:hidden!important}
+html.is-proj #map{overflow:hidden!important}
 </style>
 <script>
 if(new URLSearchParams(location.search).get('host')!=='1'||new URLSearchParams(location.search).get('projector')==='1') document.documentElement.classList.add('is-guest');
